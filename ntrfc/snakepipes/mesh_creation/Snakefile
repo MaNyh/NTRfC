@@ -1,0 +1,8 @@
+rule igg_cascade:
+#    input:
+#        "input/helloworld.txt"
+#    output:
+#        "output/heythere.txt"
+    script:
+        "python helloworld.py"
+

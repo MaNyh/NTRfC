@@ -1,0 +1,31 @@
+rule openfoam_les:
+#    input:
+#        "input/helloworld.txt"
+#    output:
+#        "output/heythere.txt"
+    script:
+        "python helloworld.py"
+
+rule openfoam_ras:
+#    input:
+#        "input/helloworld.txt"
+#    output:
+#        "output/heythere.txt"
+    shell:
+        "python helloworld.py"
+
+rule openfoam_potential:
+#    input:
+#        "input/helloworld.txt"
+#    output:
+#        "output/heythere.txt"
+    shell:
+        "python helloworld.py"
+
+rule trace_ras:
+#    input:
+#        "input/helloworld.txt"
+#    output:
+#        "output/heythere.txt"
+    shell:
+        "python helloworld.py"
