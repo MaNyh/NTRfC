@@ -29,7 +29,7 @@ def test_ellipsoidVol():
 def test_randomUnitVec():
     from ntrfc.utils.math.vectorcalc import randomUnitVec, vecAbs
     rvec = randomUnitVec()
-    assert vecAbs(rvec)==1
+    assert np.isclose(vecAbs(rvec),1)
 
 
 def test_gradToRad():
