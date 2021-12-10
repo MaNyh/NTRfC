@@ -8,8 +8,8 @@ import numpy as np
 
 
 from ntrfc import ntrfc
-from ntrfc.utils.geometry.pointcloud_methods import midLength, midline_from_sides, extractSidePolys
-from ntrfc.utils.pyvista_utils.line import refine_spline
+
+
 
 
 @pytest.fixture
@@ -128,6 +128,8 @@ def test_pickle_operations(tmpdir):
 
 
 def test_refine_spline():
+    from ntrfc.utils.pyvista_utils.line import refine_spline
+
     coarseres = 2
     line = pv.Line(resolution=coarseres)
     fineres = 100
@@ -148,18 +150,21 @@ def test_largedistance_indices():
 
 
 def test_midLength():
+    from ntrfc.utils.geometry.pointcloud_methods import midLength
     #todo fill
     a = midLength
     return 0
 
 
 def test_midline_from_sides():
+    from ntrfc.utils.geometry.pointcloud_methods import midline_from_sides
     #todo fill
     a=midline_from_sides
     return 0
 
 
 def test_extractSidePolys():
+    from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
     #todo fill
     a=extractSidePolys
     return 0
