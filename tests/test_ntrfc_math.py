@@ -6,15 +6,15 @@ import pyvista as pv
 def test_absVec():
     from ntrfc.utils.math.vectorcalc import vecAbs
     a = np.array([1,1])
-    assert np.sqrt(2)==vecAbs(a)
-    b = np.array([1,1,1])
-    assert np.sqrt(3) == vecAbs(b)
+    assert 2**.5==vecAbs(a)
+    b = np.array([7,4,4])
+    assert 9 == vecAbs(b)
 
-def test_unitVec():
-    from ntrfc.utils.math.vectorcalc import unitVec
+def test_vecDir():
+    from ntrfc.utils.math.vectorcalc import vecDir, vecAbs
 
-    b = unitVec(np.array([1,1,1]))
-    assert absVec(b) == 1.0
+    b = vecDir(np.array([1,1,1]))
+    assert vecAbs(b) == 1.0
 
 
 def test_ellipsoidVol():
