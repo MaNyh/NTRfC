@@ -2,7 +2,6 @@ import numpy as np
 import pyvista as pv
 
 
-
 def test_absVec():
     from ntrfc.utils.math.vectorcalc import vecAbs
     a = np.array([1,1])
@@ -23,3 +22,9 @@ def test_ellipsoidVol():
     ellipsoid = pv.ParametricEllipsoid(*sigma)
     calcVol = ellipsoidVol(sigma)
     assert np.isclose(calcVol, ellipsoid.volume, rtol=1e-03, atol=1e-03)
+
+
+def test_randomUnitVec():
+    from ntrfc.utils.math.vectorcalc import randomUnitVec, vecAbs
+    rvec = randomUnitVec()
+    assert vecAbs(rvec)==1
