@@ -8,6 +8,8 @@ import numpy as np
 
 
 from ntrfc import ntrfc
+from ntrfc.utils.math.vectorcalc import calc_largedistant_idx
+from ntrfc.utils.pyvista_utils.line import refine_spline
 
 
 @pytest.fixture
@@ -120,3 +122,21 @@ def test_pickle_operations(tmpdir):
     write_pickle_protocolzero(fname,dict)
     pklread_zero = read_pickle(fname)
     assert dict["test"] == pklread_zero["test"]
+
+
+def test_refine_spline():
+    coarseres = 2
+    line = pv.Line(resolution=coarseres)
+    fineres = 100
+    fline_xx,fline_yy = refine_spline(line.points[::,0],line.points[::,1], fineres)
+    fline = pv.lines_from_points(np.stack([fline_xx,fline_yy,np.zeros(len(fline_xx))]).T)
+    assert line.length == fline.length
+    assert fline.number_of_points == fineres
+
+
+def test_largedistance_indices():
+    line = pv.Line(resolution=100)
+    xx,yy = line.points[::,0],line.points[::,1]
+    id1,id2 = calc_largedistant_idx(xx,yy)
+    assert  id1 == 0
+    assert id2 == 100

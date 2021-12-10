@@ -1,10 +1,9 @@
 import numpy as np
 import pyvista as pv
 from scipy.spatial import Delaunay
-from scipy.spatial.distance import squareform, pdist
 from itertools import product
 
-
+from ntrfc.utils.math.vectorcalc import calc_largedistant_idx
 from ntrfc.utils.pyvista_utils.line import polyline_from_points, refine_spline
 
 def calcConcaveHull(x, y, alpha):
@@ -125,9 +124,10 @@ def midLength(ind_1, ind_2, sortedPoly):
     """
     psPoly, ssPoly = extractSidePolys(ind_1, ind_2, sortedPoly)
     midsPoly = midline_from_sides(ind_1, ind_2, sortedPoly.points, psPoly, ssPoly)
-    arclength = midsPoly.compute_arc_length()["arc_length"]
-    midslength = sum(arclength)
+    arclengths = midsPoly.compute_arc_length()["arc_length"]
+    midslength = sum(arclengths)
     return midslength
+
 
 def midline_from_sides(ind_hk, ind_vk, points, psPoly, ssPoly):
     x_ps, y_ps = psPoly.points[::, 0], psPoly.points[::, 1]
@@ -151,18 +151,6 @@ def midline_from_sides(ind_hk, ind_vk, points, psPoly, ssPoly):
     ymids[-1] = points[ind_hk][1]
     midsPoly = polyline_from_points(np.stack((xmids, ymids, np.zeros(len(ymids)))).T)
     return midsPoly
-
-def calc_largedistant_idx(x_koords, y_koords):
-    A = np.dstack((x_koords, y_koords))[0]
-    D = squareform(pdist(A))
-    #    N = np.max(D)
-    I = np.argmax(D)
-    I_row, I_col = np.unravel_index(I, D.shape)
-
-    index_1 = I_row
-    index_2 = I_col
-
-    return index_1, index_2
 
 
 def extract_vk_hk(sortedPoly, verbose=False):
