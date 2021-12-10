@@ -10,8 +10,6 @@ import numpy as np
 from ntrfc import ntrfc
 
 
-
-
 @pytest.fixture
 def response():
     """Sample pytest fixture.
@@ -20,12 +18,6 @@ def response():
     """
     # import requests
     # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
-
-
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument."""
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
 
 
 def test_yamlDictRead(tmpdir):
@@ -145,7 +137,7 @@ def test_largedistance_indices():
     line = pv.Line(resolution=100)
     xx,yy = line.points[::,0],line.points[::,1]
     id1,id2 = calc_largedistant_idx(xx,yy)
-    assert  id1 == 0
+    assert id1 == 0
     assert id2 == 100
 
 

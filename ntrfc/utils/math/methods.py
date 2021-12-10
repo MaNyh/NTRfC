@@ -2,6 +2,7 @@ import numpy as np
 
 
 def calcAnisoMatrix(R):
+    #todo: implement test
     RPG = np.linalg.eigh(R)[1]
     Rii = sum([RPG[0][0], RPG[1][1], RPG[2][2]])
     aniso = R / Rii - np.identity(3) / 3
@@ -9,6 +10,8 @@ def calcAnisoMatrix(R):
 
 
 def calcAnisoEigs(aniso):
+    #todo: implement test
+
     # eigenwerte für anisotropie muss hiermit berechnet werden!
     # wieso nochmal? es tauchen negative eigenwerte auf, bei berechnung mit numpy
     # nicht-symmetrische matrix (anisotrop)
@@ -33,6 +36,7 @@ def calcAnisoEigs(aniso):
 
 
 def C_barycentric(R):
+    #todo: implement test
     aniso = calcAnisoMatrix(R)
     anisoEigs = calcAnisoEigs(aniso)[0]
     if list(anisoEigs) == [0, 0, 0]:
@@ -51,11 +55,13 @@ def C_barycentric(R):
 
 
 def autocorr(x):
+    #todo: implement test
     norm = np.sum(np.array(x) ** 2)
     result = np.correlate(np.array(x), np.array(x), 'full') / norm
     return result[int(len(result) / 2):]
 
 
 def zero_crossings(data_series):
+    #todo: implement test
     zcs = np.where(np.diff(np.sign(data_series)))[0]
     return zcs
