@@ -168,21 +168,6 @@ def eulersFromRPG(R):
     return eul1, eul2, eul3
 
 
-def angle_between(v1, v2):
-    """ Returns the angle in radians between vectors 'v1' and 'v2'::
-
-            angle_between((1, 0, 0), (0, 1, 0))
-                1.5707963267948966
-            angle_between((1, 0, 0), (1, 0, 0))
-                0.0
-            angle_between((1, 0, 0), (-1, 0, 0))
-                3.141592653589793
-    """
-    v1_u = vecDir(v1)
-    v2_u = vecDir(v2)
-    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
-
-
 def randomUnitVec():
     """
     tested method to generate a random unit vector
@@ -224,11 +209,20 @@ def minDists(vecs):
 
 
 def vecProjection(direction, vector):
-    unitDir = unitVec(direction)
+    unitDir = vecDir(direction)
     return np.dot(vector, unitDir) * unitDir
 
 
 def vecAngle(vec1, vec2):
+    """ Returns the angle in radians between vectors 'v1' and 'v2'::
+
+            angle_between((1, 0, 0), (0, 1, 0))
+                1.5707963267948966
+            angle_between((1, 0, 0), (1, 0, 0))
+                0.0
+            angle_between((1, 0, 0), (-1, 0, 0))
+                3.141592653589793
+    """
     absVec1 = vecAbs(vec1)
     absVec2 = vecAbs(vec2)
     return np.arccos(np.dot(vec1, vec2) / (absVec1 * absVec2))
