@@ -111,7 +111,7 @@ def pcoef(
     return coef
 
 
-def parsec_airfoil_gen(pparray,halfsinespacing, resolution):
+def parsec_airfoil_gen(pparray,halfsinespacing=True, resolution=2000):
 
     # TE & LE of airfoil (normalized, chord = 1)
     xle = 0.0
@@ -219,3 +219,4 @@ def demo():
     X,Y = profile_points[::,0],profile_points[::,1]
     d.plot(X, Y)
     d.show()
+
