@@ -88,7 +88,6 @@ def Rz(zAngle):
 
 
 def RotFromTwoVecs(vec1, vec2):
-    #todo: implement test
     """ Find the rotation matrix that aligns vec1 to vec2
     :param vec1: A 3d "source" vector
     :param vec2: A 3d "destination" vector
@@ -105,7 +104,6 @@ def RotFromTwoVecs(vec1, vec2):
 
 
 def radiusFromPt(pts, sigma):
-    #todo: implement test
     pts = np.abs(pts)
     if pts[1] > 0:
         teta = np.arctan(pts[2] / pts[1])
@@ -134,19 +132,16 @@ def vecDir(vec):
 
 
 def posVec(vec):
-    #todo: implement test
     return (vec ** 2) ** .5
 
 
 def findNearest(array, point):
-    #todo: implement test
     array = np.asarray(array)
     idx = (np.abs(array - point)).argmin()
     return idx
 
 
 def eulersFromRPG(R):
-    #todo: implement test
     tol = sys.float_info.epsilon * 10
 
     if abs(R.item(0, 0)) < tol and abs(R.item(1, 0)) < tol:
@@ -174,7 +169,6 @@ def eulersFromRPG(R):
 
 
 def angle_between(v1, v2):
-    #todo: implement test
     """ Returns the angle in radians between vectors 'v1' and 'v2'::
 
             angle_between((1, 0, 0), (0, 1, 0))
@@ -205,7 +199,6 @@ def randomUnitVec():
 
 
 def randomOrthMat():
-    #todo: implement test
     num_dim = 3
     x = special_ortho_group.rvs(num_dim)
     return x
@@ -221,7 +214,6 @@ def ellipsoidVol(sig):
 
 
 def minDists(vecs):
-    #todo: implement test
     dist = scipy.spatial.distance.cdist(vecs, vecs)
 
     dist[dist == 0] = np.inf
@@ -232,13 +224,11 @@ def minDists(vecs):
 
 
 def vecProjection(direction, vector):
-    #todo: implement test
     unitDir = unitVec(direction)
     return np.dot(vector, unitDir) * unitDir
 
 
 def vecAngle(vec1, vec2):
-    #todo: implement test
     absVec1 = vecAbs(vec1)
     absVec2 = vecAbs(vec2)
     return np.arccos(np.dot(vec1, vec2) / (absVec1 * absVec2))

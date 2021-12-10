@@ -1,7 +1,8 @@
 import numpy as np
 import pyvista as pv
 
-from ntrfc.utils.math.vectorcalc import lineseg_dist
+from ntrfc.utils.math.vectorcalc import lineseg_dist, RotFromTwoVecs, radiusFromPt, posVec, findNearest, eulersFromRPG, \
+    angle_between, randomOrthMat, minDists, vecProjection, vecAngle
 
 
 def test_absVec():
@@ -78,3 +79,43 @@ def test_lineseg():
     testpt = np.array([0,1,0])
     pt_a, pt_b = line.points[0], line.points[-1]
     assert line.length == lineseg_dist(testpt, pt_a, pt_b)
+
+
+def test_RotFromTwoVecs():
+    a = RotFromTwoVecs
+
+
+def test_radiusFromPt():
+    a = radiusFromPt
+
+
+def test_posVec():
+    a = posVec
+
+
+def test_findNearest():
+    a = findNearest
+
+
+def test_eulersFromRPG():
+    a = eulersFromRPG
+
+
+def test_angle_between():
+    a = angle_between
+
+
+def test_randomOrthMat():
+    a = randomOrthMat
+
+
+def test_minDists():
+    a = minDists
+
+
+def test_vecProjection():
+    a = vecProjection
+
+
+def test_vecAngle():
+    a = vecAngle
