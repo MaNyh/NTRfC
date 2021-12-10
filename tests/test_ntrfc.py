@@ -9,7 +9,6 @@ import numpy as np
 
 from ntrfc import ntrfc
 from ntrfc.utils.geometry.pointcloud_methods import midLength, midline_from_sides, extractSidePolys
-from ntrfc.utils.math.vectorcalc import calc_largedistant_idx
 from ntrfc.utils.pyvista_utils.line import refine_spline
 
 
@@ -139,6 +138,8 @@ def test_refine_spline():
 
 
 def test_largedistance_indices():
+    from ntrfc.utils.math.vectorcalc import calc_largedistant_idx
+
     line = pv.Line(resolution=100)
     xx,yy = line.points[::,0],line.points[::,1]
     id1,id2 = calc_largedistant_idx(xx,yy)

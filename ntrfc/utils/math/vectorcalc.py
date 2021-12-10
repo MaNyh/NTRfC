@@ -14,6 +14,12 @@ import math as m
 import scipy
 
 def calc_largedistant_idx(x_koords, y_koords):
+    """
+    tested method to find indices of coordinates of a 2d-pointcloud with the biggest distance
+    :param x_koords: array of xcords
+    :param y_koords: array of ycords
+    :return: index_1,index_2 (int)
+    """
     A = np.dstack((x_koords, y_koords))[0]
     D = squareform(pdist(A))
     #    N = np.max(D)
@@ -105,10 +111,20 @@ def radiusFromPt(pts, sigma):
 
 
 def vecAbs(vec):
+    """
+    tested method to calculate the absolute value of a vector
+    :param vec:
+    :return:
+    """
     return np.sqrt(sum(vec**2))
 
 
 def vecDir(vec):
+    """
+    tested method to compute the direction of a vector
+    :param vec:
+    :return: unit vec
+    """
     return vec / vecAbs(vec)
 
 
@@ -165,6 +181,10 @@ def angle_between(v1, v2):
 
 
 def randomUnitVec():
+    """
+    tested method to generate a random unit vector
+    :return:
+    """
     phi = np.random.uniform(0, np.pi * 2)
     costheta = np.random.uniform(-1, 1)
 
@@ -182,6 +202,11 @@ def randomOrthMat():
 
 
 def ellipsoidVol(sig):
+    """
+    tested method to compute the ellipsoid volume by the sigma-parameters of a parametric ellipsoid
+    :param sig:
+    :return:
+    """
     return 4 / 3 * np.pi * sig[0] * sig[1] * sig[2]
 
 
@@ -194,13 +219,6 @@ def minDists(vecs):
         mDist.append(np.min(i))
     return mDist
 
-
-
-
-def unitVec(vector):
-    vecLength = vecAbs(vector)
-    unitDir = vector / vecLength
-    return unitDir
 
 
 
