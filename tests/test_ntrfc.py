@@ -8,6 +8,7 @@ import numpy as np
 
 
 from ntrfc import ntrfc
+from ntrfc.utils.geometry.pointcloud_methods import midLength, midline_from_sides, extractSidePolys
 from ntrfc.utils.math.vectorcalc import calc_largedistant_idx
 from ntrfc.utils.pyvista_utils.line import refine_spline
 
@@ -95,18 +96,21 @@ def test_surface_distance():
 
 def test_cgnsReader():
     from ntrfc.utils.filehandling.read_mesh import cgnsReader
+    #todo fill
     a = cgnsReader
     return 0
 
 
 def test_vtkUnstructuredGridReader():
     from ntrfc.utils.filehandling.read_mesh import vtkUnstructuredGridReader
+    #todo fill
     a = vtkUnstructuredGridReader
     return 0
 
 
 def test_vtkFLUENTReader():
     from ntrfc.utils.filehandling.read_mesh import vtkFLUENTReader
+    #todo fill
     a = vtkFLUENTReader
     return 0
 
@@ -140,3 +144,21 @@ def test_largedistance_indices():
     id1,id2 = calc_largedistant_idx(xx,yy)
     assert  id1 == 0
     assert id2 == 100
+
+
+def test_midLength():
+    #todo fill
+    a = midLength
+    return 0
+
+
+def test_midline_from_sides():
+    #todo fill
+    a=midline_from_sides
+    return 0
+
+
+def test_extractSidePolys():
+    #todo fill
+    a=extractSidePolys
+    return 0

@@ -14,7 +14,6 @@ with open('HISTORY.rst') as history_file:
 install_reqs = parse_requirements("requirements.txt",session="hack")
 requirements = [ir.requirement for ir in install_reqs]
 
-#requirements = ["snakemake==6.12.3" ]
 
 test_requirements = ['pytest>=3', ]
 
