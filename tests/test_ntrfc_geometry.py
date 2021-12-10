@@ -58,6 +58,7 @@ def test_parsec():
 
 
 def test_naca():
+    from ntrfc.database.naca_airfoil_creator import naca
     def rand_naca_code():
         digits = np.random.choice([4,5])
         if digits ==4:
@@ -68,3 +69,43 @@ def test_naca():
             digitstring = str(d1)+str(d2)+str(d3)+str(d4)+str(d5)
         return digitstring
     profNaca = [rand_naca_code() for i in range(6)]
+    for i,p in enumerate(profNaca):
+        X,Y = naca(p, 240, finite_TE=np.random.choice([True,False]), half_cosine_spacing=np.random.choice([True,False]))
+
+
+def test_extract_vk_hk(verbose=False):
+    """
+    tests a NACA  profile in a random angle as a minimal example.
+    :return:
+    """
+    from ntrfc.utils.geometry.pointcloud_methods import extract_vk_hk
+    from ntrfc.database.naca_airfoil_creator import naca
+    res = 400
+
+    # d1,d2,d3,d4 = np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9)
+    # digitstring = str(d1)+str(d2)+str(d3)+str(d4)
+    # manifold problems with other profiles with veronoi-mid and other unoptimized code. therefor tests only 0009
+    X, Y = naca("6409", res, finite_TE=False, half_cosine_spacing=True)
+    ind_hk_test = 0
+    ind_vk_test = res
+
+    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2))).T
+
+    profilepoints = pv.PolyData(points)
+
+    random_angle = np.random.randint(-40, 40)
+    profilepoints.rotate_z(random_angle)
+
+    sortedPoly = pv.PolyData(profilepoints)
+    ind_hk, ind_vk = extract_vk_hk(sortedPoly, verbose=verbose)
+
+    if verbose:
+        p = pv.Plotter()
+        p.add_mesh(sortedPoly.points[ind_hk], color="yellow", point_size=20)
+        p.add_mesh(sortedPoly.points[ind_vk], color="red", point_size=20)
+        p.add_mesh(sortedPoly)
+        p.show()
+
+    assert ind_hk == ind_hk_test, "wrong hk-index chosen"
+    assert ind_vk == ind_vk_test, "wrong vk-index chosen"
+

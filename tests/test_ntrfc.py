@@ -50,7 +50,7 @@ def test_yamlDictWrite(tmpdir):
     assert yaml_dict_read(test_file) == test_dict
 
 def test_polyline_from_points():
-    from ntrfc.utils.filehandling.read_mesh import polyline_from_points
+    from ntrfc.utils.pyvista_utils.line import polyline_from_points
 
     points = pv.Line(resolution=100).points
     line = polyline_from_points(points)
@@ -58,7 +58,7 @@ def test_polyline_from_points():
 
 
 def test_line_from_points():
-    from ntrfc.utils.filehandling.read_mesh import lines_from_points
+    from ntrfc.utils.pyvista_utils.line import lines_from_points
 
     points = pv.Line(resolution=100).points
     line = lines_from_points(points)
@@ -81,7 +81,7 @@ def test_loadmesh_vtk(tmpdir):
 
 
 def test_surface_distance():
-    from ntrfc.utils.filehandling.read_mesh import calc_dist_from_surface
+    from ntrfc.utils.pyvista_utils.surface import calc_dist_from_surface
 
     surf_one = pv.Plane()
     surf_two = pv.Plane()

@@ -1,5 +1,11 @@
 import numpy as np
+import pyvista as pv
 from scipy.spatial import Delaunay
+from scipy.spatial.distance import squareform, pdist
+from itertools import product
+
+
+from ntrfc.utils.pyvista_utils.line import polyline_from_points, refine_spline
 
 def calcConcaveHull(x, y, alpha):
     """
@@ -107,3 +113,145 @@ def calcConcaveHull(x, y, alpha):
         y_new.append(points[boundary_lst[0][i][0]][1])
 
     return x_new, y_new
+
+
+def midLength(ind_1, ind_2, sortedPoly):
+    """
+    calc length of a midline
+    :param ind_1: index LE
+    :param ind_2: index TE
+    :param sortedPoly: pv.PolyData sorted
+    :return: length
+    """
+    psPoly, ssPoly = extractSidePolys(ind_1, ind_2, sortedPoly)
+    midsPoly = midline_from_sides(ind_1, ind_2, sortedPoly.points, psPoly, ssPoly)
+    arclength = midsPoly.compute_arc_length()["arc_length"]
+    midslength = sum(arclength)
+    return midslength
+
+def midline_from_sides(ind_hk, ind_vk, points, psPoly, ssPoly):
+    x_ps, y_ps = psPoly.points[::, 0], psPoly.points[::, 1]
+    x_ss, y_ss = ssPoly.points[::, 0], ssPoly.points[::, 1]
+
+    midsres = 100
+    if x_ps[0] < x_ps[-1]:
+        ax, ay = refine_spline(x_ps[::-1], y_ps[::-1], midsres)
+    else:
+        ax, ay = refine_spline(x_ps, y_ps, midsres)
+    if x_ss[0] < x_ss[-1]:
+        bx, by = refine_spline(x_ss[::-1], y_ss[::-1], midsres)
+    else:
+        bx, by = refine_spline(x_ss, y_ss, midsres)
+    xmids, ymids = ((ax + bx) / 2, (ay + by) / 2)
+    xmids = np.array(xmids)[::-1][1:-1]
+    ymids = np.array(ymids)[::-1][1:-1]
+    xmids[0] = points[ind_vk][0]
+    ymids[0] = points[ind_vk][1]
+    xmids[-1] = points[ind_hk][0]
+    ymids[-1] = points[ind_hk][1]
+    midsPoly = polyline_from_points(np.stack((xmids, ymids, np.zeros(len(ymids)))).T)
+    return midsPoly
+
+def calc_largedistant_idx(x_koords, y_koords):
+    A = np.dstack((x_koords, y_koords))[0]
+    D = squareform(pdist(A))
+    #    N = np.max(D)
+    I = np.argmax(D)
+    I_row, I_col = np.unravel_index(I, D.shape)
+
+    index_1 = I_row
+    index_2 = I_col
+
+    return index_1, index_2
+
+
+def extract_vk_hk(sortedPoly, verbose=False):
+    """
+    This function is calculating the leading-edge and trailing edge of a long 2d-body
+    The function is not 100% reliable yet. The computation is iterative and it can take a while
+    Points in origPoly and sortedPoly have to have defined points on the LE and TE, otherwise a LE or TE is not defined
+    and it will be random which point will be found near the LE / TE
+    :param origPoly: all original points, unsorted
+    :param sortedPoly: sorted via calcConcaveHull
+    :param verbose: bool (True -> plots, False -> silent)
+    :return: returns indexes of LE(vk) and TE(hk) from sortedPoints
+    """
+
+    xs, ys = sortedPoly.points[::, 0], sortedPoly.points[::, 1]
+    ind_1, ind_2 = calc_largedistant_idx(xs, ys)
+    allowed_shift = 1
+    midLength0 = midLength(ind_1, ind_2, sortedPoly)
+    nopt = sortedPoly.number_of_points
+
+    checked_combs = {}
+    found = True
+    while (found):
+
+        shifts = np.arange(-allowed_shift, allowed_shift + 1)
+        ind_1_ts = (shifts + ind_1) % nopt
+        ind_2_ts = (shifts + ind_2) % nopt
+
+        combs = list(product(ind_1_ts, ind_2_ts))
+        for key in combs:
+            if key not in checked_combs.keys():
+                checked_combs[key] = False
+
+        midLengths = []
+        for ind_1_t, ind2_t in combs:
+            if checked_combs[(ind_1_t, ind2_t)] == False:
+                checked_combs[(ind_1_t, ind2_t)] = True
+                midLengths.append(midLength(ind_1_t, ind2_t, sortedPoly))
+            else:
+                midLengths.append(0)
+        cids = midLengths.index(max(midLengths))
+
+        ind_1_n, ind_2_n = combs[cids]
+        midLength_new = midLength(ind_1_n, ind_2_n, sortedPoly)
+        if midLength_new > midLength0:
+            ind_1, ind_2 = ind_1_n, ind_2_n
+            midLength0 = midLength_new
+            allowed_shift += 1
+            found = True
+        else:
+            found = False
+
+    if sortedPoly.points[ind_1][0] > sortedPoly.points[ind_2][0]:
+        ind_vk = ind_2
+        ind_hk = ind_1
+    else:
+        ind_vk = ind_1
+        ind_hk = ind_2
+    return ind_hk, ind_vk
+
+
+def extractSidePolys(ind_hk, ind_vk, sortedPoly):
+    xs, ys = list(sortedPoly.points[::, 0]), list(sortedPoly.points[::, 1])
+
+    if ind_vk < ind_hk:
+        x_ss = xs[ind_vk:ind_hk + 1]
+        y_ss = ys[ind_vk:ind_hk + 1]
+
+        y_ps = ys[ind_hk:] + ys[:ind_vk + 1]
+        x_ps = xs[ind_hk:] + xs[:ind_vk + 1]
+
+    else:
+        x_ss = xs[ind_hk:ind_vk + 1]
+        y_ss = ys[ind_hk:ind_vk + 1]
+
+        y_ps = ys[ind_vk:] + ys[:ind_hk + 1]
+        x_ps = xs[ind_vk:] + xs[:ind_hk + 1]
+
+    psl_helper = polyline_from_points(np.stack((x_ps, y_ps, np.zeros(len(x_ps)))).T)
+    ssl_helper = polyline_from_points(np.stack((x_ss, y_ss, np.zeros(len(x_ss)))).T)
+
+    if psl_helper.length > ssl_helper.length:
+
+        psPoly = pv.PolyData(ssl_helper.points)
+        ssPoly = pv.PolyData(psl_helper.points)
+    else:
+
+        psPoly = pv.PolyData(psl_helper.points)
+        ssPoly = pv.PolyData(ssl_helper.points)
+
+
+    return ssPoly, psPoly
