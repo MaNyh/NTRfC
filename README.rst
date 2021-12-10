@@ -27,6 +27,8 @@ Installation
 install using 'pip install ntrfc'
 or install using 'python -m setup install'
 
+use 'pip install -v requirements_dev' to install development-packages
+
 Features
 --------
 

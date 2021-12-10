@@ -1,4 +1,4 @@
-pip==19.2.3
+pip=21.3.1
 pytest==6.2.4
 snakemake==6.12.3
 matplotlib==3.3.4
