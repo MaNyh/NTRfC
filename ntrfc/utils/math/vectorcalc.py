@@ -103,16 +103,6 @@ def RotFromTwoVecs(vec1, vec2):
     return rotation_matrix
 
 
-def radiusFromPt(pts, sigma):
-    pts = np.abs(pts)
-    if pts[1] > 0:
-        teta = np.arctan(pts[2] / pts[1])
-    else:
-        teta = 0
-    r = sigma[1] * sigma[2] / ((np.sin(teta) * sigma[2]) ** 2 + (np.cos(teta) * sigma[1]) ** 2) ** .5
-    return r
-
-
 def vecAbs(vec):
     """
     tested method to calculate the absolute value of a vector
@@ -137,7 +127,7 @@ def posVec(vec):
 
 def findNearest(array, point):
     array = np.asarray(array)
-    idx = (np.abs(array - point)).argmin()
+    idx = np.array([vecAbs(i) for i in (np.abs(array - point))]).argmin()
     return idx
 
 

@@ -100,10 +100,6 @@ def test_RotFromTwoVecs():
     Rcontrol = Rz(np.pi/2)
     assert all(np.isclose(Rab,Rcontrol).flatten())
 
-def test_radiusFromPt():
-    from ntrfc.utils.math.vectorcalc import radiusFromPt
-    a = radiusFromPt
-
 
 def test_posVec():
     import numpy as np
@@ -114,23 +110,37 @@ def test_posVec():
     b = posVec(a)
     blength = vecAbs(b)
     assert alength==blength
-    assert np.equal(-1*a,b)
+    assert all(np.isclose(-1*a,b).flatten())
 
 
 def test_findNearest():
     from ntrfc.utils.math.vectorcalc import findNearest
-    a = findNearest
-
+    import pyvista as pv
+    import numpy as np
+    res = 100
+    line = pv.Line(resolution=res)
+    point = np.array([0,0,0])
+    near = findNearest(line.points,point)
+    assert near == int(res/2)
 
 def test_eulersFromRPG():
-    from ntrfc.utils.math.vectorcalc import eulersFromRPG
-    a = eulersFromRPG
+    from ntrfc.utils.math.vectorcalc import eulersFromRPG, RotFromTwoVecs, vecAngle
+    import numpy as np
+    a = np.array([1, 0, 0])
+    b = np.array([0, 1, 0])
+    cangle = vecAngle(a,b)
+    R = RotFromTwoVecs(a,b)
+
+    angle = eulersFromRPG(R)
+    assert angle[0]==cangle
 
 
 def test_randomOrthMat():
     from ntrfc.utils.math.vectorcalc import randomOrthMat
-    a = randomOrthMat
-
+    import numpy as np
+    o = randomOrthMat()
+    dot_o = np.dot(o,o.T)
+    assert all(np.isclose(dot_o,np.identity(3)).flatten())
 
 def test_minDists():
     from ntrfc.utils.math.vectorcalc import minDists
