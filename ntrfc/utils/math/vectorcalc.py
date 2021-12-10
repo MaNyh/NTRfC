@@ -32,6 +32,11 @@ def calc_largedistant_idx(x_koords, y_koords):
     return index_1, index_2
 
 def symToMatrix(symTensor):
+    """
+    tested translates symmetric tensor notation to complete matrix
+    :param symTensor:
+    :return:
+    """
     # xx,xy,xz,yy,yz,zz
     Matrix = np.array([[symTensor[0], symTensor[1], symTensor[2]],
                        [symTensor[1], symTensor[3], symTensor[4]],
@@ -39,15 +44,12 @@ def symToMatrix(symTensor):
     return Matrix
 
 
-def symToMatrixPVPoly(symTensor):
-    # xx,xy,xz,yy,yz,zz
-    Matrix = np.array([[symTensor[0], symTensor[3], symTensor[4]],
-                       [symTensor[3], symTensor[1], symTensor[5]],
-                       [symTensor[4], symTensor[5], symTensor[2]]])
-    return Matrix
-
-
 def gradToRad(angle):
+    """
+    tested method to translate from grad to rad
+    :param angle:
+    :return:
+    """
     return (angle / 180) * np.pi
 
 
@@ -60,6 +62,7 @@ def Rx(xAngle):
     return np.array([[1, 0, 0],
                      [0, np.cos(xAngle), np.sin(xAngle)],
                      [0, -np.sin(xAngle), np.cos(xAngle)]])
+
 
 
 def Ry(yAngle):
@@ -220,8 +223,6 @@ def minDists(vecs):
     return mDist
 
 
-
-
 def vecProjection(direction, vector):
     unitDir = unitVec(direction)
     return np.dot(vector, unitDir) * unitDir
@@ -254,5 +255,4 @@ def lineseg_dist(p, a, b):
     c = np.cross(p - a, d)
 
     return np.hypot(h, np.linalg.norm(c))
-
 
