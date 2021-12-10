@@ -142,10 +142,6 @@ def test_randomOrthMat():
     dot_o = np.dot(o,o.T)
     assert all(np.isclose(dot_o,np.identity(3)).flatten())
 
-def test_minDists():
-    from ntrfc.utils.math.vectorcalc import minDists
-    a = minDists
-
 
 def test_vecProjection():
     import numpy as np

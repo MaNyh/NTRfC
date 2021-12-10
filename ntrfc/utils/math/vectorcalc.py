@@ -188,15 +188,6 @@ def ellipsoidVol(sig):
     return 4 / 3 * np.pi * sig[0] * sig[1] * sig[2]
 
 
-def minDists(vecs):
-    dist = scipy.spatial.distance.cdist(vecs, vecs)
-
-    dist[dist == 0] = np.inf
-    mDist = []
-    for i in dist:
-        mDist.append(np.min(i))
-    return mDist
-
 
 def vecProjection(direction, vector):
     unitDir = vecDir(direction)
