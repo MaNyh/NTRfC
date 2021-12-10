@@ -3,8 +3,12 @@
 """Tests for `ntrfc` package."""
 
 import pytest
+import pyvista as pv
+import numpy as np
+
 
 from ntrfc import ntrfc
+
 
 @pytest.fixture
 def response():
@@ -21,3 +25,98 @@ def test_content(response):
     # from bs4 import BeautifulSoup
     # assert 'GitHub' in BeautifulSoup(response.content).title.string
 
+
+def test_yamlDictRead(tmpdir):
+    """
+    tests if yaml is returning a known dictionary
+    """
+    from ntrfc.utils.filehandling.read_datafiles import yaml_dict_read
+
+    test_file = tmpdir / "test.yaml"
+    with open(test_file, "w") as handle:
+        handle.write("test_key: True\n")
+    assert yaml_dict_read(test_file) == {"test_key": True}
+
+def test_yamlDictWrite(tmpdir):
+    """
+    tests if yaml is writing and returning a known dictionary
+    """
+    from ntrfc.utils.filehandling.read_datafiles import yaml_dict_read, write_yaml_dict
+
+    test_file = tmpdir / "test.yaml"
+    test_dict = {"test_key": True}
+    write_yaml_dict(test_file,test_dict)
+
+    assert yaml_dict_read(test_file) == test_dict
+
+def test_polyline_from_points():
+    from ntrfc.utils.filehandling.read_mesh import polyline_from_points
+
+    points = pv.Line(resolution=100).points
+    line = polyline_from_points(points)
+    assert line.length == 1.0 , "theres something fishy about the polyline_from_points implementation"
+
+
+def test_line_from_points():
+    from ntrfc.utils.filehandling.read_mesh import lines_from_points
+
+    points = pv.Line(resolution=100).points
+    line = lines_from_points(points)
+    assert line.length == 1.0 , "theres something fishy about the polyline_from_points implementation"
+
+
+def test_loadmesh_vtk(tmpdir):
+    """
+    tests if a vtk mesh can be read and Density is translated to rho
+    """
+    from ntrfc.utils.filehandling.read_mesh import load_mesh
+
+    test_file = tmpdir / "tmp.vtk"
+    mesh = pv.Box()
+    mesh["Density"] = np.ones( mesh.number_of_cells)
+    mesh.save(test_file)
+    mesh_load = load_mesh(test_file)
+    assert "rho" in mesh_load.array_names
+
+
+
+def test_surface_distance():
+    from ntrfc.utils.filehandling.read_mesh import calc_dist_from_surface
+
+    surf_one = pv.Plane()
+    surf_two = pv.Plane()
+    z_shift = 1.0
+    surf_two.points += np.array([0,0,z_shift])
+    dist = calc_dist_from_surface(surf_one,surf_two)
+    assert any(dist["distances"]==z_shift)
+
+
+def test_cgnsReader():
+    from ntrfc.utils.filehandling.read_mesh import cgnsReader
+    a = cgnsReader
+    return 0
+
+
+def test_vtkUnstructuredGridReader():
+    from ntrfc.utils.filehandling.read_mesh import vtkUnstructuredGridReader
+    a = vtkUnstructuredGridReader
+    return 0
+
+
+def test_vtkFLUENTReader():
+    from ntrfc.utils.filehandling.read_mesh import vtkFLUENTReader
+    a = vtkFLUENTReader
+    return 0
+
+
+def test_pickle_operations(tmpdir):
+    from ntrfc.utils.filehandling.read_datafiles import write_pickle, read_pickle, write_pickle_protocolzero
+
+    fname = tmpdir / "test.pkl"
+    dict = {"test":1}
+    write_pickle(fname,dict)
+    pklread = read_pickle(fname)
+    assert dict["test"] == pklread["test"]
+    write_pickle_protocolzero(fname,dict)
+    pklread_zero = read_pickle(fname)
+    assert dict["test"] == pklread_zero["test"]
