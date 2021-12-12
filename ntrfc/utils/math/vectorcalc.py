@@ -11,7 +11,7 @@ from scipy.spatial.distance import squareform, pdist
 
 import sys
 import math as m
-import scipy
+
 
 def calc_largedistant_idx(x_koords, y_koords):
     """
@@ -230,4 +230,21 @@ def lineseg_dist(p, a, b):
     c = np.cross(p - a, d)
 
     return np.hypot(h, np.linalg.norm(c))
+
+def line_intersection(point_a1, point_a2,
+                      point_b1, point_b2):
+    def det_2d(a, b):
+        return a[0] * b[1] - a[1] * b[0]
+
+    xdiff = (point_a1[0] - point_a2[0], point_b1[0] - point_b2[0])
+    ydiff = (point_a1[1] - point_a2[1], point_b1[1] - point_b2[1])
+
+    div = det_2d(xdiff, ydiff)
+    if div == 0:
+        return None
+
+    d = (det_2d(point_a1, point_a2), det_2d(point_b1, point_b2))
+    x = det_2d(d, xdiff) / div
+    y = det_2d(d, ydiff) / div
+    return x, y
 

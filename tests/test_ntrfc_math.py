@@ -166,3 +166,12 @@ def test_vecAngle():
     b = np.array([0, 1, 0])
     angle = vecAngle(a, b)
     assert angle == np.pi / 2
+
+
+def test_line_intersection():
+    import numpy as np
+    from ntrfc.utils.math.vectorcalc import line_intersection
+
+    intersect = line_intersection((-1,0),(1,0),
+                      (0,-1),(0,1))
+    assert all(intersect==np.array([0,0]))
