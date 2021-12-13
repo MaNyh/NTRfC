@@ -1,0 +1,49 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+description: Config file for the parPE snakemake optimization workflow
+
+type: dict
+properties:
+    blade:
+        type: dict
+        description: settings for the generation of the profile-splines
+
+        properties:
+            algorithm:
+                type: string
+                description: definition of the generation-algorithm (from_pointcloud, nacagen, parsecgen)
+
+            ptcloud_profile:
+                type: string
+                description: in case from_pointcloud is picked, one has to define a path to the pointcloudfile
+
+            ptcloud_profile_unit:
+                type: string                                  #m vs mm
+                description: in case from_pointcloud is picked, one has to define the right unit (a default-value for m should be defined)
+
+            alpha:
+                type: string                                  #Geometric parameter used for hull-calculations
+                description: an alpha-value for the alphashape has to be defined
+    geometry:
+        type: dict
+        properties:
+
+            pitch:
+                type: string                                #Pitch [m]
+                description: the pitch of the cascade-blades has to be defined
+
+            x_inlet:
+                type: string
+                description: position of the inlet x-position has to be defined. LE is the zeroposition
+
+            x_outlet:
+                type: string
+                description: position of the outlet x-position has to be defined. LE is the zeroposition
+
+            shift_domain:
+              type : string
+              description: shift the blade in the domain, so that probes can be placed in the passage-midline
+
+required:
+  - blade
+  - geometry
+
