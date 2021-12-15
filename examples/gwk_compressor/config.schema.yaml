@@ -1,57 +1,54 @@
-$schema: "http://json-schema.org/draft-06/schema#"
-description: Config file for the parPE snakemake optimization workflow
-
-properties:
-    blade:
-        type: object
-        description: settings for the generation of the profile-splines
-
-        properties:
-            algorithm:
-                type: string
-                description: definition of the generation-algorithm (from_pointcloud, nacagen, parsecgen)
-                pattern: * #TBD
-
-            ptcloud_profile:
-                type: string
-                description: in case from_pointcloud is picked, one has to define a path to the pointcloudfile
-                pattern: * #TBD
-
-            ptcloud_profile_unit:
-                type: string                                  #m vs mm
-                description: in case from_pointcloud is picked, one has to define the right unit (a default-value for m should be defined)
-                pattern: * #TBD
-
-            alpha:
-                type: number                                  #Geometric parameter used for hull-calculations
-                description: an alpha-value for the alphashape has to be defined
-                minimum: 0
-    geometry:
-        type: object
-        properties:
-
-            pitch:
-                type: number                                #Pitch [m]
-                description: the pitch of the cascade-blades has to be defined
-                minimum: 0
-
-            x_inlet:
-                type: number
-                description: position of the inlet x-position has to be defined. LE is the zeroposition
-                maximum: 0
+$schema : "http://json-schema.org/draft-06/schema#"
+description : Config file for the parPE snakemake optimization workflow
 
 
-            x_outlet:
-                type: number
-                description: position of the outlet x-position has to be defined. LE is the zeroposition
-                minimum: 0
+properties :
+    blade :
+        type : object
+        description : settings for the generation of the profile-splines
 
-            shift_domain:
-              type : number
-              description: shift the blade in the domain, so that probes can be placed in the passage-midline
-              maximum : 1 # this should be limited by the pitch-size. the shift can't be bigger then this
+        properties :
+            algorithm :
+                type : string
+                description : definition of the generation-algorithm
+                pattern : [from_pointcloud]{,1}|[nacagen]{,1}|[parsecgen]{,1} #TBD
 
-required:
-  - blade
-  - geometry
+            ptcloud_profile :
+                type : string
+                description : in case from_pointcloud is picked, one has to define a path to the pointcloudfile
+                pattern : a #TBD
 
+            ptcloud_profile_unit :
+                type : string                                  #m vs mm
+                description : in case from_pointcloud is picked, one has to define the right unit (a default-value for m should be defined)
+                pattern : a #TBD
+
+            alpha :
+                type : number                                  #Geometric parameter used for hull-calculations
+                description : an alpha-value for the alphashape has to be defined
+                minimum : 0
+    geometry :
+        type : object
+        description : Config file for the parPE snakemake optimization workflow
+
+        properties :
+            pitch :
+                type : number                                #Pitch [m]
+                description : the pitch of the cascade-blades has to be defined
+                minimum : 0
+
+            x_inlet :
+                type : number
+                description : position of the inlet x-position has to be defined. LE is the zeroposition
+                maximum : 0
+
+
+            x_outlet :
+                type : number
+                description : position of the outlet x-position has to be defined. LE is the zeroposition
+                minimum : 0
+
+            shift_domain :
+                type : number
+                description : shift the blade in the domain, so that probes can be placed in the passage-midline
+                maximum : 1 # this should be limited by the pitch-size. the shift can't be bigger then this

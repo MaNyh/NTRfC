@@ -1,14 +1,14 @@
 from snakemake.utils import validate
 from ntrfc.preprocessing.geometry_creation.profile_pointcloud import hello
 
-configfile : "casesettings.yml"
-validate("config","config.schema.yaml")
+configfile : "casesettings.yaml"
+validate(config,"config.schema.yaml")
 
 rule from_pointcloud:
     input:
         "00_resources/profile_pointcloud.txt"
     output:
-        "01_geometry/ssPoly.pkl", "01_geometry/psPoly.pkl"
+        "01_geometry/geometry.pkl"
     run:
         hello
 
@@ -18,7 +18,7 @@ rule from_naca_generator:
 #    output:
 #        "output/heythere.txt"
     shell:
-        "python helloworld.py"
+        "rhoPimpleFoam"
 
 
 rule create_parsec_generator:
