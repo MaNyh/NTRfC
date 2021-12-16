@@ -3,7 +3,7 @@ import pyvista as pv
 from scipy.spatial import Delaunay
 from itertools import product
 
-from ntrfc.utils.math.vectorcalc import calc_largedistant_idx
+from ntrfc.utils.math.vectorcalc import calc_largedistant_idx, vecAngle
 from ntrfc.utils.pyvista_utils.line import polyline_from_points, refine_spline
 
 def calcConcaveHull(x, y, alpha):
@@ -116,7 +116,8 @@ def calcConcaveHull(x, y, alpha):
 
 def midLength(ind_1, ind_2, sortedPoly):
     """
-    calc length of a midline
+    calc length of a midline. currently only used in the iterative computation of LE and TE index of a profile. probably
+    this method is not necessary, as it is only two lines
     :param ind_1: index LE
     :param ind_2: index TE
     :param sortedPoly: pv.PolyData sorted
@@ -124,9 +125,7 @@ def midLength(ind_1, ind_2, sortedPoly):
     """
     psPoly, ssPoly = extractSidePolys(ind_1, ind_2, sortedPoly)
     midsPoly = midline_from_sides(ind_1, ind_2, sortedPoly.points, psPoly, ssPoly)
-    arclengths = midsPoly.compute_arc_length()["arc_length"]
-    midslength = sum(arclengths)
-    return midslength
+    return midsPoly.length
 
 
 def midline_from_sides(ind_hk, ind_vk, points, psPoly, ssPoly):
@@ -243,3 +242,45 @@ def extractSidePolys(ind_hk, ind_vk, sortedPoly):
 
 
     return ssPoly, psPoly
+
+
+def extract_geo_paras(points, alpha, verbose=False):
+    """
+    This function is extracting profile-data as stagger-angle, midline, psPoly, ssPoly and more from a set of points
+    Be careful, you need a suitable alpha-parameter in order to get the right geometry
+    The calculation of the leading-edge and trailing-edge index needs time and its not 100% reliable (yet)
+    Keep in mind, to check the results!
+    :param points: array of points in 3d with the shape (n,3)
+    :param alpha: nondimensional alpha-coefficient (calcConcaveHull)
+    :param verbose: bool for plots
+    :return: points, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing
+    """
+
+    xs, ys = calcConcaveHull(points[:, 0], points[:, 1], alpha)
+    points = np.stack((xs, ys, np.zeros(len(xs)))).T
+    sortedPoly = pv.PolyData(points)
+
+    ind_hk, ind_vk = extract_vk_hk( sortedPoly)
+    psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly)
+    midsPoly = midline_from_sides(ind_hk, ind_vk, points, psPoly, ssPoly)
+
+    #compute angles from 2d-midline
+    xmids, ymids = midsPoly.points[::, 0], midsPoly.points[::, 1]
+    vk_tangent = np.stack((xmids[0] - xmids[1], ymids[0] - ymids[1], 0)).T
+    hk_tangent = np.stack((xmids[-2] - xmids[-1], ymids[-2] - ymids[-1], 0)).T
+    camber = np.stack((xmids[0] - xmids[-1], ymids[0] - ymids[-1], 0)).T[::-1]
+    beta_leading = vecAngle(vk_tangent, np.array([0, 1, 0])) / np.pi * 180
+    beta_trailing = vecAngle(hk_tangent, np.array([0, 1, 0])) / np.pi * 180
+    camber_angle = vecAngle(camber, np.array([0, 1, 0])) / np.pi * 180
+
+    if verbose:
+        p = pv.Plotter()
+        p.add_mesh(points, color="orange", label="points")
+        p.add_mesh(psPoly, color="green", label="psPoly")
+        p.add_mesh(ssPoly, color="black", label="ssPoly")
+        p.add_mesh(midsPoly, color="black", label="midsPoly")
+        p.add_mesh(pv.Line((0,0,0),(midsPoly.length,0,0)))
+        p.add_legend()
+        p.show()
+
+    return points, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle

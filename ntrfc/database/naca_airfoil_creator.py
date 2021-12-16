@@ -34,7 +34,7 @@ from math import pi
 from math import pow
 from math import sqrt
 import numpy as np
-
+import pyvista as pv
 
 def linspace(start,stop,np):
     """
@@ -248,13 +248,45 @@ def naca5(number, n, finite_TE = False, half_cosine_spacing = False):
 
     return X,Z
 
-def naca(number, n, finite_TE = False, half_cosine_spacing = False):
+def naca(number, n, finite_TE = False, half_cosine_spacing = True):
     if len(number)==4:
-        return naca4(number, n, finite_TE, half_cosine_spacing)
+        X,Y = naca4(number, n, finite_TE, half_cosine_spacing)
     elif len(number)==5:
-        return naca5(number, n, finite_TE, half_cosine_spacing)
+        X,Y  = naca5(number, n, finite_TE, half_cosine_spacing)
     else:
         raise Exception
+
+    """
+    fix for trailing_edge finite_TE
+    """
+    ind_hk = 0
+    ind_vk = n
+    points = np.stack((X,Y, np.zeros(len(X)))).T
+
+    # todo: here is a minor bug. when creating a circle the points might be slightly rotated different to the blade
+    if finite_TE:
+        pointa = np.array([X[0],Y[0],0])
+        pointb = np.array([X[-1],Y[-1],0])
+        center = (pointb - pointa) / 2 + pointa
+        arcres = int(n/5)
+        arc = pv.CircularArc(pointa, pointb, center, resolution=arcres, negative=True)
+        arcpts = arc.points[1:-2]
+        points = np.vstack([points, arcpts[::-1]])
+        X,Y = points[::,0],points[::,1]
+        """
+        # Creating equally spaced 100 data in range 0 to 2*pi
+        theta = np.linspace(0, 2 * np.pi, 100)
+
+        # Setting radius
+        radius = 5
+
+        # Generating x and y data
+        x = radius * np.cos(theta)
+        y = radius * np.sin(theta)
+        """
+    return X,Y
+
+
 
 class Display(object):
     def __init__(self):

@@ -11,25 +11,31 @@ properties :
             algorithm :
                 type : string
                 description : definition of the generation-algorithm
-                pattern : [from_pointcloud]{,1}|[nacagen]{,1}|[parsecgen]{,1} #TBD
+                pattern : from_pointcloud|nacagen|parsecgen
 
             ptcloud_profile :
                 type : string
-                description : in case from_pointcloud is picked, one has to define a path to the pointcloudfile
-                pattern : a #TBD
+                description : |
+                    in case from_pointcloud is picked, one has to define a path to the pointcloudfile
+                    any string is an allowed value
+                pattern : .* #any string
 
             ptcloud_profile_unit :
                 type : string                                  #m vs mm
-                description : in case from_pointcloud is picked, one has to define the right unit (a default-value for m should be defined)
-                pattern : a #TBD
+                description : |
+                    in case from_pointcloud is picked, one has to define the right unit
+                    m or mm (a default-value for m should be defined)
+                pattern : mm|m
 
             alpha :
                 type : number                                  #Geometric parameter used for hull-calculations
-                description : an alpha-value for the alphashape has to be defined
+                description : |
+                    an alpha-value for the alphashape has to be defined
+                    any number > 0 allowed
                 minimum : 0
     geometry :
         type : object
-        description : Config file for the parPE snakemake optimization workflow
+        description : cascade geometry parameters
 
         properties :
             pitch :
@@ -51,4 +57,5 @@ properties :
             shift_domain :
                 type : number
                 description : shift the blade in the domain, so that probes can be placed in the passage-midline
+                minimum : -1
                 maximum : 1 # this should be limited by the pitch-size. the shift can't be bigger then this

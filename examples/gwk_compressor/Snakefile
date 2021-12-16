@@ -1,5 +1,5 @@
 from snakemake.utils import validate
-from ntrfc.preprocessing.geometry_creation.profile_pointcloud import hello
+from ntrfc.preprocessing.geometry_creation.profile_pointcloud import generate_profile_pointcloud_geometry
 
 configfile : "casesettings.yaml"
 validate(config,"config.schema.yaml")
@@ -10,7 +10,7 @@ rule from_pointcloud:
     output:
         "01_geometry/geometry.pkl"
     run:
-        hello
+        generate_profile_pointcloud_geometry(config)
 
 rule from_naca_generator:
 #    input:
