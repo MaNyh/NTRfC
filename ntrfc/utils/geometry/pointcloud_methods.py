@@ -123,6 +123,7 @@ def midLength(ind_1, ind_2, sortedPoly):
     :param sortedPoly: pv.PolyData sorted
     :return: length
     """
+
     psPoly, ssPoly = extractSidePolys(ind_1, ind_2, sortedPoly)
     midsPoly = midline_from_sides(ind_1, ind_2, sortedPoly.points, psPoly, ssPoly)
     return midsPoly.length
@@ -164,10 +165,25 @@ def extract_vk_hk(sortedPoly, verbose=False):
     :return: returns indexes of LE(vk) and TE(hk) from sortedPoints
     """
 
+    def checkLength(ind_1, ind_2, sortedPoly):
+        """
+        calc length of a midline. currently only used in the iterative computation of LE and TE index of a profile. probably
+        this method is not necessary, as it is only two lines
+        :param ind_1: index LE
+        :param ind_2: index TE
+        :param sortedPoly: pv.PolyData sorted
+        :return: length
+        """
+        psPoly, ssPoly = extractSidePolys(ind_1, ind_2, sortedPoly)
+        midsPoly = midline_from_sides(ind_1, ind_2, sortedPoly.points, psPoly, ssPoly)
+        arclengths = midsPoly.compute_arc_length()["arc_length"]
+        midslength = sum(arclengths)
+        return midslength
+
     xs, ys = sortedPoly.points[::, 0], sortedPoly.points[::, 1]
     ind_1, ind_2 = calc_largedistant_idx(xs, ys)
     allowed_shift = 1
-    midLength0 = midLength(ind_1, ind_2, sortedPoly)
+    midLength0 = checkLength(ind_1, ind_2, sortedPoly)
     nopt = sortedPoly.number_of_points
 
     checked_combs = {}
@@ -187,13 +203,13 @@ def extract_vk_hk(sortedPoly, verbose=False):
         for ind_1_t, ind2_t in combs:
             if checked_combs[(ind_1_t, ind2_t)] == False:
                 checked_combs[(ind_1_t, ind2_t)] = True
-                midLengths.append(midLength(ind_1_t, ind2_t, sortedPoly))
+                midLengths.append(checkLength(ind_1_t, ind2_t, sortedPoly))
             else:
                 midLengths.append(0)
         cids = midLengths.index(max(midLengths))
 
         ind_1_n, ind_2_n = combs[cids]
-        midLength_new = midLength(ind_1_n, ind_2_n, sortedPoly)
+        midLength_new = checkLength(ind_1_n, ind_2_n, sortedPoly)
         if midLength_new > midLength0:
             ind_1, ind_2 = ind_1_n, ind_2_n
             midLength0 = midLength_new

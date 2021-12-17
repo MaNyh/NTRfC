@@ -259,12 +259,9 @@ def naca(number, n, finite_TE = False, half_cosine_spacing = True):
     """
     fix for trailing_edge finite_TE
     """
-    ind_hk = 0
-    ind_vk = n
-    points = np.stack((X,Y, np.zeros(len(X)))).T
-
-    # todo: here is a minor bug. when creating a circle the points might be slightly rotated different to the blade
     if finite_TE:
+
+        points = np.stack((X, Y, np.zeros(len(X)))).T
         pointa = np.array([X[0],Y[0],0])
         pointb = np.array([X[-1],Y[-1],0])
         center = (pointb - pointa) / 2 + pointa

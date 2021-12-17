@@ -89,7 +89,7 @@ def test_extract_vk_hk(verbose=False):
     ind_hk_test = 0
     ind_vk_test = res
 
-    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2))).T
+    points = np.stack((X, Y, np.zeros(len(X)))).T
 
     profilepoints = pv.PolyData(points)
 
@@ -106,6 +106,91 @@ def test_extract_vk_hk(verbose=False):
         p.add_mesh(sortedPoly)
         p.show()
 
-    assert ind_hk == ind_hk_test, "wrong hk-index chosen"
+    assert (ind_hk == ind_hk_test or ind_hk == ind_vk_test*2), "wrong hk-index chosen"
     assert ind_vk == ind_vk_test, "wrong vk-index chosen"
 
+
+def test_midline_from_sides():
+    from ntrfc.utils.geometry.pointcloud_methods import midline_from_sides
+    from ntrfc.utils.math.vectorcalc import vecAbs
+    from ntrfc.database.naca_airfoil_creator import naca
+    from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
+
+    res = 240
+    X, Y = naca('0009', res, finite_TE=False, half_cosine_spacing=True)
+    ind_hk = 0
+    ind_vk = res
+
+    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2) - 1)).T
+    poly = pv.PolyData(points)
+    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk, poly)
+
+    mids = midline_from_sides(ind_hk, ind_vk, poly.points, psPoly, ssPoly)
+
+    length = mids.length
+    testlength = vecAbs(ssPoly.points[0] - ssPoly.points[-1])
+
+    assert length == testlength, "midline not accurate"
+
+
+def test_midLength():
+    """
+    checks weather
+    """
+    from ntrfc.utils.geometry.pointcloud_methods import midLength
+    import numpy as np
+    import pyvista as pv
+
+    radius = 0.5
+    res = 100
+    mid = int(res / 2)
+    theta = np.linspace(0, 2 * np.pi, 100)
+
+    x = radius * np.cos(theta)
+    y = radius * np.sin(theta)
+
+    fake_vk = 0
+    fake_hk = mid
+    circle = pv.PolyData(np.stack([x, y, np.zeros(len(x))]).T)
+    length = midLength(fake_vk, fake_hk, circle)
+    assert np.isclose(2 * radius, length, rtol=1e-4), "length should be two times the size of the defined test-circle"
+
+
+def test_extractSidePolys():
+    from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
+    from ntrfc.database.naca_airfoil_creator import naca
+
+    d1, d2, d3, d4 = np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9)
+    digitstring = str(d1) + str(d2) + str(d3) + str(d4)
+
+    res = 240
+    X, Y = naca(digitstring, res, finite_TE=False, half_cosine_spacing=True)
+    ind_hk = 0
+    ind_vk = res
+    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2) - 1)).T
+
+    poly = pv.PolyData(points)
+    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk, poly)
+
+    assert ssPoly.number_of_points == psPoly.number_of_points, "number of sidepoints are not equal"
+
+
+def test_extract_geo_paras():
+    from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
+    from ntrfc.database.naca_airfoil_creator import naca
+
+    naca_code = "0009"
+    angle = 20  # deg
+    alpha = 1
+    res = 200
+    xs, ys = naca(naca_code, res, finite_TE=False, half_cosine_spacing=True)
+    sortedPoly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
+    sortedPoly.rotate_z(angle)
+
+    points, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
+        sortedPoly.points, alpha)
+
+    assert np.isclose(beta_leading , (angle + 90)), "wrong leading edge angle"
+    assert np.isclose(beta_trailing , (angle + 90)), "wrong leading edge angle"
+    assert np.isclose(midsPoly.length, 1)
+    assert np.isclose(camber_angle, (angle + 90))

@@ -1,3 +1,5 @@
+import pyvista as pv
+
 
 def test_absVec():
     import numpy as np
@@ -175,3 +177,13 @@ def test_line_intersection():
     intersect = line_intersection((-1,0),(1,0),
                       (0,-1),(0,1))
     assert all(intersect==np.array([0,0]))
+
+
+def test_largedistance_indices():
+    from ntrfc.utils.math.vectorcalc import calc_largedistant_idx
+
+    line = pv.Line(resolution=100)
+    xx, yy = line.points[::, 0], line.points[::, 1]
+    id1, id2 = calc_largedistant_idx(xx, yy)
+    assert id1 == 0
+    assert id2 == 100
