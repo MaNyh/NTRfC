@@ -1,16 +1,21 @@
 from snakemake.utils import validate
-from ntrfc.preprocessing.geometry_creation.profile_pointcloud import generate_profile_pointcloud_geometry
+import os
 
+from ntrfc.preprocessing.geometry_creation.profile_pointcloud import generate_profile_pointcloud_geometry
+#todo move this snakepipe to according dir in sourcecode
 configfile : "casesettings.yaml"
 validate(config,"config.schema.yaml")
+#todo make part of validation
+basedir = workflow.current_basedir
 
 rule from_pointcloud:
     input:
         "00_resources/profile_pointcloud.txt"
     output:
-        "01_geometry/geometry.pkl"
+        "01_geometry/sortedPoints.txt", "01_geometry/psPoly.vtk", "01_geometry/ssPoly.vtk", "01_geometry/midsPoly.vtk", "01_geometry/geometry_paras.yml"
     run:
-        generate_profile_pointcloud_geometry(config)
+        generate_profile_pointcloud_geometry(config["blade"],basedir)
+
 
 rule from_naca_generator:
 #    input:
