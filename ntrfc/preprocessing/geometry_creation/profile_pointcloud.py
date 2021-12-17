@@ -29,11 +29,11 @@ def generate_profile_pointcloud_geometry(settings,basedir):
         points,
         alpha)
 
-    geometry_paras = {"ind_vk":ind_vk,
-                    "ind_hk":ind_hk,
-                    "beta_meta_01":beta_meta_01,
-                    "beta_meta_02":beta_meta_02,
-                    "camber_angle":camber_angle}
+    geometry_paras = {"ind_vk":int(ind_vk),
+                    "ind_hk":int(ind_hk),
+                    "beta_meta_01":float(beta_meta_01),
+                    "beta_meta_02":float(beta_meta_02),
+                    "camber_angle":float(camber_angle)}
 
 
     geo_dir = os.path.join(basedir,"01_geometry")
