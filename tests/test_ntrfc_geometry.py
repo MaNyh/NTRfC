@@ -123,7 +123,7 @@ def test_midline_from_sides():
     ind_hk = 0
     ind_vk = res
 
-    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2) - 1)).T
+    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2-1))).T
     poly = pv.PolyData(points)
     ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk, poly)
 
