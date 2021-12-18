@@ -1,6 +1,7 @@
 from ntrfc.utils.geometry.pointcloud_methods import calcMidPassageStreamLine
 from ntrfc.utils.pyvista_utils.line import lines_from_points
-from ntrfc.utils.math.vectorcalc import closest_node_index, vecAbs
+from ntrfc.utils.math.vectorcalc import closest_node_index, vecAbs, vecDir
+from ntrfc.utils.filehandling.tecplot import writeTecplot1DFile
 import numpy as np
 import pyvista as pv
 import os
@@ -44,7 +45,7 @@ def create_2d_domain(geosettings, basedir, midsPoly, ssPoly, psPoly, geometry_pa
 
     outletPoly = pv.Line(*outlet_pts)
 
-    domain_dir = os.path.join(basedir, "02_boundaries")
+    domain_dir = os.path.join(basedir, "02_domainboundaries")
     inletPoly.save(os.path.join(domain_dir, "inlet_2d.vtk"), False)
     outletPoly.save(os.path.join(domain_dir, "outlet_2d.vtk"), False)
     per_y_upper.save(os.path.join(domain_dir, "y_upper_2d.vtk"), False)
@@ -83,7 +84,8 @@ def create_2d_blocklines(geo_settings, basedir, sortedPoints, psPoly, ssPoly, ge
     ogridhelpersurface.points += ogrid_size * ogridhelpersurface.point_normals
     ogridline = ogridhelpersurface.slice(normal="z")
     ogridline.points[:, 2] = 0
-    ogridline.save(os.path.join(basedir, "ogridline_2d.vtk"))
+    domain_dir = os.path.join(basedir,"03_meshgeometry")
+
 
     blademids = midsPoly.copy()
     # blademids.points += pitch/2
@@ -120,25 +122,79 @@ def create_2d_blocklines(geo_settings, basedir, sortedPoints, psPoly, ssPoly, ge
                                    geometry_paras["beta_meta_02"],
                                    inlet.bounds[0],outlet.bounds[0],0)
 
-    mspPoly = pv.PolyData(np.stack([msp_xx,msp_yy,np.zeros(len(msp_yy))]).T)
-    p = pv.Plotter()
-    p.add_mesh(inlet)
-    p.add_mesh(inlet)
-    p.add_mesh(y_upper)
-    p.add_mesh(y_lower)
-    p.add_mesh(bladeline)
+    mspPoly = lines_from_points(np.stack([msp_xx,msp_yy,np.zeros(len(msp_yy))]).T)
 
-    p.add_mesh(blademids)
+    le_ogrid = pv.Line(midsPoly.points[0],midsPoly.points[0]-vecDir(midsPoly.points[1]-midsPoly.points[0])*ogrid_size)
+    te_ogrid = pv.Line(midsPoly.points[-1],midsPoly.points[-1]-vecDir(midsPoly.points[-2]-midsPoly.points[-1])*ogrid_size)
+    ogrid_inlet_dist = vecAbs(mspPoly.points[0]-le_ogrid.points[-1])
+    ogrid_outlet_dist = vecAbs(mspPoly.points[-1]-te_ogrid.points[-1])
+    ogrid_inlet = pv.Line(le_ogrid.points[-1],le_ogrid.points[-1]-vecDir(midsPoly.points[1]-midsPoly.points[0])*ogrid_inlet_dist)
+    ogrid_oulet = pv.Line(te_ogrid.points[-1],te_ogrid.points[-1]-vecDir(midsPoly.points[-2]-midsPoly.points[-1])*ogrid_outlet_dist)
+    """
+    ogridline.save(os.path.join(domain_dir, "ogridline_2d.vtk"))
 
-    p.add_mesh(mspPoly)
-    p.add_mesh(ogridline)
-    p.add_mesh(ps_x0_ogrid_line)
-    p.add_mesh(ps_x1_ogrid_line)
-    p.add_mesh(ss_x0_ogrid_line)
-    p.add_mesh(ss_x1_ogrid_line)
-    p.add_mesh(ylower_ogrid_x0)
-    p.add_mesh(yupper_ogrid_x0)
-    p.add_mesh(ylower_ogrid_x1)
-    p.add_mesh(yupper_ogrid_x1)
-    p.show(cpos=[0, 0, 1])
+
+    ogrid_oulet.save(os.path.join(domain_dir, "ogrid_oulet.vtk"))
+    ogrid_inlet.save(os.path.join(domain_dir, "ogrid_inlet.vtk"))
+    te_ogrid.save(os.path.join(domain_dir, "te_ogrid.vtk"))
+    le_ogrid.save(os.path.join(domain_dir, "le_ogrid.vtk"))
+    yupper_ogrid_x1.save(os.path.join(domain_dir, "yupper_ogrid_x1.vtk"))
+    ylower_ogrid_x1.save(os.path.join(domain_dir, "ylower_ogrid_x1.vtk"))
+    yupper_ogrid_x0.save(os.path.join(domain_dir, "yupper_ogrid_x0.vtk"))
+    ylower_ogrid_x0.save(os.path.join(domain_dir, "ylower_ogrid_x0.vtk"))
+    ss_x1_ogrid_line.save(os.path.join(domain_dir, "ss_x1_ogrid_line.vtk"))
+    ss_x0_ogrid_line.save(os.path.join(domain_dir, "ss_x0_ogrid_line.vtk"))
+    ps_x1_ogrid_line.save(os.path.join(domain_dir, "ps_x1_ogrid_line.vtk"))
+    ps_x0_ogrid_line.save(os.path.join(domain_dir, "ps_x0_ogrid_line.vtk"))
+    """
+    plt.figure()
+    plt.plot(inlet.points[::, 0], inlet.points[::, 1], color="#6c3376")
+    plt.plot(outlet.points[::, 0], outlet.points[::, 1], color="#FF2211")
+    plt.plot(y_upper.points[::, 0], y_upper.points[::, 1], color="#FF22CC")
+    plt.plot(y_lower.points[::, 0], y_lower.points[::, 1], color="#FF22CC")
+    plt.plot(bladeline.points[::, 0], bladeline.points[::, 1], color="#6c3376")
+    plt.plot(le_ogrid.points[::, 0], le_ogrid.points[::, 1], color="#FF2211")
+    plt.plot(te_ogrid.points[::, 0], te_ogrid.points[::, 1], color="#FF22CC")
+    plt.plot(ogrid_inlet.points[::, 0], ogrid_inlet.points[::, 1], color="#FF22CC")
+    plt.plot(ogrid_oulet.points[::, 0], ogrid_oulet.points[::, 1], color="#6c3376")
+    plt.plot(ogridline.points[::, 0], ogridline.points[::, 1], color="#FF2211")
+    plt.plot(ps_x0_ogrid_line.points[::, 0], ps_x0_ogrid_line.points[::, 1], color="#FF22CC")
+    plt.plot(ps_x1_ogrid_line.points[::, 0], ps_x1_ogrid_line.points[::, 1], color="#FF22CC")
+    plt.plot(ss_x0_ogrid_line.points[::, 0], ss_x0_ogrid_line.points[::, 1], color="#FF22CC")
+    plt.plot(ss_x1_ogrid_line.points[::, 0], ss_x1_ogrid_line.points[::, 1], color="#FF22CC")
+    plt.plot(ylower_ogrid_x0.points[::, 0], ylower_ogrid_x0.points[::, 1], color="#FF22CC")
+    plt.plot(yupper_ogrid_x0.points[::, 0], yupper_ogrid_x0.points[::, 1], color="#FF22CC")
+    plt.plot(ylower_ogrid_x1.points[::, 0], ylower_ogrid_x1.points[::, 1], color="#FF22CC")
+    plt.plot(yupper_ogrid_x1.points[::, 0], yupper_ogrid_x1.points[::, 1], color="#FF22CC")
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.savefig(os.path.join(domain_dir, 'blocklines.pdf'))
+
+
+    writeTecplot1DFile(os.path.join(domain_dir,"domain.geom"),['x', 'z'],
+                       ["inlet", "outlet", "y_upper", "y_lower", "psPoly", "ssPoly"],
+                       [[inlet.points[::,0],inlet.points[::,1]],[outlet.points[::,0],outlet.points[::,1]],
+                        [y_upper.points[::,0],y_upper.points[::,1]],[y_lower.points[::,0],y_lower.points[::,1]],
+                        [psPoly.points[::,0],psPoly.points[::,1]],[ssPoly.points[::,0],ssPoly.points[::,1]]],
+                       "domainboundaries")
+
+    writeTecplot1DFile(os.path.join(domain_dir,"blocks.geom"),['x', 'z'],
+                       ["le_ogrid","te_ogrid","ogrid_inlet","ogrid_oulet","ogridline",
+                       "ps_x0_ogrid_line","ps_x1_ogrid_line","ss_x0_ogrid_line","ss_x1_ogrid_line",
+                       "ylower_ogrid_x0","yupper_ogrid_x0","ylower_ogrid_x1","yupper_ogrid_x1"],
+                       [[le_ogrid.points[::,0],le_ogrid.points[::,1]],
+                        [te_ogrid.points[::,0],te_ogrid.points[::,1]],
+                        [ogrid_inlet.points[::,0],ogrid_inlet.points[::,1]],
+                        [ogrid_oulet.points[::,0],ogrid_oulet.points[::,1]],
+                        [ogridline.points[::,0],ogridline.points[::,1]],
+                        [ps_x0_ogrid_line.points[::,0],ps_x0_ogrid_line.points[::,1]],
+                        [ps_x1_ogrid_line.points[::,0],ps_x1_ogrid_line.points[::,1]],
+                        [ss_x0_ogrid_line.points[::,0],ss_x0_ogrid_line.points[::,1]],
+                        [ss_x1_ogrid_line.points[::,0],ss_x1_ogrid_line.points[::,1]],
+                        [ylower_ogrid_x0.points[::,0],ylower_ogrid_x0.points[::,1]],
+                        [yupper_ogrid_x0.points[::,0],yupper_ogrid_x0.points[::,1]],
+                        [ylower_ogrid_x1.points[::,0],ylower_ogrid_x1.points[::,1]]],
+                       "blockboundaries")
+
+
     return 0

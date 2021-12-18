@@ -1,6 +1,6 @@
 from snakemake.utils import validate
-from ntrfc.utils.filehandling.read_datafiles import yaml_dict_read
-from ntrfc.utils.filehandling.read_mesh import load_mesh
+from ntrfc.utils.filehandling.datafiles import yaml_dict_read
+from ntrfc.utils.filehandling.mesh import load_mesh
 import numpy as np
 
 #todo move this snakepipe to according dir in sourcecode
@@ -20,39 +20,65 @@ rule profile_from_pointcloud:
 
         generate_profile_pointcloud_geometry(config["blade"],basedir)
 """
+
 """
+rule dumdidum:
+
+    #snakemake Wasd1193.csv
+    #1193 --> step für das Erzeugen von parameter (float, etc.)
+
+    output:
+        "Wasd{parameter_x}.csv"
+    run:
+        print(wildcards.parameter_x)
+"""
+
 rule create_2d_domain:
     input:
-        "01_profile/sortedPoints.txt", "01_profile/psPoly.vtk", "01_profile/ssPoly.vtk", "01_profile/midsPoly.vtk", "01_profile/geometry_paras.yml"
+#        sortedPoints_fpath="01_profile/sortedPoints.txt",
+        psPoly_fpath="01_profile/psPoly.vtk",
+        ssPoly_fpath="01_profile/ssPoly.vtk",
+        midsPoly_fpath="01_profile/midsPoly.vtk",
+        geometry_paras_fpath="01_profile/geometry_paras.yml"
     output:
-        "02_boundaries/inlet_2d.vtk","02_boundaries/outlet_2d.vtk","02_boundaries/y_upper_2d.vtk","02_boundaries/y_lower_2d.vtk",
-        "02_boundaries/domain.pdf"
+        "02_domainboundaries/inlet_2d.vtk","02_domainboundaries/outlet_2d.vtk",
+        "02_domainboundaries/y_upper_2d.vtk","02_domainboundaries/y_lower_2d.vtk",
+        "02_domainboundaries/domain.pdf"
+    params:
+        geometry=config["geometry"]
     run:
         from ntrfc.preprocessing.mesh_creation.domain_creation import create_2d_domain
 
-        sortedPoints_fpath = input[0]
-        psPoly_fpath = input[1]
-        ssPoly_fpath = input[2]
-        midsPoly_fpath = input[3]
-        geometry_paras_fpath = input[4]
+        #todo: dateieinlesen nicht im rule, sondern in der funktion
+        psPoly = load_mesh(input.psPoly_fpath)
+        ssPoly = load_mesh(input.ssPoly_fpath)
+        midsPoly = load_mesh(input.midsPoly_fpath)
+        geometry_paras = yaml_dict_read(input.geometry_paras_fpath)
 
-        psPoly = load_mesh(psPoly_fpath)
-        ssPoly = load_mesh(ssPoly_fpath)
-        midsPoly = load_mesh(midsPoly_fpath)
-        geometry_paras = yaml_dict_read(geometry_paras_fpath)
+        create_2d_domain(params["geometry"],basedir,midsPoly,ssPoly,psPoly,geometry_paras)
 
-        create_2d_domain(config["geometry"],basedir,midsPoly,ssPoly,psPoly,geometry_paras)
 """
+rule create_cascademesh:
+    input:
+    output:
+    run:
+"""
+
 rule create_blockboundaries:
     input:
         "01_profile/sortedPoints.txt", "01_profile/psPoly.vtk", "01_profile/ssPoly.vtk",
-        "01_profile/geometry_paras.yml" ,"01_profile/midsPoly.vtk" ,"02_boundaries/inlet_2d.vtk",
-        "02_boundaries/outlet_2d.vtk", "02_boundaries/y_upper_2d.vtk", "02_boundaries/y_lower_2d.vtk"
+        "01_profile/geometry_paras.yml" ,"01_profile/midsPoly.vtk" ,"02_domainboundaries/inlet_2d.vtk",
+        "02_domainboundaries/outlet_2d.vtk", "02_domainboundaries/y_upper_2d.vtk", "02_domainboundaries/y_lower_2d.vtk"
 
     output:
-        "02_domain/ogridline_2d.vtk"
+        "03_meshgeometry/blocks.geom",
+        "03_meshgeometry/domain.geom",
+        "03_meshgeometry/blocklines.pdf"
+
     run:
         from ntrfc.preprocessing.mesh_creation.domain_creation import create_2d_blocklines
+
+        #todo: params einpflegen, files in funktion laden
         sortedPoints_fpath = input[0]
         psPoly_fpath = input[1]
         ssPoly_fpath = input[2]
@@ -75,6 +101,22 @@ rule create_blockboundaries:
 
         create_2d_blocklines(config["blade"],basedir,sortedPoints,psPoly,ssPoly,geometry_paras,midsPoly,inlet,outlet,y_upper,y_lower)
 
+"""
+rule run_igg_cascademesh:
+    input:
+        "02_domainboundaries/inlet_2d.vtk", "02_domainboundaries/outlet_2d.vtk",
+        "02_domainboundaries/y_upper_2d.vtk", "02_domainboundaries/y_lower_2d.vtk",
+        "03_blockboundaries/ogridline_2d.vtk","03_blockboundaries/ogrid_oulet.vtk",
+        "03_blockboundaries/ogrid_inlet.vtk","03_blockboundaries/te_ogrid.vtk","03_blockboundaries/le_ogrid.vtk",
+        "03_blockboundaries/yupper_ogrid_x1.vtk","03_blockboundaries/ylower_ogrid_x1.vtk","03_blockboundaries/yupper_ogrid_x0.vtk",
+        "03_blockboundaries/ylower_ogrid_x0.vtk","03_blockboundaries/ss_x1_ogrid_line.vtk","03_blockboundaries/ss_x0_ogrid_line.vtk",
+        "03_blockboundaries/ps_x1_ogrid_line.vtk", "03_blockboundaries/ps_x0_ogrid_line.vtk"
+    output:
+        "04_meshgeometry/blocks.geom",
+        "04_meshgeometry/domain.geom"
+    run:
+        from ntrf.preprocessing.mesh_creation.domain_creation import create_igg_geometry
+"""
 """
 rule profile_from_naca:
 #    input:

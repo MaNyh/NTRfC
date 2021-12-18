@@ -21,7 +21,7 @@ def test_yamlDictRead(tmpdir):
     """
     tests if yaml is returning a known dictionary
     """
-    from ntrfc.utils.filehandling.read_datafiles import yaml_dict_read
+    from ntrfc.utils.filehandling.datafiles import yaml_dict_read
 
     test_file = tmpdir / "test.yaml"
     with open(test_file, "w") as handle:
@@ -33,7 +33,7 @@ def test_yamlDictWrite(tmpdir):
     """
     tests if yaml is writing and returning a known dictionary
     """
-    from ntrfc.utils.filehandling.read_datafiles import yaml_dict_read, write_yaml_dict
+    from ntrfc.utils.filehandling.datafiles import yaml_dict_read, write_yaml_dict
 
     test_file = tmpdir / "test.yaml"
     test_dict = {"test_key": True}
@@ -62,7 +62,7 @@ def test_loadmesh_vtk(tmpdir):
     """
     tests if a vtk mesh can be read and Density is translated to rho
     """
-    from ntrfc.utils.filehandling.read_mesh import load_mesh
+    from ntrfc.utils.filehandling.mesh import load_mesh
 
     test_file = tmpdir / "tmp.vtk"
     mesh = pv.Box()
@@ -84,28 +84,28 @@ def test_surface_distance():
 
 
 def test_cgnsReader():
-    from ntrfc.utils.filehandling.read_mesh import cgnsReader
+    from ntrfc.utils.filehandling.mesh import cgnsReader
     # todo fill
     a = cgnsReader
     return 0
 
 
 def test_vtkUnstructuredGridReader():
-    from ntrfc.utils.filehandling.read_mesh import vtkUnstructuredGridReader
+    from ntrfc.utils.filehandling.mesh import vtkUnstructuredGridReader
     # todo fill
     a = vtkUnstructuredGridReader
     return 0
 
 
 def test_vtkFLUENTReader():
-    from ntrfc.utils.filehandling.read_mesh import vtkFLUENTReader
+    from ntrfc.utils.filehandling.mesh import vtkFLUENTReader
     # todo fill
     a = vtkFLUENTReader
     return 0
 
 
 def test_pickle_operations(tmpdir):
-    from ntrfc.utils.filehandling.read_datafiles import write_pickle, read_pickle, write_pickle_protocolzero
+    from ntrfc.utils.filehandling.datafiles import write_pickle, read_pickle, write_pickle_protocolzero
 
     fname = tmpdir / "test.pkl"
     dict = {"test": 1}

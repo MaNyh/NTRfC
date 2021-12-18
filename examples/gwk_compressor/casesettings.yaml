@@ -8,4 +8,4 @@ geometry :
     pitch : 0.0765                                #Pitch [m]
     x_inlet : -0.13                                 #Shift Inlet along x [m]
     x_outlet : 0.26                                  #Shift Outlet along x [m]
-    blade_shift : 0.015                                 #Shift Domain to have probes inside domain [m]
+    blade_shift : 0.005                                 #Shift Domain to have probes inside domain [m]
