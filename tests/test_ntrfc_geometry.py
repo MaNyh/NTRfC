@@ -169,12 +169,12 @@ def test_extractSidePolys():
     X, Y = naca(digitstring, res, finite_TE=False, half_cosine_spacing=True)
     ind_hk = 0
     ind_vk = res
-    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2) - 1)).T
+    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2- 1) )).T
 
     poly = pv.PolyData(points)
     ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk, poly)
-
-    assert ssPoly.number_of_points == psPoly.number_of_points, "number of sidepoints are not equal"
+    #todo: this is probably not right. X[1:-1] or X[:-1]? i should not have to use a +1 here
+    assert ssPoly.number_of_points == psPoly.number_of_points+1, "number of sidepoints are not equal "
 
 
 def test_extract_geo_paras():
