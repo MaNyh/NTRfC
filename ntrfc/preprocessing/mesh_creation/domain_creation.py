@@ -3,6 +3,7 @@ from ntrfc.utils.pyvista_utils.line import lines_from_points
 import numpy as np
 import pyvista as pv
 import os
+import matplotlib.pyplot as plt
 
 def create_2d_domain(geosettings, basedir, midsPoly, ssPoly, psPoly, geometry_paras):
     beta_meta_01 = geometry_paras["beta_meta_01"]
@@ -46,6 +47,19 @@ def create_2d_domain(geosettings, basedir, midsPoly, ssPoly, psPoly, geometry_pa
     outletPoly.save(os.path.join(domain_dir,"outlet_2d.vtk"),False)
     per_y_upper.save(os.path.join(domain_dir,"y_upper_2d.vtk"),False)
     per_y_lower.save(os.path.join(domain_dir,"y_lower_2d.vtk"),False)
+
+    plt.figure()
+    plt.plot(inletPoly.points[::,0],inletPoly.points[::,1], color="#6c3376")
+    plt.plot(outletPoly.points[::,0],outletPoly.points[::,1], color="#FF2211")
+    plt.plot(per_y_upper.points[::,0],per_y_upper.points[::,1], color="#FF22CC")
+    plt.plot(per_y_lower.points[::,0],per_y_lower.points[::,1], color="#FF22CC")
+    plt.plot(x_ss,y_ss, color="#FFAA44")
+    plt.plot(x_ps,y_ps, color="#FFAA44")
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.savefig(os.path.join(domain_dir,'domain.pdf'))
+
+
 
 def create_2d_blocklines(geo_settings,basedir,sortedPoints,geometry_paras,midsPoly,inlet,outlet,y_upper,y_lower):
     bladeline = lines_from_points(sortedPoints)

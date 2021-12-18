@@ -8,8 +8,7 @@ import numpy as np
 configfile : "casesettings.yaml"
 validate(config,"config.schema.yaml")
 basedir = workflow.current_basedir
-
-
+"""
 rule profile_from_pointcloud:
     input:
         "00_resources/profile_pointcloud.txt"
@@ -20,14 +19,13 @@ rule profile_from_pointcloud:
         from ntrfc.preprocessing.geometry_creation.profile_pointcloud import generate_profile_pointcloud_geometry
 
         generate_profile_pointcloud_geometry(config["blade"],basedir)
-
 """
-
 rule create_2d_domain:
     input:
         "01_profile/sortedPoints.txt", "01_profile/psPoly.vtk", "01_profile/ssPoly.vtk", "01_profile/midsPoly.vtk", "01_profile/geometry_paras.yml"
     output:
-        "02_boundaries/inlet_2d.vtk","02_boundaries/outlet_2d.vtk","02_boundaries/y_upper_2d.vtk","02_boundaries/y_lower_2d.vtk"
+        "02_boundaries/inlet_2d.vtk","02_boundaries/outlet_2d.vtk","02_boundaries/y_upper_2d.vtk","02_boundaries/y_lower_2d.vtk",
+        "02_boundaries/domain.pdf"
     run:
         from ntrfc.preprocessing.mesh_creation.domain_creation import create_2d_domain
 
@@ -43,7 +41,6 @@ rule create_2d_domain:
         geometry_paras = yaml_dict_read(geometry_paras_fpath)
 
         create_2d_domain(config["geometry"],basedir,midsPoly,ssPoly,psPoly,geometry_paras)
-"""
 """
 rule create_blockboundaries:
     input:
