@@ -287,7 +287,7 @@ def extract_geo_paras(points, alpha, verbose=False):
     camber = np.stack((xmids[0] - xmids[-1], ymids[0] - ymids[-1], 0)).T[::-1]
     beta_leading = vecAngle(vk_tangent, np.array([0, 1, 0])) / np.pi * 180
     beta_trailing = vecAngle(hk_tangent, np.array([0, 1, 0])) / np.pi * 180
-    camber_angle = vecAngle(camber, np.array([1, 0, 0])) / np.pi * 180
+    camber_angle = vecAngle(camber, np.array([0, 1, 0])) / np.pi * 180
 
     if verbose:
         p = pv.Plotter()
