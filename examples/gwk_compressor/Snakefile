@@ -20,6 +20,7 @@ rule profile_from_pointcloud:
 
         generate_profile_pointcloud_geometry(config["blade"],basedir)
 """
+"""
 rule create_2d_domain:
     input:
         "01_profile/sortedPoints.txt", "01_profile/psPoly.vtk", "01_profile/ssPoly.vtk", "01_profile/midsPoly.vtk", "01_profile/geometry_paras.yml"
@@ -44,23 +45,27 @@ rule create_2d_domain:
 """
 rule create_blockboundaries:
     input:
-        "01_profile/sortedPoints.txt", "01_profile/geometry_paras.yml" ,"01_profile/midsPoly.vtk" ,"02_boundaries/inlet_2d.vtk",
+        "01_profile/sortedPoints.txt", "01_profile/psPoly.vtk", "01_profile/ssPoly.vtk",
+        "01_profile/geometry_paras.yml" ,"01_profile/midsPoly.vtk" ,"02_boundaries/inlet_2d.vtk",
         "02_boundaries/outlet_2d.vtk", "02_boundaries/y_upper_2d.vtk", "02_boundaries/y_lower_2d.vtk"
 
     output:
-        "02_domain/inlet_2d.vtk","02_domain/outlet_2d.vtk","02_domain/y_upper_2d.vtk","02_domain/y_lower_2d.vtk",
         "02_domain/ogridline_2d.vtk"
     run:
         from ntrfc.preprocessing.mesh_creation.domain_creation import create_2d_blocklines
         sortedPoints_fpath = input[0]
-        geometry_paras_fpath = input[1]
-        midsPoly_fpath = input[2]
-        inlet_fpath = input[3]
-        outlet_fpath = input[4]
-        y_upper_fpath = input[5]
-        y_lower_paras_fpath = input[6]
+        psPoly_fpath = input[1]
+        ssPoly_fpath = input[2]
+        geometry_paras_fpath = input[3]
+        midsPoly_fpath = input[4]
+        inlet_fpath = input[5]
+        outlet_fpath = input[6]
+        y_upper_fpath = input[7]
+        y_lower_paras_fpath = input[8]
 
         sortedPoints = np.loadtxt(os.path.join(basedir,sortedPoints_fpath))
+        psPoly = load_mesh(os.path.join(basedir,psPoly_fpath))
+        ssPoly = load_mesh(os.path.join(basedir,ssPoly_fpath))
         geometry_paras = yaml_dict_read(os.path.join(basedir,geometry_paras_fpath))
         midsPoly = load_mesh(os.path.join(basedir,midsPoly_fpath))
         inlet = load_mesh(os.path.join(basedir,inlet_fpath))
@@ -68,8 +73,8 @@ rule create_blockboundaries:
         y_upper = load_mesh(os.path.join(basedir,y_upper_fpath))
         y_lower = load_mesh(os.path.join(basedir,y_lower_paras_fpath))
 
-        create_2d_blocklines(config["blade"],basedir,sortedPoints,geometry_paras,midsPoly,inlet,outlet,y_upper,y_lower)
-"""
+        create_2d_blocklines(config["blade"],basedir,sortedPoints,psPoly,ssPoly,geometry_paras,midsPoly,inlet,outlet,y_upper,y_lower)
+
 """
 rule profile_from_naca:
 #    input:

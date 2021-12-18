@@ -7,11 +7,20 @@ Created on Sun Oct  4 19:01:50 2020
 
 import numpy as np
 from scipy.stats import special_ortho_group
+from scipy.spatial import distance
 from scipy.spatial.distance import squareform, pdist
 
 import sys
 import math as m
 
+def closest_node_index(node, nodes):
+    closest_index = distance.cdist([node], nodes).argmin()
+    return closest_index
+
+
+def distant_node_index(node, nodes):
+    closest_index = distance.cdist([node], nodes).argmax()
+    return closest_index
 
 def calc_largedistant_idx(x_koords, y_koords):
     """
