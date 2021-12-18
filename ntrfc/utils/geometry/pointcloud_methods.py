@@ -178,7 +178,7 @@ def extract_vk_hk(sortedPoly, verbose=False):
         midsPoly = midline_from_sides(ind_1, ind_2, sortedPoly.points, psPoly, ssPoly)
         arclengths = midsPoly.compute_arc_length()["arc_length"]
         midslength = sum(arclengths)
-        return midslength
+        return midsPoly.length
 
     xs, ys = sortedPoly.points[::, 0], sortedPoly.points[::, 1]
     ind_1, ind_2 = calc_largedistant_idx(xs, ys)
@@ -285,9 +285,9 @@ def extract_geo_paras(points, alpha, verbose=False):
     vk_tangent = np.stack((xmids[0] - xmids[1], ymids[0] - ymids[1], 0)).T
     hk_tangent = np.stack((xmids[-2] - xmids[-1], ymids[-2] - ymids[-1], 0)).T
     camber = np.stack((xmids[0] - xmids[-1], ymids[0] - ymids[-1], 0)).T[::-1]
-    beta_leading = vecAngle(vk_tangent, np.array([0, 1, 0])) / np.pi * 180
-    beta_trailing = vecAngle(hk_tangent, np.array([0, 1, 0])) / np.pi * 180
-    camber_angle = vecAngle(camber, np.array([0, 1, 0])) / np.pi * 180
+    beta_leading = vecAngle(vk_tangent, np.array([1, 0, 0])) / np.pi * 180
+    beta_trailing = vecAngle(hk_tangent, np.array([1, 0, 0])) / np.pi * 180
+    camber_angle = vecAngle(camber, np.array([1, 0, 0])) / np.pi * 180
 
     if verbose:
         p = pv.Plotter()

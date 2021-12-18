@@ -1,7 +1,7 @@
 from snakemake.utils import validate
-import pyvista as pv
 from ntrfc.utils.filehandling.read_datafiles import yaml_dict_read
 from ntrfc.utils.filehandling.read_mesh import load_mesh
+import numpy as np
 
 #todo move this snakepipe to according dir in sourcecode
 
@@ -9,23 +9,25 @@ configfile : "casesettings.yaml"
 validate(config,"config.schema.yaml")
 basedir = workflow.current_basedir
 
+
 rule profile_from_pointcloud:
     input:
         "00_resources/profile_pointcloud.txt"
     output:
-        "01_geometry/sortedPoints.txt", "01_geometry/psPoly.vtk", "01_geometry/ssPoly.vtk", "01_geometry/midsPoly.vtk", "01_geometry/geometry_paras.yml"
+        "01_profile/sortedPoints.txt", "01_profile/psPoly.vtk", "01_profile/ssPoly.vtk", "01_profile/midsPoly.vtk", "01_profile/geometry_paras.yml",
+        "01_profile/profile.pdf"
     run:
         from ntrfc.preprocessing.geometry_creation.profile_pointcloud import generate_profile_pointcloud_geometry
 
         generate_profile_pointcloud_geometry(config["blade"],basedir)
 
+"""
 
 rule create_2d_domain:
     input:
-        "01_geometry/sortedPoints.txt", "01_geometry/psPoly.vtk", "01_geometry/ssPoly.vtk", "01_geometry/midsPoly.vtk", "01_geometry/geometry_paras.yml"
+        "01_profile/sortedPoints.txt", "01_profile/psPoly.vtk", "01_profile/ssPoly.vtk", "01_profile/midsPoly.vtk", "01_profile/geometry_paras.yml"
     output:
-        "02_domain/inlet_2d.vtk","02_domain/outlet_2d.vtk","02_domain/y_upper_2d.vtk","02_domain/y_lower_2d.vtk",
-        "02_domain/ogridline_2d.vtk"
+        "02_boundaries/inlet_2d.vtk","02_boundaries/outlet_2d.vtk","02_boundaries/y_upper_2d.vtk","02_boundaries/y_lower_2d.vtk"
     run:
         from ntrfc.preprocessing.mesh_creation.domain_creation import create_2d_domain
 
@@ -40,9 +42,37 @@ rule create_2d_domain:
         midsPoly = load_mesh(midsPoly_fpath)
         geometry_paras = yaml_dict_read(geometry_paras_fpath)
 
-        create_2d_domain(config["blade"],basedir,midsPoly,ssPoly,psPoly)
+        create_2d_domain(config["geometry"],basedir,midsPoly,ssPoly,psPoly,geometry_paras)
+"""
+"""
+rule create_blockboundaries:
+    input:
+        "01_profile/sortedPoints.txt", "01_profile/geometry_paras.yml" ,"01_profile/midsPoly.vtk" ,"02_boundaries/inlet_2d.vtk",
+        "02_boundaries/outlet_2d.vtk", "02_boundaries/y_upper_2d.vtk", "02_boundaries/y_lower_2d.vtk"
 
+    output:
+        "02_domain/inlet_2d.vtk","02_domain/outlet_2d.vtk","02_domain/y_upper_2d.vtk","02_domain/y_lower_2d.vtk",
+        "02_domain/ogridline_2d.vtk"
+    run:
+        from ntrfc.preprocessing.mesh_creation.domain_creation import create_2d_blocklines
+        sortedPoints_fpath = input[0]
+        geometry_paras_fpath = input[1]
+        midsPoly_fpath = input[2]
+        inlet_fpath = input[3]
+        outlet_fpath = input[4]
+        y_upper_fpath = input[5]
+        y_lower_paras_fpath = input[6]
 
+        sortedPoints = np.loadtxt(os.path.join(basedir,sortedPoints_fpath))
+        geometry_paras = yaml_dict_read(os.path.join(basedir,geometry_paras_fpath))
+        midsPoly = load_mesh(os.path.join(basedir,midsPoly_fpath))
+        inlet = load_mesh(os.path.join(basedir,inlet_fpath))
+        outlet = load_mesh(os.path.join(basedir,outlet_fpath))
+        y_upper = load_mesh(os.path.join(basedir,y_upper_fpath))
+        y_lower = load_mesh(os.path.join(basedir,y_lower_paras_fpath))
+
+        create_2d_blocklines(config["blade"],basedir,sortedPoints,geometry_paras,midsPoly,inlet,outlet,y_upper,y_lower)
+"""
 """
 rule profile_from_naca:
 #    input:

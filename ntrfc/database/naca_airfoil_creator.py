@@ -256,6 +256,9 @@ def naca(number, n, finite_TE = False, half_cosine_spacing = True):
     else:
         raise Exception
 
+    #delete last point as it is defined twice
+    X = X[:-1]
+    Y = Y[:-1]
     """
     fix for trailing_edge finite_TE
     """
