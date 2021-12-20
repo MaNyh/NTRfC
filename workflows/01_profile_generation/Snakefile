@@ -1,0 +1,21 @@
+#todo make part of validation
+basedir = workflow.current_basedir
+
+rule profile_from_pointcloud:
+    output:
+        "{profile_name}/sortedPoints.txt",
+        "{profile_name}/psPoly.vtk",
+        "{profile_name}/ssPoly.vtk",
+        "{profile_name}/midsPoly.vtk",
+        "{profile_name}/geometry_paras.yml",
+        "{profile_name}/profile.pdf"
+    params:
+        algorithm=config["blade"]["algorithm"],
+        pointcloud = config["blade"]["ptcloud_profile"],
+        unit = config["blade"]["ptcloud_profile_unit"],
+        alpha = config["blade"]["alpha"]
+
+    run:
+        from ntrfc.preprocessing.geometry_creation.profile_pointcloud import generate_profile_pointcloud_geometry
+
+        generate_profile_pointcloud_geometry(basedir,**params)

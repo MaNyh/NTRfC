@@ -8,18 +8,9 @@ import numpy as np
 configfile : "casesettings.yaml"
 validate(config,"config.schema.yaml")
 basedir = workflow.current_basedir
-"""
-rule profile_from_pointcloud:
-    input:
-        "00_resources/profile_pointcloud.txt"
-    output:
-        "01_profile/sortedPoints.txt", "01_profile/psPoly.vtk", "01_profile/ssPoly.vtk", "01_profile/midsPoly.vtk", "01_profile/geometry_paras.yml",
-        "01_profile/profile.pdf"
-    run:
-        from ntrfc.preprocessing.geometry_creation.profile_pointcloud import generate_profile_pointcloud_geometry
 
-        generate_profile_pointcloud_geometry(config["blade"],basedir)
-"""
+include: "../../workflows/01_profile_generation/Snakefile"
+
 
 """
 rule dumdidum:
@@ -32,7 +23,7 @@ rule dumdidum:
     run:
         print(wildcards.parameter_x)
 """
-
+"""
 rule create_2d_domain:
     input:
 #        sortedPoints_fpath="01_profile/sortedPoints.txt",
@@ -56,14 +47,14 @@ rule create_2d_domain:
         geometry_paras = yaml_dict_read(input.geometry_paras_fpath)
 
         create_2d_domain(params["geometry"],basedir,midsPoly,ssPoly,psPoly,geometry_paras)
-
+"""
 """
 rule create_cascademesh:
     input:
     output:
     run:
 """
-
+"""
 rule create_blockboundaries:
     input:
         "01_profile/sortedPoints.txt", "01_profile/psPoly.vtk", "01_profile/ssPoly.vtk",
@@ -100,7 +91,7 @@ rule create_blockboundaries:
         y_lower = load_mesh(os.path.join(basedir,y_lower_paras_fpath))
 
         create_2d_blocklines(config["blade"],basedir,sortedPoints,psPoly,ssPoly,geometry_paras,midsPoly,inlet,outlet,y_upper,y_lower)
-
+"""
 """
 rule run_igg_cascademesh:
     input:

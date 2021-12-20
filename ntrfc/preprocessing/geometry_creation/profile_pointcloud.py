@@ -6,15 +6,16 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
-def generate_profile_pointcloud_geometry(settings,basedir):
-    ptcloud_profile = settings["ptcloud_profile"]
-    ptcloud_profile_unit = settings["ptcloud_profile_unit"]
-    alpha = settings["alpha"]
+def generate_profile_pointcloud_geometry(basedir,**params):
+
+    ptcloud_profile = params["ptcloud_profile"]
+    ptcloud_profile_unit = params["ptcloud_profile_unit"]
+    alpha = params["alpha"]
 
     # =============================================================================
     # Daten Einlesen
     # =============================================================================
-    ptcloud_abspath = os.path.join(basedir,ptcloud_profile)
+    ptcloud_abspath = os.path.join(basedir,"00_resources",ptcloud_profile)
     points = np.loadtxt(ptcloud_abspath)
     unitcoeff = 0
     if ptcloud_profile_unit == "m":

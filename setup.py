@@ -31,7 +31,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="Numerical Test Rig for Cascades. A workflow-library for cfd-analysis of cascade-flows",
+    description="Numerical Test Rig for Cascades. A workflows-library for cfd-analysis of cascade-flows",
     entry_points={
         'console_scripts': [
             'ntrfc=ntrfc.cli:main',
