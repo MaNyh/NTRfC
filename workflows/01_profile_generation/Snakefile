@@ -2,13 +2,16 @@
 basedir = workflow.current_basedir
 
 rule profile_from_pointcloud:
+    input :
+        "00_resources/{profile_name}.txt"
     output:
-        "{profile_name}/sortedPoints.txt",
-        "{profile_name}/psPoly.vtk",
-        "{profile_name}/ssPoly.vtk",
-        "{profile_name}/midsPoly.vtk",
-        "{profile_name}/geometry_paras.yml",
-        "{profile_name}/profile.pdf"
+        "01_profile/{profile_name}_sortedPoints.txt",
+        "01_profile/{profile_name}_psPoly.vtk",
+        "01_profile/{profile_name}_ssPoly.vtk",
+        "01_profile/{profile_name}_midsPoly.vtk",
+        "01_profile/{profile_name}_geometry_paras.yml",
+        "01_profile/{profile_name}_profile.pdf"
+
     params:
         algorithm=config["blade"]["algorithm"],
         pointcloud = config["blade"]["ptcloud_profile"],
@@ -16,6 +19,6 @@ rule profile_from_pointcloud:
         alpha = config["blade"]["alpha"]
 
     run:
-        from ntrfc.preprocessing.geometry_creation.profile_pointcloud import generate_profile_pointcloud_geometry
-
-        generate_profile_pointcloud_geometry(basedir,**params)
+#        from ntrfc.preprocessing.geometry_creation.profile_pointcloud import generate_profile_pointcloud_geometry
+        print(wildcards.profile_name)
+#        generate_profile_pointcloud_geometry(basedir,**params)

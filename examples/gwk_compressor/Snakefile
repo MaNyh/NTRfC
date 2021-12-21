@@ -1,7 +1,5 @@
 from snakemake.utils import validate
-from ntrfc.utils.filehandling.datafiles import yaml_dict_read
-from ntrfc.utils.filehandling.mesh import load_mesh
-import numpy as np
+
 
 #todo move this snakepipe to according dir in sourcecode
 
@@ -9,8 +7,33 @@ configfile : "casesettings.yaml"
 validate(config,"config.schema.yaml")
 basedir = workflow.current_basedir
 
-include: "../../workflows/01_profile_generation/Snakefile"
+#todo make part of validation
+basedir = workflow.current_basedir
 
+samples = 'tfd_gwk_compressor.txt'
+
+rule all:
+    input:
+        expand('00_resources/{sample}', sample=samples.split(' '))
+
+rule profile_from_pointcloud:
+    input :
+        "00_resources/{profile_name}.txt"
+    output:
+        "01_profile/{profile_name}_sortedPoints.txt",
+        "01_profile/{profile_name}_psPoly.vtk",
+        "01_profile/{profile_name}_ssPoly.vtk",
+        "01_profile/{profile_name}_midsPoly.vtk",
+        "01_profile/{profile_name}_geometry_paras.yml",
+        "01_profile/{profile_name}_profile.pdf"
+    params:
+        unit = config["blade"]["ptcloud_profile_unit"],
+        alpha = config["blade"]["alpha"]
+    run:
+        from ntrfc.preprocessing.geometry_creation.profile_pointcloud import generate_profile_pointcloud_geometry
+
+
+        generate_profile_pointcloud_geometry(basedir,{wildcards.profile_name},**params)
 
 """
 rule dumdidum:

@@ -1,6 +1,4 @@
 blade :
-    algorithm : "from_pointcloud"
-    ptcloud_profile : "00_resources/profile_pointcloud.txt"   #Name of the pointcloud-file
     ptcloud_profile_unit : "mm"                                  #m vs mm
     alpha : 0.01                                  #Geometric parameter used for hull-calculations
 
