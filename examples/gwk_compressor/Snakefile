@@ -7,24 +7,14 @@ configfile : "casesettings.yaml"
 validate(config,"config.schema.yaml")
 basedir = workflow.current_basedir
 
-#todo make part of validation
-basedir = workflow.current_basedir
 
-samples = 'tfd_gwk_compressor.txt'
-
-rule all:
-    input:
-        expand('00_resources/{sample}', sample=samples.split(' '))
 
 rule profile_from_pointcloud:
     input :
         "00_resources/{profile_name}.txt"
     output:
-        "01_profile/{profile_name}_sortedPoints.txt",
-        "01_profile/{profile_name}_psPoly.vtk",
-        "01_profile/{profile_name}_ssPoly.vtk",
-        "01_profile/{profile_name}_midsPoly.vtk",
-        "01_profile/{profile_name}_geometry_paras.yml",
+        #todo: is there a readable dataformat alternative (csv) instead of pickle?
+        "01_profile/{profile_name}_profile.pkl",
         "01_profile/{profile_name}_profile.pdf"
     params:
         unit = config["blade"]["ptcloud_profile_unit"],
@@ -35,86 +25,42 @@ rule profile_from_pointcloud:
 
         generate_profile_pointcloud_geometry(basedir,{wildcards.profile_name},**params)
 
-"""
-rule dumdidum:
-
-    #snakemake Wasd1193.csv
-    #1193 --> step für das Erzeugen von parameter (float, etc.)
-
-    output:
-        "Wasd{parameter_x}.csv"
-    run:
-        print(wildcards.parameter_x)
-"""
-"""
-rule create_2d_domain:
+rule create_meshboundaries:
     input:
-#        sortedPoints_fpath="01_profile/sortedPoints.txt",
-        psPoly_fpath="01_profile/psPoly.vtk",
-        ssPoly_fpath="01_profile/ssPoly.vtk",
-        midsPoly_fpath="01_profile/midsPoly.vtk",
-        geometry_paras_fpath="01_profile/geometry_paras.yml"
+         "01_profile/{profile_name}_profile.pkl"
     output:
-        "02_domainboundaries/inlet_2d.vtk","02_domainboundaries/outlet_2d.vtk",
-        "02_domainboundaries/y_upper_2d.vtk","02_domainboundaries/y_lower_2d.vtk",
-        "02_domainboundaries/domain.pdf"
+        "02_domain/{profile_name}_domain.pkl",
+        "02_domain/{profile_name}_domain.pdf"
     params:
         geometry=config["geometry"]
     run:
         from ntrfc.preprocessing.mesh_creation.domain_creation import create_2d_domain
 
-        #todo: dateieinlesen nicht im rule, sondern in der funktion
-        psPoly = load_mesh(input.psPoly_fpath)
-        ssPoly = load_mesh(input.ssPoly_fpath)
-        midsPoly = load_mesh(input.midsPoly_fpath)
-        geometry_paras = yaml_dict_read(input.geometry_paras_fpath)
 
-        create_2d_domain(params["geometry"],basedir,midsPoly,ssPoly,psPoly,geometry_paras)
-"""
+        create_2d_domain(basedir,{wildcards.profile_name},**params)
+
 """
 rule create_cascademesh:
     input:
     output:
     run:
 """
-"""
-rule create_blockboundaries:
-    input:
-        "01_profile/sortedPoints.txt", "01_profile/psPoly.vtk", "01_profile/ssPoly.vtk",
-        "01_profile/geometry_paras.yml" ,"01_profile/midsPoly.vtk" ,"02_domainboundaries/inlet_2d.vtk",
-        "02_domainboundaries/outlet_2d.vtk", "02_domainboundaries/y_upper_2d.vtk", "02_domainboundaries/y_lower_2d.vtk"
 
+rule create_meshgeometry:
+    input:
+        "01_profile/{profile_name}_profile.pkl",
+        "02_domain/{profile_name}_domain.pkl",
     output:
-        "03_meshgeometry/blocks.geom",
-        "03_meshgeometry/domain.geom",
-        "03_meshgeometry/blocklines.pdf"
+        "03_meshgeometry/{profile_name}_blocks.geom",
+        "03_meshgeometry/{profile_name}_domain.geom",
+        "03_meshgeometry/{profile_name}_blocklines.pdf"
 
     run:
         from ntrfc.preprocessing.mesh_creation.domain_creation import create_2d_blocklines
 
-        #todo: params einpflegen, files in funktion laden
-        sortedPoints_fpath = input[0]
-        psPoly_fpath = input[1]
-        ssPoly_fpath = input[2]
-        geometry_paras_fpath = input[3]
-        midsPoly_fpath = input[4]
-        inlet_fpath = input[5]
-        outlet_fpath = input[6]
-        y_upper_fpath = input[7]
-        y_lower_paras_fpath = input[8]
 
-        sortedPoints = np.loadtxt(os.path.join(basedir,sortedPoints_fpath))
-        psPoly = load_mesh(os.path.join(basedir,psPoly_fpath))
-        ssPoly = load_mesh(os.path.join(basedir,ssPoly_fpath))
-        geometry_paras = yaml_dict_read(os.path.join(basedir,geometry_paras_fpath))
-        midsPoly = load_mesh(os.path.join(basedir,midsPoly_fpath))
-        inlet = load_mesh(os.path.join(basedir,inlet_fpath))
-        outlet = load_mesh(os.path.join(basedir,outlet_fpath))
-        y_upper = load_mesh(os.path.join(basedir,y_upper_fpath))
-        y_lower = load_mesh(os.path.join(basedir,y_lower_paras_fpath))
+        create_2d_blocklines(basedir,{wildcards.profile_name})
 
-        create_2d_blocklines(config["blade"],basedir,sortedPoints,psPoly,ssPoly,geometry_paras,midsPoly,inlet,outlet,y_upper,y_lower)
-"""
 """
 rule run_igg_cascademesh:
     input:
