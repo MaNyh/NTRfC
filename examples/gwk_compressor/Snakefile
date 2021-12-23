@@ -61,22 +61,22 @@ rule create_meshgeometry:
 
         create_2d_blocklines(basedir,{wildcards.profile_name})
 
-"""
+
 rule run_igg_cascademesh:
     input:
-        "02_domainboundaries/inlet_2d.vtk", "02_domainboundaries/outlet_2d.vtk",
-        "02_domainboundaries/y_upper_2d.vtk", "02_domainboundaries/y_lower_2d.vtk",
-        "03_blockboundaries/ogridline_2d.vtk","03_blockboundaries/ogrid_oulet.vtk",
-        "03_blockboundaries/ogrid_inlet.vtk","03_blockboundaries/te_ogrid.vtk","03_blockboundaries/le_ogrid.vtk",
-        "03_blockboundaries/yupper_ogrid_x1.vtk","03_blockboundaries/ylower_ogrid_x1.vtk","03_blockboundaries/yupper_ogrid_x0.vtk",
-        "03_blockboundaries/ylower_ogrid_x0.vtk","03_blockboundaries/ss_x1_ogrid_line.vtk","03_blockboundaries/ss_x0_ogrid_line.vtk",
-        "03_blockboundaries/ps_x1_ogrid_line.vtk", "03_blockboundaries/ps_x0_ogrid_line.vtk"
+        "03_meshgeometry/{profile_name}_blocks.geom",
+        "03_meshgeometry/{profile_name}_domain.geom",
     output:
-        "04_meshgeometry/blocks.geom",
-        "04_meshgeometry/domain.geom"
+        "04_mesh/{profile_name}_mesh.igg",
+        "04_mesh/{profile_name}_mesh.msh",
+        "04_mesh/{profile_name}_mesh.cgns"
+    params:
+        stuff=False
     run:
-        from ntrf.preprocessing.mesh_creation.domain_creation import create_igg_geometry
-"""
+        #todo: this must be placed into a script, calling the singularity container
+        from ntrfc.preprocessing.mesh_creation.igg_mesh import run_igg
+
+        run_igg(basedir,{wildcards.profile_name},**params)
 """
 rule profile_from_naca:
 #    input:

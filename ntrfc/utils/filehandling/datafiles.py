@@ -1,5 +1,6 @@
 import yaml
 import pickle
+import csv
 
 def yaml_dict_read(yml_file):
     args_from_yaml = {}
@@ -33,3 +34,8 @@ def write_yaml_dict(fpath,data):
     with open(fpath, 'w') as outfile:
         yaml.dump(data, outfile, default_flow_style=False)
 
+def write_csv_config(fpath,datadict):
+    with open(fpath,"w") as outfile:
+        csvwriter = csv.writer(outfile, delimiter=' ',)
+        for key, value in datadict.items():
+            csvwriter.writerow([key,value])

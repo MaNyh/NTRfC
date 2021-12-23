@@ -7,3 +7,7 @@ geometry :
     x_inlet : -0.13                                 #Shift Inlet along x [m]
     x_outlet : 0.26                                  #Shift Outlet along x [m]
     blade_shift : 0.005                                 #Shift Domain to have probes inside domain [m]
+
+mesh:
+    delta_i                         : 0.0005                                #node-distribution along fixed edges
+    layers                          : 18                                    #fixed cells in boundary layer
