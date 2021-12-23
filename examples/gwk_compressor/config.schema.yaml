@@ -59,3 +59,17 @@ properties :
                 description : shift the blade in the domain, so that probes can be placed in the passage-midline
                 minimum : -1
                 maximum : 1 # this should be limited by the pitch-size. the shift can't be bigger then this
+
+    mesh:
+        type: object
+        description: settings for the generation of the mesh
+        properties :
+            delta_i :
+                description: length of the base-square of a cell
+                type : number
+                minimum : 0
+
+            layers :
+                description: number of layers in the boundarylayermeshing
+                type : number
+                minimum : 1

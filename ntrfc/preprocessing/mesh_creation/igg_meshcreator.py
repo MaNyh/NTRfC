@@ -6,7 +6,7 @@ meshdir = "04_mesh"
 if not os.path.isdir(meshdir):
     os.mkdir(meshdir)
 
-os.path.chdir(meshdir)
+os.chdir(meshdir)
 
 with open("mesh_config.csv", 'r') as f:
     mesh_configreader = csv.reader(f, delimiter=' ')
@@ -16,10 +16,11 @@ with open("mesh_config.csv", 'r') as f:
 
 
 print("hey")
+print(os.getcwd())
 print(mesh_config)
 print("ney")
 
-save_project("04_mesh/mesh.igg")
-export_FLUENT("04_mesh/fluent.msh")
+save_project("mesh.igg")
+export_FLUENT("fluent.msh")
 
-os.path.chdir("..")
+os.chdir("..")
