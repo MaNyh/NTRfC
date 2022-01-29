@@ -1,0 +1,31 @@
+from snakemake.utils import validate
+
+
+#todo move this snakepipe to according dir in sourcecode
+
+configfile : "casesettings.yaml"
+validate(config,"config.schema.yaml")
+
+rule all:
+    input:
+        "done.txt"
+
+rule copy_template:
+    output:
+        #todo: is there a readable dataformat alternative (csv) instead of pickle?
+        dynamic("01_case/{case_type}/{case_files}")
+    params:
+        case_type = config["case_params"]["case_type"],
+
+    run:
+        from case_creation import create_case_fromtemplate
+
+        create_case_fromtemplate(params["case_type"])
+
+rule check_template:
+    input:
+        dynamic("01_case/{case_type}/{case_files}"),
+    output:
+        "done.txt"
+    run:
+        print("tbd")

@@ -1,0 +1,13 @@
+$schema : "http://json-schema.org/draft-06/schema#"
+description : Config file for the parPE snakemake optimization workflow
+
+
+properties :
+    case_params :
+        type : object
+        description : definition of the case and its parameterspace
+
+        case_type :
+            type : string
+            description : name of the case-template
+            pattern : trace-compressor-cascade-ras

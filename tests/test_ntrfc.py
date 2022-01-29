@@ -6,6 +6,8 @@ import pytest
 import pyvista as pv
 import numpy as np
 
+from utils.dictionaries.dictutils import nested_dict_pairs_iterator
+
 
 @pytest.fixture
 def response():
@@ -129,4 +131,7 @@ def test_refine_spline():
     assert fline.number_of_points == fineres
 
 
-
+def test_nested_dict_pairs_iterator():
+    testdict = {"0":{"0":0,"1":1},"1":1}
+    check = [('0', '0', 0), ('0', '1', 1), ('1', 1)]
+    assert check == list(nested_dict_pairs_iterator(testdict)), "error"
