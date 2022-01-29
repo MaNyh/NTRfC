@@ -6,7 +6,7 @@ import pytest
 import pyvista as pv
 import numpy as np
 
-from utils.dictionaries.dictutils import nested_dict_pairs_iterator
+from utils.dictionaries.dict_utils import nested_dict_pairs_iterator
 
 
 @pytest.fixture

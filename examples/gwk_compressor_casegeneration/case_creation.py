@@ -5,7 +5,7 @@ from pathlib import Path
 import copy
 import re
 
-from ntrfc.utils.dictionaries.dictutils import nested_dict_pairs_iterator, setInDict
+from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, setInDict
 
 TEMPLATEDIR = r"D:\CodingProjects\NTRfC\ntrfc\database\case_templates"
 path_to_sim=r"D:\CodingProjects\NTRfC\examples\gwk_compressor_casegeneration\01_case"
