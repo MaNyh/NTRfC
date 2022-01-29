@@ -40,7 +40,7 @@ def test_calcConcaveHull():
 
 
 def test_parsec():
-    from database.airfoil_generators.parsec_airfoil_creator import parsec_airfoil_gen
+    from ntrfc.database.airfoil_generators.parsec_airfoil_creator import parsec_airfoil_gen
 
     R_LE = 0.01
     x_PRE = 0.450
@@ -58,7 +58,7 @@ def test_parsec():
 
 
 def test_naca():
-    from database.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.database.airfoil_generators.naca_airfoil_creator import naca
     def rand_naca_code():
         digits = np.random.choice([4,5])
         if digits ==4:
@@ -79,7 +79,7 @@ def test_extract_vk_hk(verbose=False):
     :return:
     """
     from ntrfc.utils.geometry.pointcloud_methods import extract_vk_hk
-    from database.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.database.airfoil_generators.naca_airfoil_creator import naca
     res = 400
 
     # d1,d2,d3,d4 = np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9)
@@ -179,7 +179,7 @@ def test_extractSidePolys():
 
 def test_extract_geo_paras():
     from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
-    from database.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.database.airfoil_generators.naca_airfoil_creator import naca
 
     naca_code = "0009"
     angle = 20  # deg
