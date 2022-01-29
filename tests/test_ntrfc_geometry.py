@@ -115,7 +115,7 @@ def test_extract_vk_hk(verbose=False):
 def test_midline_from_sides():
     from ntrfc.utils.geometry.pointcloud_methods import midline_from_sides
     from ntrfc.utils.math.vectorcalc import vecAbs
-    from database.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.database.airfoil_generators.naca_airfoil_creator import naca
     from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
 
     res = 240
