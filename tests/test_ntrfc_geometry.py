@@ -160,7 +160,7 @@ def test_midLength():
 
 def test_extractSidePolys():
     from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
-    from database.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.database.airfoil_generators.naca_airfoil_creator import naca
 
     d1, d2, d3, d4 = np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9)
     digitstring = str(d1) + str(d2) + str(d3) + str(d4)
