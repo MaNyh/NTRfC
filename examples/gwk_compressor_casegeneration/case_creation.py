@@ -15,6 +15,7 @@ def get_directory_structure(rootdir):
     """
     Creates a nested dictionary that represents the folder structure of rootdir
     """
+    #test method
     dir = {}
     rootdir = rootdir.rstrip(os.sep)
     start = rootdir.rfind(os.sep) + 1
@@ -28,6 +29,7 @@ def get_directory_structure(rootdir):
 
 
 def find_vars_opts(case_structure, sign, all_pairs, path_to_sim):
+    # todo docstring and test method
     # allowing names like JOB_NUMBERS, only capital letters and underlines - no digits, no whitespaces
     datadict = copy.deepcopy(case_structure)
     varsignature = r"<PLACEHOLDER [A-Z]{3,}(_{1,1}[A-Z]{3,}){,} PLACEHOLDER>".replace(r'PLACEHOLDER', sign)
@@ -43,6 +45,7 @@ def find_vars_opts(case_structure, sign, all_pairs, path_to_sim):
     return datadict
 
 def create_simdirstructure(case_structure, path):
+    # todo docstring and test method
     directories = list(nested_dict_pairs_iterator(case_structure))
     for d in directories:
         dirstructure = d[:-2]
@@ -51,6 +54,7 @@ def create_simdirstructure(case_structure, path):
 
 
 def search_paras(case_structure, line, pair, siglim, varsignature, varsign):
+    # todo docstring and test method
     lookforvar = True
     while (lookforvar):
         lookup_var = re.search(varsignature, line)
@@ -64,8 +68,42 @@ def search_paras(case_structure, line, pair, siglim, varsignature, varsign):
             line = line.replace(match, "")
     return case_structure
 
+def writeout_simulation(case_structure_parameters, path_to_sim, settings):
+    walk_casefile_list = nested_dict_pairs_iterator(case_structure_parameters)
+    for parameterdata in walk_casefile_list:
+        fpath = os.path.join(path_to_sim, *parameterdata[:-2])
+        parametername = parameterdata[-2]
 
-def create_case_fromtemplate(template, path_to_sim):
+        para_type = parameterdata[-1]
+        if para_type == "var":
+            para_type = "variables"
+            variable = settings["simcase_settings"][para_type][parametername]
+            with open(fpath) as fobj:
+                newText = fobj.read().replace("<var " + parametername + " var>", str(variable))
+            with open(fpath, "w") as fobj:
+                fobj.write(newText)
+
+"""def check_settings_necessarities(case_structure, settings_dict):
+
+    #todo not used yet, might be handy!
+    necessarities = list(nested_dict_pairs_iterator(case_structure))
+    necessarity_vars = []
+    for item in necessarities:
+        if item[-1] == "var":
+            necessarity_vars.append(item[-2])
+
+    assert "variables" in settings_dict["simcase_settings"].keys(), "variables not set simcase_settings"
+    if settings_dict["simcase_settings"]["variables"]:
+        settings_variables = list(settings_dict["simcase_settings"]["variables"].keys())
+    else:
+        settings_variables = []
+
+    for variable in necessarity_vars:
+        assert variable in settings_variables, "variable " + variable + " not set in configuration file"
+"""
+
+def create_case_fromtemplate(template, settings, path_to_sim):
+    #todo docstring and test method
     found = template in TEMPLATES
     assert found, "template unknown. check ntrfc.database.casetemplates directory"
 
@@ -88,7 +126,8 @@ def create_case_fromtemplate(template, path_to_sim):
     variables = find_vars_opts(case_structure, "var", list(nested_dict_pairs_iterator(case_structure)),"01_case")
     nov = len(list(nested_dict_pairs_iterator(variables)))
     print("found ", str(nov), "parameters of type var in copied template")
+    #check_settings_necessarities(variables, settings)
     return case_files
 
-
-case_structure = create_case_fromtemplate('trace-compressor-cascade-ras', path_to_sim)
+settings = {}
+case_structure = create_case_fromtemplate('trace-compressor-cascade-ras', settings, path_to_sim)
