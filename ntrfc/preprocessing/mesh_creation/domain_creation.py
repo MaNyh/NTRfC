@@ -83,6 +83,8 @@ def create_2d_domain(basedir,profile_set,geometry):
 
 def create_2d_blocklines(basedir,profile_set):
 
+
+
     for profile_name in profile_set:
         profile_dict = read_pickle(os.path.join(basedir,"01_profile",profile_name+"_profile.pkl"))
         domain_dict =  read_pickle(os.path.join(basedir,"02_domain",profile_name+"_domain.pkl"))
@@ -96,7 +98,7 @@ def create_2d_blocklines(basedir,profile_set):
         outlet = domain_dict["outlet"]
 
         ssPoly = profile_dict["ssPoly"]
-        psPoly  = profile_dict["psPoly"]
+        psPoly = profile_dict["psPoly"]
 
         bladehelpersurface = bladeline.extrude((0, 0, 0.01))
 
@@ -109,15 +111,29 @@ def create_2d_blocklines(basedir,profile_set):
         distance_upper = vecAbs(y_upper[upper_idx] - ogrid_zero)
         distance_lower = vecAbs(y_lower[lower_idx] - ogrid_zero)
         ogrid_size = 0.3 * min([distance_upper, distance_lower])
-        chord_start = 0.05
+
+        chord_start = 0.01
         chord_idx_helper = int(chord_start * len(midsPoly))
         cstart_1 = midsPoly[chord_idx_helper]
         cstart_2 = midsPoly[-chord_idx_helper]
+
         ogridhelpersurface.points += ogrid_size * ogridhelpersurface.point_normals
         ogridline = ogridhelpersurface.slice(normal="z")
         ogridline.points[:, 2] = 0
         domain_dir = os.path.join(basedir,"03_meshgeometry")
 
+        for chord_start in range(len(midsPoly)):
+            ss_le = closest_node_index(midsPoly[chord_start],ssPoly)
+            ps_le = closest_node_index(midsPoly[chord_start],psPoly)
+
+            ss_le_ogrid = closest_node_index(ss_le,ogridline.points)
+            ps_le_ogrid = closest_node_index(ps_le,ogridline.points)
+
+            yupper_le = closest_node_index(ss_le_ogrid,y_upper)
+            ylower_le = closest_node_index(ps_le_ogrid,y_lower)
+
+            a=1
+            #angle_
 
         ps_x0_blade = closest_node_index(cstart_1, psPoly)
         ps_x1_blade = closest_node_index(cstart_2, psPoly)
@@ -193,12 +209,22 @@ def create_2d_blocklines(basedir,profile_set):
                             [y_lower[::,0],y_lower[::,1]],
                             [psPoly[::,0],psPoly[::,1]],
                             [ssPoly[::,0],ssPoly[::,1]]],
-                           "domainboundaries")
+                           profile_name+"Domainboundaries")
 
         writeTecplot1DFile(os.path.join(domain_dir,profile_name+"_blocks.geom"),['x', 'z'],
-                           ["le_ogrid","te_ogrid","ogrid_inlet","ogrid_oulet","ogridline",
-                           "ps_x0_ogrid_line","ps_x1_ogrid_line","ss_x0_ogrid_line","ss_x1_ogrid_line",
-                           "ylower_ogrid_x0","yupper_ogrid_x0","ylower_ogrid_x1","yupper_ogrid_x1"],
+                           ["le_ogrid",
+                            "te_ogrid",
+                            "ogrid_inlet",
+                            "ogrid_oulet",
+                            "ogridline",
+                           "ps_x0_ogrid_line",
+                            "ps_x1_ogrid_line",
+                            "ss_x0_ogrid_line",
+                            "ss_x1_ogrid_line",
+                           "ylower_ogrid_x0",
+                            "yupper_ogrid_x0",
+                            "ylower_ogrid_x1",
+                            "yupper_ogrid_x1"],
                            [[le_ogrid.points[::,0],le_ogrid.points[::,1]],
                             [te_ogrid.points[::,0],te_ogrid.points[::,1]],
                             [ogrid_inlet.points[::,0],ogrid_inlet.points[::,1]],
@@ -211,7 +237,7 @@ def create_2d_blocklines(basedir,profile_set):
                             [ylower_ogrid_x0.points[::,0],ylower_ogrid_x0.points[::,1]],
                             [yupper_ogrid_x0.points[::,0],yupper_ogrid_x0.points[::,1]],
                             [ylower_ogrid_x1.points[::,0],ylower_ogrid_x1.points[::,1]]],
-                           "blockboundaries")
+                           profile_name+"Blockboundaries")
 
 
 
