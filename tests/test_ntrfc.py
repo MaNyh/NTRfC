@@ -107,6 +107,11 @@ def test_vtkFLUENTReader():
 
 
 def test_pickle_operations(tmpdir):
+    """
+    checks if the pickle-operators are working
+    :param tmpdir:
+    :return:
+    """
     from ntrfc.utils.filehandling.datafiles import write_pickle, read_pickle, write_pickle_protocolzero
 
     fname = tmpdir / "test.pkl"
@@ -120,6 +125,9 @@ def test_pickle_operations(tmpdir):
 
 
 def test_refine_spline():
+    """
+    tests if you can refine a spline by checking the number of points and the length of the spline
+    """
     from ntrfc.utils.pyvista_utils.line import refine_spline
 
     coarseres = 2
@@ -132,6 +140,11 @@ def test_refine_spline():
 
 
 def test_nested_dict_pairs_iterator():
+    """
+    tests if nested_dict_pairs_iterator returns the right list for a nested dict
+    nested_dict_pairs_iterator is used for returning a nested dict as a list
+    which comes in handy when handling nested directories with files
+    """
     testdict = {"0":{"0":0,"1":1},"1":1}
     check = [('0', '0', 0), ('0', '1', 1), ('1', 1)]
     assert check == list(nested_dict_pairs_iterator(testdict)), "error"

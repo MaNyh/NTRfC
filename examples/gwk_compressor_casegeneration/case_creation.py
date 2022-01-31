@@ -83,32 +83,49 @@ def writeout_simulation(case_structure_parameters, path_to_sim, settings):
             with open(fpath, "w") as fobj:
                 fobj.write(newText)
 
-"""def check_settings_necessarities(case_structure, settings_dict):
+def check_settings_necessarities(case_structure, settings_dict):
 
-    #todo not used yet, might be handy!
     necessarities = list(nested_dict_pairs_iterator(case_structure))
     necessarity_vars = []
     for item in necessarities:
         if item[-1] == "var":
             necessarity_vars.append(item[-2])
 
-    assert "variables" in settings_dict["simcase_settings"].keys(), "variables not set simcase_settings"
-    if settings_dict["simcase_settings"]["variables"]:
-        settings_variables = list(settings_dict["simcase_settings"]["variables"].keys())
-    else:
-        settings_variables = []
+    defined_variables = list(settings_dict.keys())
 
+    defined = []
+    undefined = []
+    unused = []
+    used = []
     for variable in necessarity_vars:
-        assert variable in settings_variables, "variable " + variable + " not set in configuration file"
-"""
+        #assert variable in settings_variables, "variable " + variable + " not set in configuration file"
+        if variable in defined_variables:
+            defined.append(variable)
+        else:
+            undefined.append(variable)
+    for variable in defined_variables:
+        if not variable in necessarity_vars:
+            unused.append(variable)
+        else:
+            used.append(variable)
+    return defined, undefined, used, unused
+
 
 def create_case_fromtemplate(template, settings, path_to_sim):
+    """
+
+    :param template: str - template-name
+    :param settings: dict - dict-settings
+    :param path_to_sim: path - path to case-directory
+    :return:
+    """
     #todo docstring and test method
     found = template in TEMPLATES
     assert found, "template unknown. check ntrfc.database.casetemplates directory"
 
     case_structure = get_directory_structure(os.path.join(TEMPLATEDIR, template))
     case_files = [i[:-1] for i in list(nested_dict_pairs_iterator(case_structure)) if os.path.isfile(os.path.join(TEMPLATEDIR,*list(i[:-1])))]
+    variables = find_vars_opts(case_structure, "var", list(nested_dict_pairs_iterator(case_structure)),os.path.join(TEMPLATEDIR))
 
     for fpath in case_files:
         filename = fpath[-1]
@@ -123,11 +140,15 @@ def create_case_fromtemplate(template, settings, path_to_sim):
         sim_fpath = os.path.join(path_to_sim, *dirstructure)
 
         shutil.copyfile(template_fpath, os.path.join(sim_fpath,filename))
-    variables = find_vars_opts(case_structure, "var", list(nested_dict_pairs_iterator(case_structure)),"01_case")
-    nov = len(list(nested_dict_pairs_iterator(variables)))
-    print("found ", str(nov), "parameters of type var in copied template")
-    #check_settings_necessarities(variables, settings)
-    return case_files
+
+    defined, undefined, used, unused = check_settings_necessarities(variables, settings)
+    print("found ", str(len(defined)), " defined parameters")
+    print("found ", str(len(undefined)), " undefined parameters")
+    print("used ", str(len(used)), " parameters")
+    print("unused ", str(len(unused)), " parameters")
+
+
+
 
 settings = {}
 case_structure = create_case_fromtemplate('trace-compressor-cascade-ras', settings, path_to_sim)
