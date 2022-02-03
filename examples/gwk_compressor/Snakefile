@@ -1,6 +1,5 @@
 from snakemake.utils import validate
 
-
 #todo move this snakepipe to according dir in sourcecode
 
 configfile : "casesettings.yaml"
@@ -9,6 +8,14 @@ basedir = workflow.current_basedir
 
 
 
+'''
+
+rule all:
+    input:  "01_profile/tfd_gwk_compressor_profile.pdf",
+            "02_domain/tfd_gwk_compressor_domain.pkl",
+            "02_domain/tfd_gwk_compressor_domain.pdf"
+
+'''
 rule profile_from_pointcloud:
     input :
         "00_resources/{profile_name}.txt"
@@ -27,7 +34,7 @@ rule profile_from_pointcloud:
 
 rule create_meshboundaries:
     input:
-         "01_profile/{profile_name}_profile.pkl"
+         "01_profile/{profile_name}_profile.pkl" # rules.profile_from_pointcloud.output[0]
     output:
         "02_domain/{profile_name}_domain.pkl",
         "02_domain/{profile_name}_domain.pdf"
@@ -48,8 +55,8 @@ rule create_cascademesh:
 
 rule create_meshgeometry:
     input:
-        "01_profile/{profile_name}_profile.pkl",
-        "02_domain/{profile_name}_domain.pkl",
+        "01_profile/{profile_name}_profile.pkl", ## rules.profile_from_pointcloud.output[0]
+        "02_domain/{profile_name}_domain.pkl"    ## rules.create_meshboundaries.output[0]
     output:
         "03_meshgeometry/{profile_name}_blocks.geom",
         "03_meshgeometry/{profile_name}_domain.geom",
@@ -65,11 +72,12 @@ rule create_meshgeometry:
 rule run_igg_cascademesh:
     input:
         "03_meshgeometry/{profile_name}_blocks.geom",
-        "03_meshgeometry/{profile_name}_domain.geom",
+        "03_meshgeometry/{profile_name}_domain.geom"
     output:
         "04_mesh/{profile_name}_mesh.igg",
         "04_mesh/{profile_name}_mesh.msh",
         "04_mesh/{profile_name}_mesh.cgns"
+
     params:
         stuff=False
     run:
