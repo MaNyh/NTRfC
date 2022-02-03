@@ -1,5 +1,5 @@
 
-
+configfile: "NTRfC/workflows/config.yaml"
 profileparam = ["sortedPoints.txt", "psPoly.vtk","ssPoly.vtk","midsPoly.vtk","geometry_paras.yml"]
 
 rule profile_geometry:
@@ -7,6 +7,10 @@ rule profile_geometry:
         "00_resources/{profileName}.txt"
     output:
         expand("01_profile/{profileName}_{ext}", ext = profileparam)
+
+    params:
+        unit = config["blade"]["ptcloud_profile_unit"]
+        alpha = config["blade"]["alpha"]
     run:
         "Our function"
 
