@@ -1,0 +1,40 @@
+from snakemake.utils import validate
+import os
+
+def write_dummy_output(output):
+    with open(output,"w") as fhandle:
+        fhandle.write("dummystuff")
+
+rule all:
+    input:
+        "postprocessedsolution.txt"
+
+rule meshing:
+    output:
+        "mesh.txt"
+    run:
+        write_dummy_output(output[0])
+
+rule casecreation:
+    input:
+        "mesh.txt"
+    output:
+        "case.txt"
+    run:
+        write_dummy_output(output[0])
+
+rule run:
+    input:
+        "case.txt"
+    output:
+        "solution.txt"
+    run:
+        write_dummy_output(output[0])
+
+rule post:
+    input:
+        "solution.txt"
+    output:
+        "postprocessedsolution.txt"
+    run:
+        write_dummy_output(output[0])
