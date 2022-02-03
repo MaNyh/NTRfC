@@ -9,6 +9,14 @@ rule all:
     input:
         "postprocessedsolution.txt"
 
+# todo: we need to use a configuration-file to decide, which rule should be called.
+#  https://json-schema.org/understanding-json-schema/reference/conditionals.html#if-then-else
+#  either way, we need to validate the user input. as the validation needs to be dynamic, you should use the link above
+#  to write the validation.schema.yml
+
+# todo: only use the validation.yml and the validation.schema.yml after calling snakemake as a module.
+#  it does not make sense to work on the validation before using the ntrfc.workflows as a module
+
 rule meshing:
     output:
         "mesh.txt"
