@@ -60,11 +60,11 @@ def test_snakefile(tmpdir: TmpDir) -> None:
     # Run Snakemake
     result: bool = snakemake.snakemake(
         snakefile=str(snakefile),
-        #resources={"mem_gb": 8},
+        resources={"mem_gb": 8},
         workdir=str(workdir),
-        lint=True,
+        #lint=True,
         dryrun=True,
-        quiet=True,
+        quiet=False,
         #log_handler=[logger.log_handler],
         ignore_ambiguity=True,
     )
