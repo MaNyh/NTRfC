@@ -6,7 +6,7 @@ rule profile_geometry:
     input:
         "00_resources/{profileName}.txt"
     output:
-        expand("01_profile/{profileName}_{ext}", ext = profileparam)
+        expand("01_profile/{{profileName}}_{ext}", ext = profileparam)
 
     params:
         unit = config["blade"]["ptcloud_profile_unit"]
