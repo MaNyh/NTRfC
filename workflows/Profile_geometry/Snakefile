@@ -1,0 +1,12 @@
+
+
+profileparam = ["sortedPoints.txt", "psPoly.vtk","ssPoly.vtk","midsPoly.vtk","geometry_paras.yml"]
+
+rule profile_geometry:
+    input:
+        "00_resources/{profileName}.txt"
+    output:
+        expand("01_profile/{profileName}_{ext}", ext = profileparam)
+    run:
+        "Our function"
+
