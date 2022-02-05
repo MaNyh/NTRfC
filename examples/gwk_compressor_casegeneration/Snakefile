@@ -1,4 +1,7 @@
 from snakemake.utils import validate
+from snakemake.utils import Paramspace
+import pandas as pd
+
 import os
 
 #todo move this snakepipe to according dir in sourcecode
@@ -7,30 +10,58 @@ configfile : "casesettings.yaml"
 validate(config,"config.schema.yaml")
 basedir = workflow.current_basedir
 
+# declare a dataframe to be a paramspace
+paramspace = Paramspace(pd.read_csv("params.tsv", sep="\t"))
+paramspace.param_sep="-"
+#paramspace.pattern="{}~{}~{}"
+
+def create_filelist_from_template(template):
+    """
+    :param template: path
+    :return: list of files
+    """
+    import ntrfc
+    from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
+    from case_creation import  get_directory_structure
+    templatepath = os.path.join(os.path.dirname(ntrfc.__file__),"database","case_templates",template)
+    assert os.path.isdir(templatepath)
+    files = list(nested_dict_pairs_iterator(get_directory_structure(templatepath)))
+    fpaths = [os.path.join(*i[:-1]) for i in files]
+    return fpaths
+
+
+TEMPLATE = config["case_params"]["case_type"]
+DATASETS = create_filelist_from_template(TEMPLATE)
+
 rule all:
     input:
-        "done.txt"
+        # Aggregate over entire parameter space (or a subset thereof if needed)
+        # of course, something like this can happen anywhere in the workflow (not
+        # only at the end).
+        #create_filelist_from_template(TEMPLATE)
+        "99_Report/parametrization.txt"
+        #expand("results/plots/{params}.pdf", params=paramspace.instance_patterns)
+
 
 rule copy_template:
     output:
         #todo: is there a readable dataformat alternative (csv) instead of pickle?
         #dynamic("01_case/{case_type}/{case_files}"),
-        dynamic("01_case/{level_1}/{level_2}"),
-        "01_case/check.txt"
+        create_filelist_from_template(TEMPLATE)
+        #dynamic("01_case/{level_1}/{level_2}"),
+#        "01_case/check.txt"
     params:
         case_type = config["case_params"]["case_type"],
         case_parameters = config["case_params"]["parameters"]
     run:
-        from case_creation import create_case_fromtemplate
-        create_case_fromtemplate(params["case_type"],params["case_parameters"],os.path.join(basedir,"01_case"))
+        from case_creation import copy_template
+        copy_template(output,params["case_type"],params["case_parameters"])
 
-
-
-rule check_template:
+rule set_paras:
     input:
-        #dynamic("01_case/{case_type}/{case_files}")
-        dynamic("01_case/{level_1}/{level_2}")
+        create_filelist_from_template(TEMPLATE)
     output:
-        "done.txt"
+        "99_Report/parametrization.txt"
     run:
-        print("tbd")
+        with open(output[0],"w") as fhandle:
+            fhandle.write(" ")

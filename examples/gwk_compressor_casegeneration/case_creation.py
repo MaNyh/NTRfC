@@ -4,8 +4,10 @@ import shutil
 from pathlib import Path
 import copy
 import re
+import warnings
 
-from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, setInDict
+from ntrfc.utils.dictionaries.dict_utils import setInDict
+from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
 
 TEMPLATEDIR = r"D:\CodingProjects\NTRfC\ntrfc\database\case_templates"
 path_to_sim=r"D:\CodingProjects\NTRfC\examples\gwk_compressor_casegeneration\01_case"
@@ -33,6 +35,9 @@ def find_vars_opts(case_structure, sign, all_pairs, path_to_sim):
     # allowing names like JOB_NUMBERS, only capital letters and underlines - no digits, no whitespaces
     datadict = copy.deepcopy(case_structure)
     varsignature = r"<PLACEHOLDER [A-Z]{3,}(_{1,1}[A-Z]{3,}){,} PLACEHOLDER>".replace(r'PLACEHOLDER', sign)
+    #int
+    #float
+    #string
     siglim = (len(sign)+2, -(len(sign)+2))
 
     for pair in all_pairs:
@@ -110,8 +115,21 @@ def check_settings_necessarities(case_structure, settings_dict):
             used.append(variable)
     return defined, undefined, used, unused
 
+def inplace_change(filename, old_string, new_string):
+    # Safely read the input filename using 'with'
+    with open(filename) as f:
+        s = f.read()
+        if old_string not in s:
+            print('"{old_string}" not found in {filename}.'.format(**locals()))
+            return
 
-def create_case_fromtemplate(template, settings, path_to_sim):
+    # Safely write the changed content, if found in the file
+    with open(filename, 'w') as f:
+        print('Changing "{old_string}" to "{new_string}" in {filename}'.format(**locals()))
+        s = s.replace(old_string, new_string)
+        f.write(s)
+
+def copy_template(output, template, paras):
     """
 
     :param template: str - template-name
@@ -124,31 +142,25 @@ def create_case_fromtemplate(template, settings, path_to_sim):
     assert found, "template unknown. check ntrfc.database.casetemplates directory"
 
     case_structure = get_directory_structure(os.path.join(TEMPLATEDIR, template))
-    case_files = [i[:-1] for i in list(nested_dict_pairs_iterator(case_structure)) if os.path.isfile(os.path.join(TEMPLATEDIR,*list(i[:-1])))]
     variables = find_vars_opts(case_structure, "var", list(nested_dict_pairs_iterator(case_structure)),os.path.join(TEMPLATEDIR))
 
-    for fpath in case_files:
-        filename = fpath[-1]
-        dirstructure = fpath[:-1]
-        if dirstructure == ():
-            dirstructure = ""
-
-        template_fpath = os.path.join(TEMPLATEDIR,
-                                      *dirstructure,
-                                      filename)
-        create_simdirstructure(case_structure,path_to_sim)
-        sim_fpath = os.path.join(path_to_sim, *dirstructure)
-
-        shutil.copyfile(template_fpath, os.path.join(sim_fpath,filename))
-
-    defined, undefined, used, unused = check_settings_necessarities(variables, settings)
+    defined, undefined, used, unused = check_settings_necessarities(variables, paras)
     print("found ", str(len(defined)), " defined parameters")
     print("found ", str(len(undefined)), " undefined parameters")
     print("used ", str(len(used)), " parameters")
     print("unused ", str(len(unused)), " parameters")
 
+    if len(undefined)>0:
+        warnings.warn("undefined variables")
+        warnings.warn(str(undefined))
+        return -1
 
+    if len(unused)>0:
+        warnings.warn("unused "+str(len(unused)))
+        warnings.warn(str(unused))
 
-
-settings = {}
-case_structure = create_case_fromtemplate('trace-compressor-cascade-ras', settings, path_to_sim)
+    for fpath in output:
+        template_fpath = os.path.join(TEMPLATEDIR,fpath)
+        shutil.copyfile(template_fpath, fpath)
+        for para in used:
+            inplace_change(fpath,para,paras[para])
