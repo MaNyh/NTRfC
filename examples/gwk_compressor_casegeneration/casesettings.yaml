@@ -1,34 +1,5 @@
 case_params:
     case_type: "trace-compressor-cascade-ras"
     parameters:
-        TRACE_CONTROLINPUT : nope
-        MESHNAME: nope
-        OUTFLOW_PRESSURE: nope
-        GLOBAL_TOLERANCE: nope
-        LENGTH_YPER: nope
-        STAGPOINT_ANNOMALLYFIX: nope
-        QUASIUNSTEADYMODEL: nope
-        WAVINESSMODEL: nope
-        VERSION_TWONULLNULLNINE: nope
-        HEATFLUXMODEL: nope
-        PRANDTLTURBULENT: nope
-        ROTATIONAL_EFF: nope
-        TRANSITIONMODEL: nope
-        VGJMODEL: nope
-        ACCURACY_ORDER: nope
-        OUTLET_MFLOW: nope
-        OUTLET_RADIAL_EQUI: nope
-        INLET_TOTAL_PRESSURE: nope
-        VEL_YANGLE: nope
-        ABS_STAGN_TEMP: nope
-        TURBULENTINTENSITY: nope
-        TURBULENTLENGTHSCALE: nope
-        INLET_TEMP: nope
-        INLET_VELX: nope
-        INLET_VELY: nope
-        INLET_VELZ: nope
-        OUTFLOW_TEMP: nope
-        OUTFLOW_PRESSURE: nope
-        OUTFLOW_VELX: nope
-        OUTFLOW_VELY: nope
-        OUTFLOW_VELZ: nope
+        LENGTH_YPER: 0.0765
+

@@ -9,6 +9,7 @@ import warnings
 from ntrfc.utils.dictionaries.dict_utils import setInDict
 from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
 
+#todo: at least the next two lines have to be fixed
 TEMPLATEDIR = r"D:\CodingProjects\NTRfC\ntrfc\database\case_templates"
 path_to_sim=r"D:\CodingProjects\NTRfC\examples\gwk_compressor_casegeneration\01_case"
 TEMPLATES = [i for i in os.listdir(TEMPLATEDIR) if os.path.isdir(os.path.join(TEMPLATEDIR, i))]
