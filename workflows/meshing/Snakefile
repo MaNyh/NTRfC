@@ -1,0 +1,19 @@
+# I am on the right way Malte??
+
+configfile: "config.yaml"
+
+def do_meshing(params, outputs):
+    for param in params:
+        for item in param:
+            for output in outputs:
+                with open(output, "a") as f:
+                    f.write(item+" ")
+
+rule mesh:
+    output:
+        r"meshing/mesh1.txt", r"meshing/mesh2.txt"
+    params:
+        typ = config["mesh"]["param1"],
+        qua= config["mesh"]["param2"]
+    run:
+        do_meshing(params, output)

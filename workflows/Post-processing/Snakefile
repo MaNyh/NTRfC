@@ -1,0 +1,12 @@
+include: "../Run/Snakefile"
+
+rule Post:
+    input: rules.Run.output
+
+    params:
+        rs= config["post_processing"]["param"]
+
+    output: r"Post-processing/results.txt"
+    shell:
+        "touch {output}"
+

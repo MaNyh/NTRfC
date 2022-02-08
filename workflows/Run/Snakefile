@@ -1,0 +1,14 @@
+include: "../Case/Snakefile"
+
+
+rule Run:
+    input: rules.Case.output
+
+    params:
+        rn=config["run"]["param"]
+
+    output: r"Run/run.txt"
+
+    shell:
+        "touch {output}"
+
