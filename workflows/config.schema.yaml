@@ -1,0 +1,88 @@
+$schema: http://json-schema.org/draft-04/schema#
+properties:
+  WorkflowSteps:
+    properties:
+      Creat_Geometry:
+        properties:
+          alpha:
+            type: number
+          unit:
+            items:
+            - type: string
+            - type: string
+            type: array
+        required:
+        - unit
+        - alpha
+        type: object
+      Choose_the_Case:
+        properties:
+          Case_Number:
+            properties:
+              cae2:
+                type: string
+              case1:
+                type: string
+            required:
+            - case1
+            - cae2
+            type: object
+        required:
+        - Case_Number
+        type: object
+      Mesh_generation:
+        properties:
+          quality:
+            items:
+            - type: string
+            - type: string
+            type: array
+          type:
+            items:
+            - type: string
+            - type: string
+            type: array
+        required:
+        - type
+        - quality
+        type: object
+      Running_the_Simulation:
+        properties:
+          Falls:
+            properties:
+              fall1:
+                type: string
+              fall2:
+                type: string
+            required:
+            - fall1
+            - fall2
+            type: object
+        required:
+        - Falls
+        type: object
+      Post_Processing:
+        properties:
+          results:
+            properties:
+              analyse:
+                type: string
+              rating:
+                type: string
+            required:
+            - analyse
+            - rating
+            type: object
+        required:
+        - results
+        type: object
+    required:
+    - Creat_Geometry
+    - Choose_the_Case
+    - Mesh_generation
+    - Running_the_Simulation
+    - Post_Processing
+    type: object
+required:
+- WorkflowSteps
+type: object

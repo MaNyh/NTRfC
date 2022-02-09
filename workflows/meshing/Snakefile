@@ -1,6 +1,6 @@
 # I am on the right way Malte??
 
-configfile: "config.yaml"
+configfile: "config_v1.yaml"
 
 def do_meshing(params, outputs):
     for param in params:
