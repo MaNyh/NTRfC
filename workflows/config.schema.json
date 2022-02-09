@@ -1,0 +1,152 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "Job": {
+        "type": "string"
+      },
+      "WorkflowSteps": {
+        "type": "object",
+        "properties": {
+          "Creat_Geometry": {
+            "type": "object",
+            "properties": {
+              "unit": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "alpha": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "unit",
+              "alpha"
+            ]
+          },
+          "Choose_the_Case": {
+            "type": "object",
+            "properties": {
+              "Case_Number": {
+                "type": "object",
+                "properties": {
+                  "case1": {
+                    "type": "string"
+                  },
+                  "cae2": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "case1",
+                  "cae2"
+                ]
+              }
+            },
+            "required": [
+              "Case_Number"
+            ]
+          },
+          "Mesh_generation": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "quality": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "quality"
+            ]
+          },
+          "Running_the_Simulation": {
+            "type": "object",
+            "properties": {
+              "Falls": {
+                "type": "object",
+                "properties": {
+                  "fall1": {
+                    "type": "string"
+                  },
+                  "fall2": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "fall1",
+                  "fall2"
+                ]
+              }
+            },
+            "required": [
+              "Falls"
+            ]
+          },
+          "Post_Processing": {
+            "type": "object",
+            "properties": {
+              "results": {
+                "type": "object",
+                "properties": {
+                  "analyse": {
+                    "type": "string"
+                  },
+                  "rating": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "analyse",
+                  "rating"
+                ]
+              }
+            },
+            "required": [
+              "results"
+            ]
+          }
+        },
+        "required": [
+          "Creat_Geometry",
+          "Choose_the_Case",
+          "Mesh_generation",
+          "Running_the_Simulation",
+          "Post_Processing"
+        ]
+      }
+    },
+    "required": [
+      "name",
+      "Job",
+      "WorkflowSteps"
+    ]
+  }
