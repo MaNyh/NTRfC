@@ -6,7 +6,7 @@ WorkflowSteps:
     - m
   Choose_the_Case:
       Case_Number:
-          cae1: templets1
+          case1: templets1
           case2: templets2
   Mesh_generation:
     quality:
