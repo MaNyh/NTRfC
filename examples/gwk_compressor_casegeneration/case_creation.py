@@ -136,7 +136,7 @@ def inplace_change(filename, old_string, new_string):
         s = s.replace(old_string, new_string)
         f.write(s)
 
-def copy_template(output, template, paras):
+def create_case(input, output, paras):
     """
 
     :param template: str - template-name
@@ -164,8 +164,7 @@ def copy_template(output, template, paras):
     if len(unused)>0:
         warnings.warn("unused "+str(len(unused)))
 
-    for fpath in output:
-        template_fpath = os.path.join(TEMPLATEDIR(),fpath)
-        shutil.copyfile(template_fpath, fpath)
+    for templatefile, simfile in zip(input,output):
+        shutil.copyfile(templatefile, simfile)
         for para in used:
-            inplace_change(fpath,para,str(paras[para]))
+            inplace_change(simfile,para,str(paras[para]))

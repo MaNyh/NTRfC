@@ -17,22 +17,28 @@ paramspace = Paramspace(PARAMS)
 #paramspace.param_sep="-"
 #paramspace.pattern="{}~{}~{}"
 
+
+def get_template_path():
+    import ntrfc
+    templatepath = os.path.join(os.path.dirname(ntrfc.__file__),"database","case_templates")
+    return templatepath
+
 def create_filelist_from_template(template):
     """
     :param template: path
     :return: list of files
     """
-    import ntrfc
     from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
     from case_creation import  get_directory_structure
-    templatepath = os.path.join(os.path.dirname(ntrfc.__file__),"database","case_templates",template)
-    assert os.path.isdir(templatepath)
+    templatepath = os.path.join(get_template_path(),template)
+    assert os.path.isdir(os.path.join(templatepath))
     files = list(nested_dict_pairs_iterator(get_directory_structure(templatepath)))
     fpaths = [os.path.join(*i[:-1]) for i in files]
     return fpaths
 
 
 TEMPLATE = config["case_params"]["case_type"]
+TEMPLATE_PATH = os.path.join(get_template_path(),TEMPLATE)
 DATASETS = create_filelist_from_template(TEMPLATE)
 
 rule all:
@@ -42,7 +48,9 @@ rule all:
         # only at the end).
         *[f"{instance_pattern}/{file}" for instance_pattern in paramspace.instance_patterns for file in DATASETS]
 
-rule copy_template:
+rule create_case:
+    input:
+        [f"{templatepath}/{file}" for templatepath in [get_template_path()] for file in DATASETS ]
     output:
         # format a wildcard pattern like "alpha~{alpha}/beta~{beta}/gamma~{gamma}"
         # into a file path, with alpha, beta, gamma being the columns of the data frame
@@ -53,16 +61,5 @@ rule copy_template:
         # in the form of a dict (here: {"alpha": ..., "beta": ..., "gamma": ...})
         simulation=paramspace.instance
     run:
-        from case_creation import copy_template
-        copy_template(output,params["case_type"],params["simulation"])
-
-"""
-rule set_paras:
-    input:
-        [os.path.join("01_case",i) for i in create_filelist_from_template(TEMPLATE)]
-    output:
-        "99_Report/parametrization.txt"
-    run:
-        with open(output[0],"w") as fhandle:
-            fhandle.write(" ")
-"""
+        from case_creation import create_case
+        create_case(input, output,params["case_type"],params["simulation"])
