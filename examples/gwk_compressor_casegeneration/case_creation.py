@@ -136,7 +136,7 @@ def inplace_change(filename, old_string, new_string):
         s = s.replace(old_string, new_string)
         f.write(s)
 
-def create_case(input, output, paras):
+def create_case(input, output, template, paras):
     """
 
     :param template: str - template-name
@@ -167,4 +167,4 @@ def create_case(input, output, paras):
     for templatefile, simfile in zip(input,output):
         shutil.copyfile(templatefile, simfile)
         for para in used:
-            inplace_change(simfile,para,str(paras[para]))
+            inplace_change(simfile,"<var " + para + " var>",str(paras[para]))

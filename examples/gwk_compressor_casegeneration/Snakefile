@@ -46,7 +46,7 @@ rule all:
         # Aggregate over entire parameter space (or a subset thereof if needed)
         # of course, something like this can happen anywhere in the workflow (not
         # only at the end).
-        *[f"{instance_pattern}/{file}" for instance_pattern in paramspace.instance_patterns for file in DATASETS]
+        *[f"01_Simulations/{instance_pattern}/{file}" for instance_pattern in paramspace.instance_patterns for file in DATASETS]
 
 rule create_case:
     input:
@@ -54,7 +54,7 @@ rule create_case:
     output:
         # format a wildcard pattern like "alpha~{alpha}/beta~{beta}/gamma~{gamma}"
         # into a file path, with alpha, beta, gamma being the columns of the data frame
-        *[f"{paramspace.wildcard_pattern}/{file}" for file in DATASETS]
+        *[f"01_Simulations/{paramspace.wildcard_pattern}/{file}" for file in DATASETS]
     params:
         case_type = config["case_params"]["case_type"],
         # automatically translate the wildcard values into an instance of the param space
