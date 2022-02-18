@@ -1,60 +1,13 @@
-import os
-from functools import reduce
-import shutil
-from pathlib import Path
 import copy
+import os
 import re
+import shutil
 import warnings
+from pathlib import Path
 
-from ntrfc.utils.dictionaries.dict_utils import setInDict
-from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
+from utils.filehandling.datafiles import inplace_change, get_directory_structure
+from utils.dictionaries.dict_utils import nested_dict_pairs_iterator, setInDict
 
-def TEMPLATEDIR():
-    import ntrfc.database.case_templates as templates
-
-    templatepath = os.path.join(os.path.dirname(templates.__file__))
-    return templatepath
-
-#todo: at least the next two lines have to be fixed
-path_to_sim=r"D:\CodingProjects\NTRfC\examples\gwk_compressor_casegeneration"
-
-TEMPLATES = [i for i in os.listdir(TEMPLATEDIR()) if os.path.isdir(os.path.join(TEMPLATEDIR(), i))]
-
-def get_directory_structure(rootdir):
-    """
-    Creates a nested dictionary that represents the folder structure of rootdir
-    """
-    #test method
-    dir = {}
-    rootdir = rootdir.rstrip(os.sep)
-    start = rootdir.rfind(os.sep) + 1
-    for path, dirs, files in os.walk(rootdir):
-        folders = path[start:].split(os.sep)
-        subdir = dict.fromkeys(files)
-        parent = reduce(dict.get, folders[:-1], dir)
-        parent[folders[-1]] = subdir
-    return dir
-
-
-
-def find_vars_opts(case_structure, sign, all_pairs, path_to_sim):
-    # todo docstring and test method
-    # allowing names like JOB_NUMBERS, only capital letters and underlines - no digits, no whitespaces
-    datadict = copy.deepcopy(case_structure)
-    varsignature = r"<PLACEHOLDER [A-Z]{3,}(_{1,1}[A-Z]{3,}){,} PLACEHOLDER>".replace(r'PLACEHOLDER', sign)
-    #int
-    #float
-    #string
-    siglim = (len(sign)+2, -(len(sign)+2))
-
-    for pair in all_pairs:
-        #if os.path.isfile(os.path.join(path_to_sim,*pair)):
-        setInDict(datadict, pair[:-1], {})
-        filepath = os.path.join(*pair[:-1])
-        with open(os.path.join(path_to_sim, filepath), "r") as fhandle:
-            for line in fhandle.readlines():
-                datadict = search_paras(datadict, line, pair, siglim, varsignature, sign)
-    return datadict
 
 def create_simdirstructure(case_structure, path):
     # todo docstring and test method
@@ -80,6 +33,7 @@ def search_paras(case_structure, line, pair, siglim, varsignature, varsign):
             line = line.replace(match, "")
     return case_structure
 
+
 def writeout_simulation(case_structure_parameters, path_to_sim, settings):
     walk_casefile_list = nested_dict_pairs_iterator(case_structure_parameters)
     for parameterdata in walk_casefile_list:
@@ -94,6 +48,7 @@ def writeout_simulation(case_structure_parameters, path_to_sim, settings):
                 newText = fobj.read().replace("<var " + parametername + " var>", str(variable))
             with open(fpath, "w") as fobj:
                 fobj.write(newText)
+
 
 def check_settings_necessarities(case_structure, settings_dict):
 
@@ -122,19 +77,6 @@ def check_settings_necessarities(case_structure, settings_dict):
             used.append(variable)
     return defined, undefined, used, unused
 
-def inplace_change(filename, old_string, new_string):
-    # Safely read the input filename using 'with'
-    with open(filename) as f:
-        s = f.read()
-        if old_string not in s:
-            #print('"{old_string}" not found in {filename}.'.format(**locals()))
-            return
-
-    # Safely write the changed content, if found in the file
-    with open(filename, 'w') as f:
-        print('Inserting "{old_string}" to "{new_string}" in {filename}'.format(**locals()))
-        s = s.replace(old_string, new_string)
-        f.write(s)
 
 def create_case(input, output, template, paras):
     """
@@ -168,3 +110,33 @@ def create_case(input, output, template, paras):
         shutil.copyfile(templatefile, simfile)
         for para in used:
             inplace_change(simfile,"<var " + para + " var>",str(paras[para]))
+
+
+def find_vars_opts(case_structure, sign, all_pairs, path_to_sim):
+    # todo docstring and test method
+    # allowing names like JOB_NUMBERS, only capital letters and underlines - no digits, no whitespaces
+    datadict = copy.deepcopy(case_structure)
+    varsignature = r"<PLACEHOLDER [A-Z]{3,}(_{1,1}[A-Z]{3,}){,} PLACEHOLDER>".replace(r'PLACEHOLDER', sign)
+    #int
+    #float
+    #string
+    siglim = (len(sign)+2, -(len(sign)+2))
+
+    for pair in all_pairs:
+        #if os.path.isfile(os.path.join(path_to_sim,*pair)):
+        setInDict(datadict, pair[:-1], {})
+        filepath = os.path.join(*pair[:-1])
+        with open(os.path.join(path_to_sim, filepath), "r") as fhandle:
+            for line in fhandle.readlines():
+                datadict = search_paras(datadict, line, pair, siglim, varsignature, sign)
+    return datadict
+
+
+def TEMPLATEDIR():
+    import ntrfc.database.case_templates as templates
+
+    templatepath = os.path.join(os.path.dirname(templates.__file__))
+    return templatepath
+
+
+TEMPLATES = [i for i in os.listdir(TEMPLATEDIR()) if os.path.isdir(os.path.join(TEMPLATEDIR(), i))]

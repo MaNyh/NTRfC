@@ -2,44 +2,20 @@ from snakemake.utils import validate
 from snakemake.utils import Paramspace
 import pandas as pd
 
-import os
-
-#todo move this snakepipe to according dir in sourcecode
+from database.case_templates.templates import create_filelist_from_template
+from database.case_templates.templates import case_templates
 
 configfile : "casesettings.yaml"
 validate(config,"config.schema.yaml")
-basedir = workflow.current_basedir
-
-# declare a dataframe to be a paramspace
+TEMPLATENAME = config["case_params"]["case_type"]
+TEMPLATE = case_templates[TEMPLATENAME]
+TEMPLATE_PATH = TEMPLATE.path
+TEMPLATE_SCHEMA = TEMPLATE.schema
+DATASETS = create_filelist_from_template(TEMPLATENAME)
 PARAMS=pd.read_csv("caseparams.tsv", sep="\t")
-validate(PARAMS, "case.schema.yaml")
+validate(PARAMS, TEMPLATE_SCHEMA)
 paramspace = Paramspace(PARAMS)
-#paramspace.param_sep="-"
-#paramspace.pattern="{}~{}~{}"
 
-
-def get_template_path():
-    import ntrfc
-    templatepath = os.path.join(os.path.dirname(ntrfc.__file__),"database","case_templates")
-    return templatepath
-
-def create_filelist_from_template(template):
-    """
-    :param template: path
-    :return: list of files
-    """
-    from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
-    from case_creation import  get_directory_structure
-    templatepath = os.path.join(get_template_path(),template)
-    assert os.path.isdir(os.path.join(templatepath))
-    files = list(nested_dict_pairs_iterator(get_directory_structure(templatepath)))
-    fpaths = [os.path.join(*i[:-1]) for i in files]
-    return fpaths
-
-
-TEMPLATE = config["case_params"]["case_type"]
-TEMPLATE_PATH = os.path.join(get_template_path(),TEMPLATE)
-DATASETS = create_filelist_from_template(TEMPLATE)
 
 rule all:
     input:
@@ -50,7 +26,7 @@ rule all:
 
 rule create_case:
     input:
-        [f"{templatepath}/{file}" for templatepath in [get_template_path()] for file in DATASETS ]
+        [f"{templatepath}/{file}" for templatepath in [TEMPLATE_PATH] for file in DATASETS ]
     output:
         # format a wildcard pattern like "alpha~{alpha}/beta~{beta}/gamma~{gamma}"
         # into a file path, with alpha, beta, gamma being the columns of the data frame
@@ -61,5 +37,5 @@ rule create_case:
         # in the form of a dict (here: {"alpha": ..., "beta": ..., "gamma": ...})
         simulation=paramspace.instance
     run:
-        from case_creation import create_case
+        from ntrfc.preprocessing.case_creation.create_case import create_case
         create_case(input, output,params["case_type"],params["simulation"])

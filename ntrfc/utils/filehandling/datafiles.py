@@ -1,3 +1,6 @@
+import os
+from functools import reduce
+
 import yaml
 import pickle
 import csv
@@ -39,3 +42,35 @@ def write_csv_config(fpath,datadict):
         csvwriter = csv.writer(outfile, delimiter=' ',)
         for key, value in datadict.items():
             csvwriter.writerow([key,value])
+
+
+def inplace_change(filename, old_string, new_string):
+    # Safely read the input filename using 'with'
+    with open(filename) as f:
+        s = f.read()
+        if old_string not in s:
+            #print('"{old_string}" not found in {filename}.'.format(**locals()))
+            return
+
+    # Safely write the changed content, if found in the file
+    with open(filename, 'w') as f:
+        print('Inserting "{old_string}" to "{new_string}" in {filename}'.format(**locals()))
+        s = s.replace(old_string, new_string)
+        f.write(s)
+
+
+def get_directory_structure(rootdir):
+    """
+    Creates a nested dictionary that represents the folder structure of rootdir
+    """
+    #test method
+    dir = {}
+    rootdir = os.path.join(rootdir)
+    rootdir = rootdir.rstrip(os.sep)
+    start = rootdir.rfind(os.sep) + 1
+    for path, dirs, files in os.walk(rootdir):
+        folders = path[start:].split(os.sep)
+        subdir = dict.fromkeys(files)
+        parent = reduce(dict.get, folders[:-1], dir)
+        parent[folders[-1]] = subdir
+    return dir

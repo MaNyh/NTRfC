@@ -1,2 +1,2 @@
 case_params:
-    case_type: "trace-compressor-cascade-ras"
+    case_type: "traceCompressorCascadeRas"
