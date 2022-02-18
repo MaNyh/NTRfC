@@ -2,13 +2,14 @@
 
 """Tests for `ntrfc` package."""
 
-import pytest
-import pyvista as pv
-import numpy as np
-
-def test_create_case(tmpdir):
-    from ntrfc.preprocessing.case_creation.create_case import create_case
-    from ntrfc.database.case_templates import list_templates
-
-    templates = list_templates()
-    print(templates)
+def test_templates():
+    """
+    basic sanity check over the installed templates
+    """
+    import os
+    from ntrfc.database.case_templates.templates import case_templates
+    from ntrfc.database.case_templates.templates import create_filelist_from_template
+    for name, template in case_templates.items():
+        assert os.path.isdir(template.path), "path to template does not exist"
+        assert os.path.isfile(template.schema), "template-schema does not exist"
+        assert len(create_filelist_from_template(name))>0, "no files found in template"
