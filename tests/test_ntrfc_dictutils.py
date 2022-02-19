@@ -1,4 +1,4 @@
-from utils.dictionaries.dict_utils import nested_dict_pairs_iterator, delete_keys_from_dict, compare_dictionaries, \
+from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, delete_keys_from_dict, compare_dictionaries, \
     setInDict, getFromDict, merge
 
 
