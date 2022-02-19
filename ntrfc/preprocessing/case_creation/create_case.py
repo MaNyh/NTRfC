@@ -131,7 +131,7 @@ def find_vars_opts(case_structure, sign, all_pairs, path_to_sim):
                 datadict = search_paras(datadict, line, pair, siglim, varsignature, sign)
     return datadict
 
-
+"""
 def TEMPLATEDIR():
     import ntrfc.database.case_templates as templates
 
@@ -140,3 +140,4 @@ def TEMPLATEDIR():
 
 
 TEMPLATES = [i for i in os.listdir(TEMPLATEDIR()) if os.path.isdir(os.path.join(TEMPLATEDIR(), i))]
+"""
