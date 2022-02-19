@@ -28,13 +28,21 @@ def nested_dict_pairs_iterator(dict_obj):
 def setInDict(dataDict, mapList, value):
     """
     sets value to nested dict
+    dataDict: dictionary
+    mapList: list of keys to access value
+    value: any object that can be stored in a dict
     """
-    #todo: test-method
     getFromDict(dataDict, mapList[:-1])[mapList[-1]] = value
 
+
 def getFromDict(dataDict, mapList):
-    #todo: test-method
+    """
+    returns value to nested dict
+    dataDict: dictionary
+    mapList: list of keys to access value
+    """
     return reduce(operator.getitem, mapList, dataDict)
+
 
 def merge(a, b, path=None):
     "merges b into a"

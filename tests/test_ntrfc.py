@@ -6,9 +6,6 @@ import pytest
 import pyvista as pv
 import numpy as np
 
-from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
-from utils.dictionaries.dict_utils import delete_keys_from_dict, compare_dictionaries
-
 
 @pytest.fixture
 def response():
@@ -140,28 +137,3 @@ def test_refine_spline():
     assert fline.number_of_points == fineres
 
 
-def test_nested_dict_pairs_iterator():
-    """
-    tests if nested_dict_pairs_iterator returns the right list for a nested dict
-    nested_dict_pairs_iterator is used for returning a nested dict as a list
-    which comes in handy when handling nested directories with files
-    """
-    testdict = {"0":{"0":0,"1":1},"1":1}
-    check = [('0', '0', 0), ('0', '1', 1), ('1', 1)]
-    assert check == list(nested_dict_pairs_iterator(testdict)), "error"
-
-
-def test_delete_keys_from_dict():
-    dict = {"a":0,"b":1}
-    delete_keys_from_dict(dict, "a")
-    assert "a" not in dict.keys()
-    assert "b" in dict.keys()
-    assert dict["b"]==1
-
-
-def test_compare_dictionaries():
-    d1 = {"name":{"param_1":0,"param_2":3}}
-    d2 = {"name":{"param_1":4,"param_2":1}}
-    ke,ve = compare_dictionaries(d1,d2)
-    assert ke == 0
-    assert ve == 2
