@@ -2,8 +2,8 @@ from snakemake.utils import validate
 from snakemake.utils import Paramspace
 import pandas as pd
 
-from database.case_templates.templates import create_filelist_from_template
-from database.case_templates.templates import case_templates
+from ntrfc.database.case_templates.templates import create_filelist_from_template
+from ntrfc.database.case_templates.templates import case_templates
 
 configfile : "casesettings.yaml"
 validate(config,"config.schema.yaml")

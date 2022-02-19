@@ -40,7 +40,7 @@ def test_calcConcaveHull():
 
 
 def test_parsec():
-    from ntrfc.database.airfoil_generators.parsec_airfoil_creator import parsec_airfoil_gen
+    from utils.geometry.airfoil_generators.parsec_airfoil_creator import parsec_airfoil_gen
 
     R_LE = 0.01
     x_PRE = 0.450
@@ -58,7 +58,7 @@ def test_parsec():
 
 
 def test_naca():
-    from ntrfc.database.airfoil_generators.naca_airfoil_creator import naca
+    from utils.geometry.airfoil_generators.naca_airfoil_creator import naca
     def rand_naca_code():
         digits = np.random.choice([4,5])
         if digits ==4:
@@ -79,7 +79,7 @@ def test_extract_vk_hk(verbose=False):
     :return:
     """
     from ntrfc.utils.geometry.pointcloud_methods import extract_vk_hk
-    from ntrfc.database.airfoil_generators.naca_airfoil_creator import naca
+    from utils.geometry.airfoil_generators.naca_airfoil_creator import naca
     res = 400
 
     # d1,d2,d3,d4 = np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9)
@@ -115,7 +115,7 @@ def test_extract_vk_hk(verbose=False):
 def test_midline_from_sides():
     from ntrfc.utils.geometry.pointcloud_methods import midline_from_sides
     from ntrfc.utils.math.vectorcalc import vecAbs
-    from ntrfc.database.airfoil_generators.naca_airfoil_creator import naca
+    from utils.geometry.airfoil_generators.naca_airfoil_creator import naca
     from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
 
     res = 240
@@ -160,7 +160,7 @@ def test_midLength():
 
 def test_extractSidePolys():
     from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
-    from ntrfc.database.airfoil_generators.naca_airfoil_creator import naca
+    from utils.geometry.airfoil_generators.naca_airfoil_creator import naca
 
     d1, d2, d3, d4 = np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9)
     digitstring = str(d1) + str(d2) + str(d3) + str(d4)
@@ -179,7 +179,7 @@ def test_extractSidePolys():
 
 def test_extract_geo_paras():
     from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
-    from ntrfc.database.airfoil_generators.naca_airfoil_creator import naca
+    from utils.geometry.airfoil_generators.naca_airfoil_creator import naca
 
     naca_code = "0009"
     angle = 20  # deg
