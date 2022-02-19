@@ -5,8 +5,9 @@ import shutil
 import warnings
 from pathlib import Path
 
-from utils.filehandling.datafiles import inplace_change, get_directory_structure
-from utils.dictionaries.dict_utils import nested_dict_pairs_iterator, setInDict
+from ntrfc.utils.filehandling.datafiles import inplace_change, get_directory_structure
+from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, setInDict
+from ntrfc.database.case_templates.templates import case_templates
 
 
 def create_simdirstructure(case_structure, path):
@@ -87,11 +88,11 @@ def create_case(input, output, template, paras):
     :return:
     """
     #todo docstring and test method
-    found = template in TEMPLATES
+    found = template in case_templates.keys()
     assert found, "template unknown. check ntrfc.database.casetemplates directory"
-
-    case_structure = get_directory_structure(os.path.join(TEMPLATEDIR(), template))
-    variables = find_vars_opts(case_structure, "var", list(nested_dict_pairs_iterator(case_structure)),os.path.join(TEMPLATEDIR()))
+    TEMPLATEDIR=case_templates[template].path
+    case_structure = get_directory_structure(os.path.join(TEMPLATEDIR, template))
+    variables = find_vars_opts(case_structure, "var", list(nested_dict_pairs_iterator(case_structure)),os.path.join(TEMPLATEDIR))
 
     defined, undefined, used, unused = check_settings_necessarities(variables, paras)
     print("found ", str(len(defined)), " defined parameters")
@@ -130,14 +131,3 @@ def find_vars_opts(case_structure, sign, all_pairs, path_to_sim):
             for line in fhandle.readlines():
                 datadict = search_paras(datadict, line, pair, siglim, varsignature, sign)
     return datadict
-
-"""
-def TEMPLATEDIR():
-    import ntrfc.database.case_templates as templates
-
-    templatepath = os.path.join(os.path.dirname(templates.__file__))
-    return templatepath
-
-
-TEMPLATES = [i for i in os.listdir(TEMPLATEDIR()) if os.path.isdir(os.path.join(TEMPLATEDIR(), i))]
-"""
