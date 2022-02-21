@@ -6,7 +6,7 @@ rule Post:
     params:
         rs= config["post_processing"]["param"]
 
-    output: r"Post-processing/results.txt"
+    output: r"Post/results.txt"
     shell:
         "touch {output}"
 

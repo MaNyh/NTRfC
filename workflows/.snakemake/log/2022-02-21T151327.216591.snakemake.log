@@ -1,0 +1,73 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job             count    min threads    max threads
+------------  -------  -------------  -------------
+all                 1              1              1
+casecreation        1              1              1
+meshing             1              1              1
+post                1              1              1
+run                 1              1              1
+total               5              1              1
+
+Select jobs to execute...
+
+[Mon Feb 21 15:13:27 2022]
+rule meshing:
+    output: mesh.txt
+    jobid: 4
+    resources: tmpdir=/tmp
+
+[Mon Feb 21 15:13:27 2022]
+Finished job 4.
+1 of 5 steps (20%) done
+Select jobs to execute...
+
+[Mon Feb 21 15:13:27 2022]
+rule casecreation:
+    input: mesh.txt
+    output: case.txt
+    jobid: 3
+    resources: tmpdir=/tmp
+
+[Mon Feb 21 15:13:28 2022]
+Finished job 3.
+2 of 5 steps (40%) done
+Select jobs to execute...
+
+[Mon Feb 21 15:13:28 2022]
+rule run:
+    input: case.txt
+    output: solution.txt
+    jobid: 2
+    resources: tmpdir=/tmp
+
+[Mon Feb 21 15:13:28 2022]
+Finished job 2.
+3 of 5 steps (60%) done
+Select jobs to execute...
+
+[Mon Feb 21 15:13:28 2022]
+rule post:
+    input: solution.txt
+    output: postprocessedsolution.txt
+    jobid: 1
+    resources: tmpdir=/tmp
+
+[Mon Feb 21 15:13:28 2022]
+Finished job 1.
+4 of 5 steps (80%) done
+Select jobs to execute...
+
+[Mon Feb 21 15:13:28 2022]
+localrule all:
+    input: postprocessedsolution.txt
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Mon Feb 21 15:13:28 2022]
+Finished job 0.
+5 of 5 steps (100%) done
+Complete log: /home/kamal/PycharmProjects/Studium/NTRfC/workflows/.snakemake/log/2022-02-21T151327.216591.snakemake.log

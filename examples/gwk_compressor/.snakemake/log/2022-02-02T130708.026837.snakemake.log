@@ -1,0 +1,6 @@
+Building DAG of jobs...
+MissingInputException in line 9 of /home/kamal/PycharmProjects/Studium/NTRfC/examples/gwk_compressor/Snakefile:
+Missing input files for rule all:
+tfd_gwk_compressor_domain.pdf
+tfd_gwk_compressor_profile.pdf
+tfd_gwk_compressor_domain.pkl

@@ -1,0 +1,22 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job      count    min threads    max threads
+-----  -------  -------------  -------------
+mesh         1              1              1
+total        1              1              1
+
+Select jobs to execute...
+
+[Tue Feb  8 16:40:08 2022]
+rule mesh:
+    output: meshing/mesh1.txt, meshing/mesh2.txt
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Tue Feb  8 16:40:09 2022]
+Finished job 0.
+1 of 1 steps (100%) done
+Complete log: /home/kamal/PycharmProjects/Studium/NTRfC/workflows/.snakemake/log/2022-02-08T164008.681722.snakemake.log

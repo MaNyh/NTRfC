@@ -1,0 +1,3 @@
+KeyError in line 16 of /home/kamal/PycharmProjects/Studium/NTRfC/workflows/meshing/Snakefile:
+'parama1'
+  File "/home/kamal/PycharmProjects/Studium/NTRfC/workflows/meshing/Snakefile", line 16, in <module>

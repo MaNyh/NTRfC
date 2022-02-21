@@ -1,0 +1,28 @@
+geometry:
+  alpha:
+    default: number
+    value: 0.05
+  unit:
+    default: mm
+    m: None
+    mm: None
+meshing:
+  param1:
+    default: value
+    value1: None
+    value2: None
+  param2:
+    default: value
+    value1: None
+    value2: None
+create_case:
+  command: OpenFoam
+  default: case1
+run_simulation:
+  default: sim
+  fall: None
+post_processing:
+  param1:
+    default: rating
+    value1: None
+    value2: None

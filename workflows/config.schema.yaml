@@ -1,88 +1,111 @@
 $schema: http://json-schema.org/draft-04/schema#
 properties:
-  WorkflowSteps:
+  geometry:
     properties:
-      Creat_Geometry:
+      alpha:
         properties:
-          alpha:
+          default:
+            type: string
+          value:
             type: number
-          unit:
-            items:
-            - type: string
-            - type: string
-            type: array
         required:
-        - unit
-        - alpha
+        - default
+        - value
         type: object
-      Choose_the_Case:
+      unit:
         properties:
-          Case_Number:
-            properties:
-              cae2:
-                type: string
-              case1:
-                type: string
-            required:
-            - case1
-            - cae2
-            type: object
+          default:
+            type: string
+          m:
+            type: string
+          mm:
+            type: string
         required:
-        - Case_Number
-        type: object
-      Mesh_generation:
-        properties:
-          quality:
-            items:
-            - type: string
-            - type: string
-            type: array
-          type:
-            items:
-            - type: string
-            - type: string
-            type: array
-        required:
-        - type
-        - quality
-        type: object
-      Running_the_Simulation:
-        properties:
-          Falls:
-            properties:
-              fall1:
-                type: string
-              fall2:
-                type: string
-            required:
-            - fall1
-            - fall2
-            type: object
-        required:
-        - Falls
-        type: object
-      Post_Processing:
-        properties:
-          results:
-            properties:
-              analyse:
-                type: string
-              rating:
-                type: string
-            required:
-            - analyse
-            - rating
-            type: object
-        required:
-        - results
+        - default
+        - mm
+        - m
         type: object
     required:
-    - Creat_Geometry
-    - Choose_the_Case
-    - Mesh_generation
-    - Running_the_Simulation
-    - Post_Processing
+    - unit
+    - alpha
+    type: object
+  meshing:
+    properties:
+      param1:
+        properties:
+          default:
+            type: string
+          value1:
+            type: string
+          value2:
+            type: string
+        required:
+        - default
+        - value1
+        - value2
+        type: object
+      param2:
+        properties:
+          default:
+            type: string
+          value1:
+            type: string
+          value2:
+            type: string
+        required:
+        - default
+        - value1
+        - value2
+        type: object
+    required:
+    - param1
+    - param2
+    type: object
+  create_case:
+    properties:
+      command:
+        type: string
+      default:
+        type: string
+    required:
+    - default
+    - command
+    type: object
+  run_simulation:
+    properties:
+      default:
+        type: string
+      fall1:
+        type: string
+      fall2:
+        type: string
+    required:
+    - default
+    - fall1
+    - fall2
+    type: object
+  post_processing:
+    properties:
+      param1:
+        properties:
+          default:
+            type: string
+          value1:
+            type: string
+          value2:
+            type: string
+        required:
+        - default
+        - value1
+        - value2
+        type: object
+    required:
+    - param1
     type: object
 required:
-- WorkflowSteps
+- geometry
+- meshing
+- create_case
+- run_simulation
+- post_processing
 type: object

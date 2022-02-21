@@ -1,0 +1,2 @@
+SyntaxError in line 24 of /home/kamal/PycharmProjects/Studium/NTRfC/examples/gwk_compressor/Snakefile:
+Unexpected keyword default_target in rule definition (Snakefile, line 24)

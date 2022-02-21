@@ -1,0 +1,50 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 5
+Rules claiming more threads will be scaled down.
+Job stats:
+job                        count    min threads    max threads
+-----------------------  -------  -------------  -------------
+all                            1              1              1
+create_meshboundaries          1              1              1
+profile_from_pointcloud        1              1              1
+total                          3              1              1
+
+Select jobs to execute...
+
+[Wed Feb  2 13:08:44 2022]
+rule profile_from_pointcloud:
+    input: 00_resources/tfd_gwk_compressor.txt
+    output: 01_profile/tfd_gwk_compressor_profile.pkl, 01_profile/tfd_gwk_compressor_profile.pdf
+    jobid: 1
+    wildcards: profile_name=tfd_gwk_compressor
+    resources: tmpdir=/tmp
+
+[Wed Feb  2 13:08:47 2022]
+Finished job 1.
+1 of 3 steps (33%) done
+Select jobs to execute...
+
+[Wed Feb  2 13:08:47 2022]
+rule create_meshboundaries:
+    input: 01_profile/tfd_gwk_compressor_profile.pkl
+    output: 02_domain/tfd_gwk_compressor_domain.pkl, 02_domain/tfd_gwk_compressor_domain.pdf
+    jobid: 2
+    wildcards: profile_name=tfd_gwk_compressor
+    resources: tmpdir=/tmp
+
+[Wed Feb  2 13:08:49 2022]
+Finished job 2.
+2 of 3 steps (67%) done
+Select jobs to execute...
+
+[Wed Feb  2 13:08:49 2022]
+localrule all:
+    input: 01_profile/tfd_gwk_compressor_profile.pdf, 02_domain/tfd_gwk_compressor_domain.pkl, 02_domain/tfd_gwk_compressor_domain.pdf
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Wed Feb  2 13:08:49 2022]
+Finished job 0.
+3 of 3 steps (100%) done
+Complete log: /home/kamal/PycharmProjects/Studium/NTRfC/examples/gwk_compressor/.snakemake/log/2022-02-02T130844.664953.snakemake.log

@@ -1,0 +1,3 @@
+WorkflowError in line 17 of /home/kamal/PycharmProjects/Studium/NTRfC/examples/gwk_compressor/Snakefile:
+Workflow defines configfile NTRfC/examples/gwk_compressor/Files.yaml but it is not present or accessible.
+  File "/home/kamal/PycharmProjects/Studium/NTRfC/examples/gwk_compressor/Snakefile", line 17, in <module>
