@@ -1,4 +1,4 @@
-include: "../Case/Snakefile"
+include: "case.smk"
 
 
 rule Run:

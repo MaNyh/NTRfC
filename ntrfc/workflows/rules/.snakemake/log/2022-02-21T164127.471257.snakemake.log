@@ -1,0 +1,4 @@
+WorkflowError in line 1 of /home/kamal/PycharmProjects/Studium/NTRfC/ntrfc/workflows/rules/post.smk:
+Failed to open source file /home/kamal/PycharmProjects/Studium/NTRfC/ntrfc/workflows/rules/../Run/run.smk
+FileNotFoundError: [Errno 2] No such file or directory: '/home/kamal/PycharmProjects/Studium/NTRfC/ntrfc/workflows/rules/../Run/run.smk'
+  File "/home/kamal/PycharmProjects/Studium/NTRfC/ntrfc/workflows/rules/post.smk", line 1, in <module>

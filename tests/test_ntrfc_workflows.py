@@ -55,7 +55,7 @@ def test_snakefile(tmpdir: TmpDir) -> None:
 
     # Get the path to the snakefile
     src_dir: Path = Path(__file__).absolute().parent.parent
-    snakefile: Path = src_dir / "workflows" / "Snakefile"
+    snakefile: Path = src_dir / "workflows" / "case.smk"
 
     # Run Snakemake
     result: bool = snakemake.snakemake(

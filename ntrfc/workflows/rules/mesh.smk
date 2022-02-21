@@ -1,8 +1,8 @@
 from snakemake.utils import validate
 
 
-configfile: "config.yaml"
-validate(config, "config.schema.yaml")
+configfile: "NTRfC/ntrfc/config/config.yaml"
+validate(config, "NTRfC/ntrfc/config/config.schema.yaml")
 
 
 rule mesh:

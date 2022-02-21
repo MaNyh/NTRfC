@@ -1,4 +1,4 @@
-include: "../Run/Snakefile"
+include: "run.smk"
 
 rule Post:
     input: rules.Run.output

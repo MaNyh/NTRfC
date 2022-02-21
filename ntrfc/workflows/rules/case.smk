@@ -1,4 +1,4 @@
-include: "../meshing/Snakefile"
+include: "mesh.smk"
 
 
 rule Case:

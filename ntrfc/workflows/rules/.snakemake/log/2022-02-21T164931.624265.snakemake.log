@@ -1,0 +1,6 @@
+WorkflowError in line 4 of /home/kamal/PycharmProjects/Studium/NTRfC/ntrfc/workflows/rules/mesh.smk:
+Workflow defines configfile NTRfC/ntrfc/config/config.yaml but it is not present or accessible.
+  File "/home/kamal/PycharmProjects/Studium/NTRfC/ntrfc/workflows/rules/post.smk", line 1, in <module>
+  File "/home/kamal/PycharmProjects/Studium/NTRfC/ntrfc/workflows/rules/run.smk", line 1, in <module>
+  File "/home/kamal/PycharmProjects/Studium/NTRfC/ntrfc/workflows/rules/case.smk", line 1, in <module>
+  File "/home/kamal/PycharmProjects/Studium/NTRfC/ntrfc/workflows/rules/mesh.smk", line 4, in <module>
