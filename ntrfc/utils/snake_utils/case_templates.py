@@ -11,7 +11,11 @@ class case_template:
         self.path = importlib_resources.files("ntrfc") / f"database/case_templates/{name}"
         self.schema = importlib_resources.files("ntrfc") / f"database/case_templates/{name}.schema.yaml"
 
-
+"""
+avail_templates is used to create a dictionary of with case_templates-Objects
+listed templates in avail_templates will be checked via tests
+only listed templates in avail_templates can be called via a workflow
+"""
 avail_templates = ["traceCompressorCascadeRas"]
 
 case_templates = {}

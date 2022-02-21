@@ -16,22 +16,11 @@ def test_snakefile(tmpdir: TmpDir) -> None:
     # Create input files
     import shutil
     import os
+    from ntrfc.utils.snake_utils.deployment import deploy
 
-    workdir: Path = Path(tmpdir) #/ "working"
-    #workdir.mkdir()
-
+    workdir: Path = Path(tmpdir)
     # Get the path to the snakefile
-    src_dir: Path = Path(__file__).absolute().parent.parent
-    configfile: Path = src_dir / "examples" / "gwk_compressor_casegeneration" / "casesettings.yaml"
-    paramfile: Path = src_dir / "examples" / "gwk_compressor_casegeneration" / "caseparams.tsv"
-    paramschema: Path = src_dir / "examples" / "gwk_compressor_casegeneration" / "config.schema.yaml"
-    snakefile: Path = src_dir / "examples" / "gwk_compressor_casegeneration" / "Snakefile"
-    workflowpath: Path = src_dir / "examples" / "gwk_compressor_casegeneration"
-    shutil.copy(configfile, tmpdir)
-    shutil.copy(paramfile, tmpdir)
-    shutil.copy(paramschema, tmpdir)
-    shutil.copy(snakefile, tmpdir)
-
+    deploy("case_creation",workdir)
     # Run Snakemake
     result: bool = snakemake.snakemake(
         snakefile=str(os.path.join(tmpdir,"Snakefile")),
@@ -46,4 +35,3 @@ def test_snakefile(tmpdir: TmpDir) -> None:
 
     # Check the results
     assert result, "Snakemake did not complete successfully"
-

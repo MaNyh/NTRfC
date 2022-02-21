@@ -7,7 +7,7 @@ from pathlib import Path
 
 from ntrfc.utils.filehandling.datafiles import inplace_change, get_directory_structure
 from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, setInDict
-from ntrfc.database.case_templates.templates import case_templates
+from utils.snake_utils.case_templates import case_templates
 
 
 def create_simdirstructure(case_structure, path):
