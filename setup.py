@@ -18,6 +18,7 @@ requirements = [ir.requirement for ir in install_reqs]
 test_requirements = ['pytest>=3', ]
 
 setup(
+    name='ntrfc',
     author="Malte Nyhuis",
     author_email='nyhuis@tfd.uni-hannover.de',
     python_requires='>=3.6',
@@ -42,7 +43,6 @@ setup(
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='ntrfc',
-    name='ntrfc',
     packages=find_packages(include=['ntrfc', 'ntrfc.*']),
     test_suite='tests',
     tests_require=test_requirements,

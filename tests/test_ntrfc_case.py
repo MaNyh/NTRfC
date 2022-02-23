@@ -7,8 +7,8 @@ def test_template_installations():
     basic sanity check over the installed templates
     """
     import os
-    from utils.snake_utils.case_templates import case_templates
-    from utils.snake_utils.case_templates import create_filelist_from_template
+    from ntrfc.utils.snake_utils.case_templates import case_templates
+    from ntrfc.utils.snake_utils.case_templates import create_filelist_from_template
     for name, template in case_templates.items():
         assert os.path.isdir(template.path), "path to template does not exist"
         assert os.path.isfile(template.schema), "template-schema does not exist"
@@ -19,7 +19,7 @@ def test_templates():
 
     """
     import os
-    from utils.snake_utils.case_templates import case_templates
+    from ntrfc.utils.snake_utils.case_templates import case_templates
     from ntrfc.utils.filehandling.datafiles import yaml_dict_read
     from ntrfc.utils.filehandling.datafiles import get_directory_structure
     from ntrfc.preprocessing.case_creation.create_case import find_vars_opts,check_settings_necessarities
