@@ -14,7 +14,6 @@ def test_snakefile(tmpdir: TmpDir) -> None:
     it copies (deploys) the workflow into TmpDir and it is executing a snakemake dry-run
     """
     # Create input files
-    import shutil
     import os
     from ntrfc.utils.snake_utils.deployment import deploy
 

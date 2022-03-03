@@ -10,7 +10,7 @@ properties:
     properties:
       case_type:
         type: string
-        pattern : traceCompressorCascadeRas
+        pattern : openfoamCompressorCascadeRas
 
     required:
         - case_type

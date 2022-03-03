@@ -1,0 +1,121 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     rhoPimpleFoam;
+
+startFrom       <var startfrom var>;
+
+startTime       0;
+
+stopAt		    endTime;
+
+endTime         0.6;
+
+deltaT          <var timestep var>;
+
+writeControl    timeStep;
+
+writeInterval   100;
+
+purgeWrite      3;
+
+writeFormat     ascii;
+
+writePrecision  16;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   16;
+
+runTimeModifiable true;
+
+adjustTimeStep  on;
+
+maxCo           50;
+
+libs (
+"libfieldFunctionObjects.so"
+"libsampling.so"
+"libAdvectiveFields.so"
+);
+
+
+
+fieldAverage1
+    {
+        type            fieldAverage;
+        libs            ("libfieldFunctionObjects.so");
+        writeControl    writeTime;
+        startTime       1
+
+
+        fields
+        (
+              wallShearStress
+              {
+                mean true;
+                prime2Mean false;
+                base time;
+              }
+              rho
+              {
+                mean true;
+                prime2Mean false;
+                base	time;
+              }
+
+	        U
+            {
+                mean        true;
+                prime2Mean  true;
+                base        time;
+            }
+
+            p
+            {
+              mean        true;
+              prime2Mean  true;
+              base        time;
+            }
+            T
+            {
+              mean        true;
+              prime2Mean  true;
+              base        time;
+            }
+            nut
+            {
+              mean        true;
+	          prime2Mean  true;
+              base        time;
+            }
+            alphat
+            {
+             mean 	      true;
+             prime2Mean	  true;
+             base 	      time;
+	        }
+
+	);
+  }
+
+
+}
+
+// ************************************************************************* //
