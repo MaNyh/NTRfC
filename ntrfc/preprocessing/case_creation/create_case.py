@@ -2,20 +2,10 @@ import copy
 import os
 import re
 import shutil
-from pathlib import Path
 
 from ntrfc.utils.filehandling.datafiles import inplace_change, get_directory_structure
-from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, setInDict,merge
+from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, setInDict
 from database.case_templates.case_templates import CASE_TEMPLATES
-
-
-def create_simdirstructure(case_structure, path):
-    # todo docstring and test method
-    directories = list(nested_dict_pairs_iterator(case_structure))
-    for d in directories:
-        dirstructure = d[:-2]
-        Path(os.path.join(path, *dirstructure)).mkdir(parents=True, exist_ok=True)
-    return 0
 
 
 def search_paras(case_structure, line, pair, siglim, varsignature):
@@ -70,30 +60,19 @@ def check_settings_necessarities(case_structure, settings_dict):
     return defined, undefined, used, unused
 
 
-def test_create_case(tmpdir):
-    from ntrfc.database.case_templates.case_templates import create_filelist_from_template
-    template = list(CASE_TEMPLATES.values())[0]
-    TEMPLATEFILES = template.files
-
-    input = [f"{TEMPLATE_PATH}/{file}" for file in TEMPLATEFILES]
-    output = [f"{tmpdir}/{file}" for file in TEMPLATEFILES]
-    paras = {}
-    create_case(input,output,template,paras)
-
-
-def create_case(input, output, template, paras):
+def create_case(input, output, templatename, paras):
     """
 
-    :param template: str - template-name
+    :param templatename: str - template-name
     :param settings: dict - dict-settings
     :param path_to_sim: path - path to case-directory
     :return:
     """
 
-    found = template in CASE_TEMPLATES.keys()
+    found = templatename in CASE_TEMPLATES.keys()
     assert found, "template unknown. check ntrfc.database.casetemplates directory"
-    TEMPLATEDIR = CASE_TEMPLATES[template].path
-    case_structure = get_directory_structure(os.path.join(TEMPLATEDIR, template))
+    TEMPLATEDIR = CASE_TEMPLATES[templatename].path
+    case_structure = get_directory_structure(os.path.join(TEMPLATEDIR, templatename))
 
     variables=find_vars_opts(case_structure, TEMPLATEDIR)
 

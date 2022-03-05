@@ -1,5 +1,6 @@
 import os
 from functools import reduce
+from pathlib import Path
 
 import yaml
 import pickle
@@ -74,3 +75,18 @@ def get_directory_structure(rootdir):
         parent = reduce(dict.get, folders[:-1], dir)
         parent[folders[-1]] = subdir
     return dir
+
+
+def get_filelist_fromdir(path):
+    filelist = []
+    for r, d, f in os.walk(path):
+        for file in f:
+            filelist.append(os.path.join(r, file))
+    return filelist
+
+
+def create_dirstructure(directories, path):
+    # todo docstring and test method
+    for d in directories:
+        Path(os.path.join(path,d)).mkdir(parents=True, exist_ok=True)
+    return 0

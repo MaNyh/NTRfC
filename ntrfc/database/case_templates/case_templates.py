@@ -1,14 +1,17 @@
-import os
 import importlib_resources
+import os
 
 from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
 from ntrfc.utils.filehandling.datafiles import get_directory_structure
+from utils.filehandling.datafiles import get_filelist_fromdir
+
 
 class case_template:
     def __init__(self,name):
         self.name = name
         self.path = importlib_resources.files("ntrfc") / f"database/case_templates/{name}"
         self.schema = importlib_resources.files("ntrfc") / f"database/case_templates/{name}.schema.yaml"
+        self.files = get_filelist_fromdir(self.path)
 
 """
 avail_templates is used to create a dictionary of with case_templates-Objects

@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 """Tests for `ntrfc` package."""
+import os
 
 import pytest
 import pyvista as pv
 import numpy as np
+
 
 
 @pytest.fixture
@@ -137,3 +139,11 @@ def test_refine_spline():
     assert fline.number_of_points == fineres
 
 
+def test_create_dirstructure(tmpdir):
+    from ntrfc.utils.filehandling.datafiles import create_dirstructure
+
+
+    dirstructure = ["ast/bla","ast/ble"]
+    create_dirstructure(dirstructure,tmpdir)
+    checks = [os.path.isdir(path) for path in [os.path.join(tmpdir,relpath) for relpath in dirstructure]]
+    assert all(checks), "not all directories have been created"
