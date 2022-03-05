@@ -17,7 +17,7 @@ FoamFile
 
 dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   uniform <VAR pressure_outlet VAR>;
+internalField   uniform <PARAM pressure_outlet PARAM>;
 
 boundaryField
 {
@@ -25,15 +25,15 @@ boundaryField
     {
         type            waveTransmissive;
         gamma           1.4;
-	    value		    uniform <VAR pressure_inlet VAR>;
+	    value		    uniform <PARAM pressure_inlet PARAM>;
 
     }
     OUTLET
     {
         type            waveTransmissive;
         gamma		    1.4;
-        value		    uniform <VAR pressure_outlet VAR>;
-        fieldInf  	    <VAR pressure_outlet VAR>;
+        value		    uniform <PARAM pressure_outlet PARAM>;
+        fieldInf  	    <PARAM pressure_outlet PARAM>;
         lInf            0.01;
     }
     BLADE

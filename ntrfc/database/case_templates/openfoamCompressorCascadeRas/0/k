@@ -14,7 +14,7 @@
 
 
 
-kInlet <var tke_inlet var>;
+kInlet <PARAM tke_inlet PARAM>;
 dimensions [0 2 -2 0 0 0 0];
 
 internalField uniform $kInlet;

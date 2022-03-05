@@ -19,7 +19,7 @@ simulationType RAS;
 
 RAS
 {
-    RASModel        <var turbmodel TURBULENCE_MODEL var>;
+    RASModel        <PARAM turbulence_model PARAM>;
 
     turbulence      on;
 

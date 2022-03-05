@@ -64,7 +64,7 @@ patches
             neighbourPatch Z_upper;
 
             transform translational;
-            separationVector (0 0 <var ZSPAN var>);
+            separationVector (0 0 <PARAM zspan PARAM>);
             matchTolerance 0.02;
         }
 
@@ -89,7 +89,7 @@ patches
             neighbourPatch Z_lower;
 
             transform translational;
-            separationVector (0 0 -<var ZSPAN var>);
+            separationVector (0 0 -<PARAM zspan PARAM>);
             matchTolerance 0.1;
         }
 
@@ -114,7 +114,7 @@ patches
             neighbourPatch Y_upper;
 
             transform translational;
-            separationVector (0 <var PITCHPER var> 0);
+            separationVector (0 <PARAM pitch PARAM> 0);
             matchTolerance 0.1;
         }
 
@@ -135,7 +135,7 @@ patches
             neighbourPatch Y_lower;
 
             transform translational;
-            separationVector (0 -<var pitch PITCHPER var> 0);
+            separationVector (0 -<PARAM pitch PARAM> 0);
             matchTolerance 0.02;
         }
 

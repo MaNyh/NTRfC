@@ -30,7 +30,7 @@ mixture
     specie
     {
         nMoles      1;
-        molWeight   <var mweight MOLARWEIGHT var>; 	//Air [g/mol]
+        molWeight   <PARAM molarweight PARAM>; 	//Air [g/mol]
     }
     thermodynamics
     {
@@ -39,7 +39,7 @@ mixture
     }
     transport
     {
-        mu	    <VAR dynvisk VAR>;     	//dynamische viskositaet, aehnlich Luft
+        mu	    <PARAM dynvisc PARAM>;     	//dynamische viskositaet, aehnlich Luft
 	    Pr	    0.7;      	//prandtl-zahl, aehnlich Luft
     }
 }

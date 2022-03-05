@@ -28,10 +28,12 @@ def search_paras(case_structure, line, pair, siglim, varsignature):
         lookup_var = re.search(varsignature, line)
         if not lookup_var:
             lookforvar = False
+            filename = os.path.join(*pair[:-1])
+            assert "PARAM" not in line, f"parameter is not defined correct \n file: {filename}\n line: {line}"
         else:
             span = lookup_var.span()
             parameter = line[span[0] + siglim[0]:span[1] + siglim[1]]
-            setInDict(case_structure, list(pair[:-1]) + [parameter])
+            setInDict(case_structure, list(pair[:-1]) + [parameter], "PARAM")
             match = line[span[0]:span[1]]
             line = line.replace(match, "")
     return case_structure
@@ -46,7 +48,7 @@ def check_settings_necessarities(case_structure, settings_dict):
     necessarities = list(nested_dict_pairs_iterator(case_structure))
     necessarity_vars = []
     for item in necessarities:
-        if item[-1] in PARAMS.keys():
+        if item[-1] == "PARAM":
             necessarity_vars.append(item[-2])
 
     defined_variables = list(settings_dict.keys())
@@ -78,6 +80,7 @@ def test_create_case(tmpdir):
     paras = {}
     create_case(input,output,template,paras)
 
+
 def create_case(input, output, template, paras):
     """
 
@@ -92,7 +95,7 @@ def create_case(input, output, template, paras):
     TEMPLATEDIR = CASE_TEMPLATES[template].path
     case_structure = get_directory_structure(os.path.join(TEMPLATEDIR, template))
 
-    variables=find_vars_opts(case_structure, list(nested_dict_pairs_iterator(case_structure)), TEMPLATEDIR)
+    variables=find_vars_opts(case_structure, TEMPLATEDIR)
 
     defined, undefined, used, unused = check_settings_necessarities(variables, paras)
     print("found ", str(len(defined)), " defined parameters")
@@ -108,7 +111,7 @@ def create_case(input, output, template, paras):
             inplace_change(simfile,f"<var {parameter} var>",str(paras[parameter]))
 
 
-def find_vars_opts(case_structure,all_pairs, path_to_sim):
+def find_vars_opts(case_structure, path_to_sim):
     """
     : param case_structure: dict - case-structure. can carry parameters
     : param sign: str - sign of a parameter (Velocity -> U etc.)
@@ -119,11 +122,13 @@ def find_vars_opts(case_structure,all_pairs, path_to_sim):
     # todo docstring and test method
     # allowing names like JOB_NUMBERS, only capital letters and underlines - no digits, no whitespaces
     datadict = copy.deepcopy(case_structure)
+    all_pairs = list(nested_dict_pairs_iterator(case_structure))
     varsignature = r"<PARAM [a-z]{3,}(_{1,1}[a-z]{3,}){,} PARAM>"
     #int
     #float
     #string
-    siglim = (len("<PARAM "), -(len(" PARAM")+2))
+    # todo move into param-module
+    siglim = (len("<PARAM "), -(len(" PARAM>")))
 
     for pair in all_pairs:
         #if os.path.isfile(os.path.join(path_to_sim,*pair)):
@@ -131,5 +136,5 @@ def find_vars_opts(case_structure,all_pairs, path_to_sim):
         filepath = os.path.join(*pair[:-1])
         with open(os.path.join(path_to_sim, filepath), "r") as fhandle:
             for line in fhandle.readlines():
-                datadict = merge(search_paras(datadict, line, pair, siglim, varsignature),datadict)
+                datadict = search_paras(datadict, line, pair, siglim, varsignature)
     return datadict

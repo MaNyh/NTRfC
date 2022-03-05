@@ -20,7 +20,7 @@ FoamFile
 
 dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform (<VAR velocity_inlet VAR>);
+internalField   uniform (<PARAM velocity_inlet PARAM>);
 
 
 boundaryField
@@ -29,15 +29,15 @@ boundaryField
     {
         type            waveTransmissive;
 	    gamma		    1.4;
-        value           uniform (<VAR velocity_inlet VAR>);
-	    fieldInf	    <VAR velocity_inlet VAR>;
+        value           uniform (<PARAM velocity_inlet PARAM>);
+	    fieldInf	    <PARAM velocity_inlet PARAM>;
     }
 
     OUTLET
     {
         type            waveTransmissive;
 	    gamma		    1.4;
-        value           uniform (<VAR velocity_inlet VAR>); //startwert only
+        value           uniform (<PARAM velocity_inlet PARAM>); //startwert only
 	    inletValue	    uniform (0 0 0);
     }
 

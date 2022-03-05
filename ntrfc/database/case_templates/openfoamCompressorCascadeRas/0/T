@@ -17,9 +17,9 @@ FoamFile
 
 dimensions      [0 0 0 1 0 0 0];
 
-internalField   uniform <VAR temperature_inlet VAR>;
+internalField   uniform <PARAM temperature_inlet PARAM>;
 
-Tinlet          <VAR temperature_inlet VAR>;
+Tinlet          <PARAM temperature_inlet PARAM>;
 
 boundaryField
 {

@@ -13,7 +13,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-omegaInlet <VAR omega_inlet VAR>;
+omegaInlet <PARAM omega_inlet PARAM>;
 
 dimensions [0 0 -1 0 0 0 0];
 
