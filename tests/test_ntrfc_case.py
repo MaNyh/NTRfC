@@ -12,12 +12,12 @@ def test_template_installations():
     basic sanity check over the installed templates
     """
     import os
-    from database.case_templates.case_templates import CASE_TEMPLATES
-    from database.case_templates.case_templates import create_filelist_from_template
+    from ntrfc.database.case_templates.case_templates import CASE_TEMPLATES
+    from ntrfc.utils.filehandling.datafiles import get_filelist_fromdir
     for name, template in CASE_TEMPLATES.items():
         assert os.path.isdir(template.path), "path to template does not exist"
         assert os.path.isfile(template.schema), "template-schema does not exist"
-        assert len(create_filelist_from_template(name)) > 0, "no files found in template"
+        assert len(get_filelist_fromdir(template.path)) > 0, "no files found in template"
 
 
 def test_templates_params():
@@ -53,12 +53,11 @@ def test_create_case(tmpdir):
 
     template = list(CASE_TEMPLATES.values())[0]
     templatefiles = template.files
-    templatefiles_rel = [os.path.relpath(fpath, template.path) for fpath in templatefiles]
     templateschema = yaml_dict_read(template.schema)
-    directories = [os.path.dirname(fpath) for fpath in templatefiles_rel]
+    directories = [os.path.dirname(fpath) for fpath in templatefiles]
 
-    input = templatefiles
-    output = [f"{tmpdir}/{template.name}/{file}" for file in templatefiles_rel]
+    input = [f"{template.path}/{file}" for file in templatefiles]
+    output = [f"{tmpdir}/{template.name}/{file}" for file in templatefiles]
     paras = {k:v["default"] for k,v in templateschema["properties"].items()}
     os.mkdir(os.path.join(tmpdir,template.name))
     create_dirstructure(directories,os.path.join(tmpdir,template.name))

@@ -1,9 +1,7 @@
 import importlib_resources
 import os
 
-from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
-from ntrfc.utils.filehandling.datafiles import get_directory_structure
-from utils.filehandling.datafiles import get_filelist_fromdir
+from ntrfc.utils.filehandling.datafiles import get_filelist_fromdir
 
 
 class case_template:
@@ -11,7 +9,7 @@ class case_template:
         self.name = name
         self.path = importlib_resources.files("ntrfc") / f"database/case_templates/{name}"
         self.schema = importlib_resources.files("ntrfc") / f"database/case_templates/{name}.schema.yaml"
-        self.files = get_filelist_fromdir(self.path)
+        self.files = [os.path.relpath(fpath, self.path) for fpath in get_filelist_fromdir(self.path)]
 
 """
 avail_templates is used to create a dictionary of with case_templates-Objects
@@ -24,13 +22,3 @@ AVAIL_TEMPLATES = ["openfoamCompressorCascadeRas"]
 CASE_TEMPLATES = {templatename: case_template(templatename) for templatename in AVAIL_TEMPLATES}
 
 
-def create_filelist_from_template(templatename):
-    """
-    :param template: path
-    :return: list of files
-    """
-    templatepath = CASE_TEMPLATES[templatename].path
-    assert os.path.isdir(os.path.join(templatepath))
-    files = list(nested_dict_pairs_iterator(get_directory_structure(templatepath)))
-    fpaths = [os.path.join(*i[1:-1]) for i in files]
-    return fpaths

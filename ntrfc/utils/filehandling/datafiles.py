@@ -6,6 +6,9 @@ import yaml
 import pickle
 import csv
 
+from utils.dictionaries.dict_utils import nested_dict_pairs_iterator
+
+
 def yaml_dict_read(yml_file):
     args_from_yaml = {}
 
@@ -86,7 +89,11 @@ def get_filelist_fromdir(path):
 
 
 def create_dirstructure(directories, path):
-    # todo docstring and test method
+    """
+
+    :param : directories - list of directories
+    :param : path - path
+    """
     for d in directories:
         Path(os.path.join(path,d)).mkdir(parents=True, exist_ok=True)
     return 0
