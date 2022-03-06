@@ -152,8 +152,8 @@ def naca4(number, n, finite_te=False, half_cosine_spacing=False):
         xl = x
         yl = [-xx for xx in yt]
 
-        xc = xc1 + xc2
-        # zc = [0] * len(xc)
+        #xc = xc1 + xc2
+        #zc = [0] * len(xc)
     else:
         yc1 = [m / pow(p, 2) * xx * (2 * p - xx) for xx in xc1]
         yc2 = [m / pow(1 - p, 2) * (1 - 2 * p + xx) * (1 - xx) for xx in xc2]
@@ -217,7 +217,7 @@ def naca5(number, n, finite_te=False, half_cosine_spacing=False):
 
     xc1 = [xx for xx in x if xx <= p]
     xc2 = [xx for xx in x if xx > p]
-    xc = xc1 + xc2
+    #xc = xc1 + xc2
 
     if p == 0:
         xu = x
