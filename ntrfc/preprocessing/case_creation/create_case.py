@@ -74,7 +74,7 @@ def create_case(input, output, templatename, paras):
     template = CASE_TEMPLATES[templatename]
     case_structure = get_directory_structure(template.path)
 
-    variables=find_vars_opts(case_structure[template.name], template.path)
+    variables = find_vars_opts(case_structure[template.name], template.path)
 
     defined, undefined, used, unused = check_settings_necessarities(variables, paras)
     print("found ", str(len(defined)), " defined parameters")
@@ -82,12 +82,12 @@ def create_case(input, output, templatename, paras):
     print("used ", str(len(used)), " parameters")
     print("unused ", str(len(unused)), " parameters")
 
-    assert len(undefined)==0, "undefined parameters"
+    assert len(undefined) == 0, "undefined parameters"
 
-    for templatefile, simfile in zip(input,output):
+    for templatefile, simfile in zip(input, output):
         shutil.copyfile(templatefile, simfile)
         for parameter in used:
-            inplace_change(simfile,f"<var {parameter} var>",str(paras[parameter]))
+            inplace_change(simfile, f"<var {parameter} var>", str(paras[parameter]))
 
 
 def find_vars_opts(case_structure, path_to_sim):
@@ -102,14 +102,14 @@ def find_vars_opts(case_structure, path_to_sim):
     datadict = copy.deepcopy(case_structure)
     all_pairs = list(nested_dict_pairs_iterator(case_structure))
     varsignature = r"<PARAM [a-z]{3,}(_{1,1}[a-z]{3,}){,} PARAM>"
-    #int
-    #float
-    #string
+    # int
+    # float
+    # string
     # todo move into param-module
     siglim = (len("<PARAM "), -(len(" PARAM>")))
 
     for pair in all_pairs:
-        #if os.path.isfile(os.path.join(path_to_sim,*pair)):
+        # if os.path.isfile(os.path.join(path_to_sim,*pair)):
         setInDict(datadict, pair[:-1], {})
         filepath = os.path.join(*pair[:-1])
         with open(os.path.join(path_to_sim, filepath), "r") as fhandle:

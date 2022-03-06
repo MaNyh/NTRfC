@@ -7,7 +7,6 @@ import pickle
 import csv
 
 
-
 def yaml_dict_read(yml_file):
     args_from_yaml = {}
 
@@ -23,16 +22,19 @@ def write_pickle_protocolzero(file, args):
     with open(file, "wb") as Fobj:
         pickle.dump(args, Fobj, protocol=0)
 
+
 def write_pickle(file, args):
     with open(file, "wb") as Fobj:
         pickle.dump(args, Fobj)
+
 
 def read_pickle(file):
     with open(file, 'rb') as f:
         args = pickle.load(f)
     return args
 
-def write_yaml_dict(fpath,data):
+
+def write_yaml_dict(fpath, data):
     """
     :param fpath: target path
     :param data: dictionary
@@ -40,11 +42,12 @@ def write_yaml_dict(fpath,data):
     with open(fpath, 'w') as outfile:
         yaml.dump(data, outfile, default_flow_style=False)
 
-def write_csv_config(fpath,datadict):
-    with open(fpath,"w") as outfile:
-        csvwriter = csv.writer(outfile, delimiter=' ',)
+
+def write_csv_config(fpath, datadict):
+    with open(fpath, "w") as outfile:
+        csvwriter = csv.writer(outfile, delimiter=' ', )
         for key, value in datadict.items():
-            csvwriter.writerow([key,value])
+            csvwriter.writerow([key, value])
 
 
 def inplace_change(filename, old_string, new_string):
@@ -52,7 +55,7 @@ def inplace_change(filename, old_string, new_string):
     with open(filename) as f:
         s = f.read()
         if old_string not in s:
-            #print('"{old_string}" not found in {filename}.'.format(**locals()))
+            # print('"{old_string}" not found in {filename}.'.format(**locals()))
             return
 
     # Safely write the changed content, if found in the file
@@ -66,7 +69,7 @@ def get_directory_structure(rootdir):
     """
     Creates a nested dictionary that represents the folder structure of rootdir
     """
-    #test method
+    # test method
     dir = {}
     rootdir = os.path.join(rootdir)
     rootdir = rootdir.rstrip(os.sep)
@@ -94,5 +97,5 @@ def create_dirstructure(directories, path):
     :param : path - path
     """
     for d in directories:
-        Path(os.path.join(path,d)).mkdir(parents=True, exist_ok=True)
+        Path(os.path.join(path, d)).mkdir(parents=True, exist_ok=True)
     return 0

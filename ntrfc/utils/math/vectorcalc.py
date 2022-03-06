@@ -13,6 +13,7 @@ from scipy.spatial.distance import squareform, pdist
 import sys
 import math as m
 
+
 def closest_node_index(node, nodes):
     closest_index = distance.cdist([node], nodes).argmin()
     return closest_index
@@ -21,6 +22,7 @@ def closest_node_index(node, nodes):
 def distant_node_index(node, nodes):
     closest_index = distance.cdist([node], nodes).argmax()
     return closest_index
+
 
 def calc_largedistant_idx(x_koords, y_koords):
     """
@@ -39,6 +41,7 @@ def calc_largedistant_idx(x_koords, y_koords):
     index_2 = I_col
 
     return index_1, index_2
+
 
 def symToMatrix(symTensor):
     """
@@ -71,7 +74,6 @@ def Rx(xAngle):
     return np.array([[1, 0, 0],
                      [0, np.cos(xAngle), np.sin(xAngle)],
                      [0, -np.sin(xAngle), np.cos(xAngle)]])
-
 
 
 def Ry(yAngle):
@@ -118,7 +120,7 @@ def vecAbs(vec):
     :param vec:
     :return:
     """
-    return np.sqrt(sum(vec**2))
+    return np.sqrt(sum(vec ** 2))
 
 
 def vecDir(vec):
@@ -197,7 +199,6 @@ def ellipsoidVol(sig):
     return 4 / 3 * np.pi * sig[0] * sig[1] * sig[2]
 
 
-
 def vecProjection(direction, vector):
     unitDir = vecDir(direction)
     return np.dot(vector, unitDir) * unitDir
@@ -225,7 +226,7 @@ def lineseg_dist(p, a, b):
     :param b: line point b
     :return: distance
     """
-       # normalized tangent vector
+    # normalized tangent vector
     d = np.divide(b - a, np.linalg.norm(b - a))
 
     # signed parallel distance components
@@ -239,6 +240,7 @@ def lineseg_dist(p, a, b):
     c = np.cross(p - a, d)
 
     return np.hypot(h, np.linalg.norm(c))
+
 
 def line_intersection(point_a1, point_a2,
                       point_b1, point_b2):
@@ -256,4 +258,3 @@ def line_intersection(point_a1, point_a2,
     x = det_2d(d, xdiff) / div
     y = det_2d(d, ydiff) / div
     return x, y
-

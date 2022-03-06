@@ -87,7 +87,6 @@ def writeTecplot2D3DFile(filename, X, Y, Z, vars):
 
 
 def openTecplotFile(path):
-
     values = []
     var = []
     zones = []
