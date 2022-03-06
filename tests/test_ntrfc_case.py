@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 """Tests for `ntrfc` package."""
+from preprocessing.case_creation.create_case import search_paras
+from utils.dictionaries.dict_utils import nested_dict_pairs_iterator
+
 
 def test_casestructure(tmpdir):
     import os
@@ -102,3 +105,27 @@ def test_create_case(tmpdir):
     create_case(input,output,template.name,paras)
     check = [os.path.isfile(fpath) for fpath in output]
     assert all(check), "not all files have been created"
+
+
+def test_search_paras(tmpdir):
+    import os
+    from ntrfc.utils.filehandling.datafiles import get_directory_structure
+
+
+    paramnameone ="parameter_name_one"
+    paramnametwo ="parameter_name_two"
+
+    filecontent = f"""
+    <PARAM {paramnameone} PARAM>
+    <PARAM {paramnametwo} PARAM>
+    """
+    filename = "paramfile.txt"
+    with open(os.path.join(tmpdir,filename),"w") as fhandle:
+        fhandle.write(filecontent)
+    case_structure = get_directory_structure(tmpdir)
+
+    varsignature = r"<PARAM [a-z]{3,}(_{1,1}[a-z]{3,}){,} PARAM>"
+    all_pairs = list(nested_dict_pairs_iterator(case_structure))
+    for line in filecontent:
+        for pair in all_pairs:
+            search_paras(case_structure, line, pair, (len("<PARAM "),len(" PARAM>")), varsignature)

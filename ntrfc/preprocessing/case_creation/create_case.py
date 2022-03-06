@@ -5,7 +5,7 @@ import shutil
 
 from ntrfc.utils.filehandling.datafiles import inplace_change, get_directory_structure
 from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, setInDict
-from database.case_templates.case_templates import CASE_TEMPLATES
+from ntrfc.database.case_templates.case_templates import CASE_TEMPLATES
 
 
 def search_paras(case_structure, line, pair, siglim, varsignature):
