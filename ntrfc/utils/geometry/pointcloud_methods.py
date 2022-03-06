@@ -6,6 +6,7 @@ from itertools import product
 from ntrfc.utils.math.vectorcalc import calc_largedistant_idx, vecAngle
 from ntrfc.utils.pyvista_utils.line import polyline_from_points, refine_spline
 
+
 def calcConcaveHull(x, y, alpha):
     """
     origin: https://stackoverflow.com/questions/50549128/boundary-enclosing-a-given-set-of-points/50714300#50714300
@@ -114,24 +115,24 @@ def calcConcaveHull(x, y, alpha):
     return x_new, y_new
 
 
-def midLength(ind_1, ind_2, sortedPoly):
+def mid_length(ind_1, ind_2, sorted_poly):
     """
     calc length of a midline. currently only used in the iterative computation of LE and TE index of a profile. probably
     this method is not necessary, as it is only two lines
     :param ind_1: index LE
     :param ind_2: index TE
-    :param sortedPoly: pv.PolyData sorted
+    :param sorted_poly: pv.PolyData sorted
     :return: length
     """
 
-    psPoly, ssPoly = extractSidePolys(ind_1, ind_2, sortedPoly)
-    midsPoly = midline_from_sides(ind_1, ind_2, sortedPoly.points, psPoly, ssPoly)
-    return midsPoly.length
+    ps_poly, ss_poly = extractSidePolys(ind_1, ind_2, sorted_poly)
+    mids_poly = midline_from_sides(ind_1, ind_2, sorted_poly.points, ps_poly, ss_poly)
+    return mids_poly.length
 
 
-def midline_from_sides(ind_hk, ind_vk, points, psPoly, ssPoly):
-    x_ps, y_ps = psPoly.points[::, 0], psPoly.points[::, 1]
-    x_ss, y_ss = ssPoly.points[::, 0], ssPoly.points[::, 1]
+def midline_from_sides(ind_hk, ind_vk, points, ps_poly, ss_poly):
+    x_ps, y_ps = ps_poly.points[::, 0], ps_poly.points[::, 1]
+    x_ss, y_ss = ss_poly.points[::, 0], ss_poly.points[::, 1]
 
     midsres = 100
     if x_ps[0] < x_ps[-1]:
@@ -153,38 +154,36 @@ def midline_from_sides(ind_hk, ind_vk, points, psPoly, ssPoly):
     return midsPoly
 
 
-def extract_vk_hk(sortedPoly, verbose=False):
+def extract_vk_hk(sorted_poly, verbose=False):
     """
     This function is calculating the leading-edge and trailing edge of a long 2d-body
     The function is not 100% reliable yet. The computation is iterative and it can take a while
     Points in origPoly and sortedPoly have to have defined points on the LE and TE, otherwise a LE or TE is not defined
     and it will be random which point will be found near the LE / TE
-    :param origPoly: all original points, unsorted
-    :param sortedPoly: sorted via calcConcaveHull
+    :param sorted_poly: sorted via calcConcaveHull
     :param verbose: bool (True -> plots, False -> silent)
     :return: returns indexes of LE(vk) and TE(hk) from sortedPoints
     """
 
-    def checkLength(ind_1, ind_2, sortedPoly):
+    def checklength(ind1, ind2, sorted_poly):
         """
         calc length of a midline. currently only used in the iterative computation of LE and TE index of a profile. probably
         this method is not necessary, as it is only two lines
-        :param ind_1: index LE
-        :param ind_2: index TE
-        :param sortedPoly: pv.PolyData sorted
+        :param ind1: index LE
+        :param ind2: index TE
+        :param sorted_poly: pv.PolyData sorted
         :return: length
         """
-        psPoly, ssPoly = extractSidePolys(ind_1, ind_2, sortedPoly)
-        midsPoly = midline_from_sides(ind_1, ind_2, sortedPoly.points, psPoly, ssPoly)
-        arclengths = midsPoly.compute_arc_length()["arc_length"]
-        midslength = sum(arclengths)
+        psPoly, ssPoly = extractSidePolys(ind1, ind2, sorted_poly)
+        midsPoly = midline_from_sides(ind1, ind2, sorted_poly.points, psPoly, ssPoly)
+
         return midsPoly.length
 
-    xs, ys = sortedPoly.points[::, 0], sortedPoly.points[::, 1]
+    xs, ys = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
     ind_1, ind_2 = calc_largedistant_idx(xs, ys)
     allowed_shift = 1
-    midLength0 = checkLength(ind_1, ind_2, sortedPoly)
-    nopt = sortedPoly.number_of_points
+    midLength0 = checklength(ind_1, ind_2, sorted_poly)
+    nopt = sorted_poly.number_of_points
 
     checked_combs = {}
     found = True
@@ -203,13 +202,13 @@ def extract_vk_hk(sortedPoly, verbose=False):
         for ind_1_t, ind2_t in combs:
             if checked_combs[(ind_1_t, ind2_t)] == False:
                 checked_combs[(ind_1_t, ind2_t)] = True
-                midLengths.append(checkLength(ind_1_t, ind2_t, sortedPoly))
+                midLengths.append(checklength(ind_1_t, ind2_t, sorted_poly))
             else:
                 midLengths.append(0)
         cids = midLengths.index(max(midLengths))
 
         ind_1_n, ind_2_n = combs[cids]
-        midLength_new = checkLength(ind_1_n, ind_2_n, sortedPoly)
+        midLength_new = checklength(ind_1_n, ind_2_n, sorted_poly)
         if midLength_new > midLength0:
             ind_1, ind_2 = ind_1_n, ind_2_n
             midLength0 = midLength_new
@@ -218,7 +217,7 @@ def extract_vk_hk(sortedPoly, verbose=False):
         else:
             found = False
 
-    if sortedPoly.points[ind_1][0] > sortedPoly.points[ind_2][0]:
+    if sorted_poly.points[ind_1][0] > sorted_poly.points[ind_2][0]:
         ind_vk = ind_2
         ind_hk = ind_1
     else:
@@ -256,7 +255,6 @@ def extractSidePolys(ind_hk, ind_vk, sortedPoly):
         psPoly = pv.PolyData(psl_helper.points)
         ssPoly = pv.PolyData(ssl_helper.points)
 
-
     return ssPoly, psPoly
 
 
@@ -276,11 +274,11 @@ def extract_geo_paras(points, alpha, verbose=False):
     points = np.stack((xs, ys, np.zeros(len(xs)))).T
     sortedPoly = pv.PolyData(points)
 
-    ind_hk, ind_vk = extract_vk_hk( sortedPoly)
+    ind_hk, ind_vk = extract_vk_hk(sortedPoly)
     psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly)
     midsPoly = midline_from_sides(ind_hk, ind_vk, points, psPoly, ssPoly)
 
-    #compute angles from 2d-midline
+    # compute angles from 2d-midline
     xmids, ymids = midsPoly.points[::, 0], midsPoly.points[::, 1]
     vk_tangent = np.stack((xmids[0] - xmids[1], ymids[0] - ymids[1], 0)).T
     hk_tangent = np.stack((xmids[-2] - xmids[-1], ymids[-2] - ymids[-1], 0)).T
@@ -295,7 +293,7 @@ def extract_geo_paras(points, alpha, verbose=False):
         p.add_mesh(psPoly, color="green", label="psPoly")
         p.add_mesh(ssPoly, color="black", label="ssPoly")
         p.add_mesh(midsPoly, color="black", label="midsPoly")
-        p.add_mesh(pv.Line((0,0,0),(midsPoly.length,0,0)))
+        p.add_mesh(pv.Line((0, 0, 0), (midsPoly.length, 0, 0)))
         p.add_legend()
         p.show()
 

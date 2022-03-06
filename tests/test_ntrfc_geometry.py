@@ -144,7 +144,7 @@ def test_midLength():
     """
     checks weather
     """
-    from ntrfc.utils.geometry.pointcloud_methods import midLength
+    from ntrfc.utils.geometry.pointcloud_methods import mid_length
     import numpy as np
     import pyvista as pv
 
@@ -159,7 +159,7 @@ def test_midLength():
     fake_vk = 0
     fake_hk = mid
     circle = pv.PolyData(np.stack([x, y, np.zeros(len(x))]).T)
-    length = midLength(fake_vk, fake_hk, circle)
+    length = mid_length(fake_vk, fake_hk, circle)
     assert np.isclose(2 * radius, length, rtol=1e-4), "length should be two times the size of the defined test-circle"
 
 
