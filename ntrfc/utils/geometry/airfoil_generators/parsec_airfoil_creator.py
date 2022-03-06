@@ -64,7 +64,7 @@ def pcoef(xte, yte, rle, x_cre, y_cre, d2ydx2_cre, th_cre, surface):
 def parsec_airfoil_gen(pparray, halfsinespacing=True, resolution=2000):
     # TE & LE of airfoil (normalized, chord = 1)
     xle = 0.0
-    #yle = 0.0
+    # yle = 0.0
     xte = 1.0
     yte = 0.0
 
@@ -99,12 +99,12 @@ def parsec_airfoil_gen(pparray, halfsinespacing=True, resolution=2000):
         beta = np.linspace(0.0, pi, resolution)
         halfsinespacing = [(0.5 * (1.0 - np.cos(x))) for x in beta]
         xx_pre = np.array(halfsinespacing[::-1])
-        #xx_suc = np.array(halfsinespacing)
+        # xx_suc = np.array(halfsinespacing)
 
     else:  # Evaluate pressure (lower) surface points
         xx_pre = np.linspace(xte, xle, 101)
         # Evaluate suction (upper) surface points
-        #xx_suc = np.linspace(xle, xte, 101)
+        # xx_suc = np.linspace(xle, xte, 101)
 
     yy_pre = (cf_pre[0] * xx_pre ** (1 / 2) +
               cf_pre[1] * xx_pre ** (3 / 2) +
