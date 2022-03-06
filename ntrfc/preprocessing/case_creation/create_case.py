@@ -71,10 +71,10 @@ def create_case(input, output, templatename, paras):
 
     found = templatename in CASE_TEMPLATES.keys()
     assert found, "template unknown. check ntrfc.database.casetemplates directory"
-    TEMPLATEDIR = CASE_TEMPLATES[templatename].path
-    case_structure = get_directory_structure(os.path.join(TEMPLATEDIR, templatename))
+    template = CASE_TEMPLATES[templatename]
+    case_structure = get_directory_structure(template.path)
 
-    variables=find_vars_opts(case_structure, TEMPLATEDIR)
+    variables=find_vars_opts(case_structure[template.name], template.path)
 
     defined, undefined, used, unused = check_settings_necessarities(variables, paras)
     print("found ", str(len(defined)), " defined parameters")
@@ -98,7 +98,6 @@ def find_vars_opts(case_structure, path_to_sim):
     : param path_to_sim: path - path-like object
     return : ?
     """
-    # todo docstring and test method
     # allowing names like JOB_NUMBERS, only capital letters and underlines - no digits, no whitespaces
     datadict = copy.deepcopy(case_structure)
     all_pairs = list(nested_dict_pairs_iterator(case_structure))

@@ -6,7 +6,6 @@ import yaml
 import pickle
 import csv
 
-from utils.dictionaries.dict_utils import nested_dict_pairs_iterator
 
 
 def yaml_dict_read(yml_file):

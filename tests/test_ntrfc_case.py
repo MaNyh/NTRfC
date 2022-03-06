@@ -1,10 +1,46 @@
 #!/usr/bin/env python
 
 """Tests for `ntrfc` package."""
-import os
 
-from database.case_templates.case_templates import CASE_TEMPLATES
-from preprocessing.case_creation.create_case import create_case
+def test_casestructure(tmpdir):
+    import os
+    from ntrfc.utils.filehandling.datafiles import get_directory_structure, create_dirstructure
+    from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
+
+    test_structure = {"directory":{"dir1_file1": "",
+                                   "dir1_file2": "",
+                                   }}
+
+    directories = [os.path.join(*i[:-1])for i in list(nested_dict_pairs_iterator(test_structure))]
+
+    create_dirstructure(directories,tmpdir)
+
+    case_structure = get_directory_structure(tmpdir)
+
+    assert test_structure["directory"].keys()==case_structure[tmpdir.basename]["directory"].keys(), "error collecting case_structure"
+
+
+def test_findvarsopts(tmpdir):
+    import os
+    from ntrfc.preprocessing.case_creation.create_case import find_vars_opts
+    from ntrfc.utils.filehandling.datafiles import get_directory_structure
+
+    paramnameone ="parameter_name_one"
+    paramnametwo ="parameter_name_two"
+
+    filecontent = f"""
+    <PARAM {paramnameone} PARAM>
+    <PARAM {paramnametwo} PARAM>
+    """
+
+    filename = "simstuff.txt"
+
+    with open(os.path.join(tmpdir,filename),"w") as fhandle:
+        fhandle.write(filecontent)
+    case_structure = get_directory_structure(tmpdir)
+
+    variables = find_vars_opts(case_structure, tmpdir.dirname)
+    assert (variables[tmpdir.basename][filename][paramnameone] == "PARAM" and variables[tmpdir.basename][filename][paramnametwo] == "PARAM"), "not all variablees were found in test-run"
 
 
 def test_template_installations():
@@ -47,9 +83,11 @@ def test_create_case(tmpdir):
     """
 
     """
+    import os
+    from ntrfc.database.case_templates.case_templates import CASE_TEMPLATES
     from ntrfc.utils.filehandling.datafiles import yaml_dict_read
     from ntrfc.utils.filehandling.datafiles import create_dirstructure
-
+    from ntrfc.preprocessing.case_creation.create_case import create_case
 
     template = list(CASE_TEMPLATES.values())[0]
     templatefiles = template.files
