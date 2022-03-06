@@ -61,8 +61,6 @@ def pcoef(
     return coef
 
 
-
-
 # User function pcoef
 def pcoef(
     xte, yte, rle,
@@ -111,8 +109,7 @@ def pcoef(
     return coef
 
 
-def parsec_airfoil_gen(pparray,halfsinespacing=True, resolution=2000):
-
+def parsec_airfoil_gen(pparray, halfsinespacing=True, resolution=2000):
     # TE & LE of airfoil (normalized, chord = 1)
     xle = 0.0
     yle = 0.0
@@ -136,13 +133,13 @@ def parsec_airfoil_gen(pparray,halfsinespacing=True, resolution=2000):
 
     # Evaluate pressure (lower) surface coefficients
     cf_pre = pcoef(xte, yte, rle,
-                      x_pre, y_pre, d2ydx2_pre, th_pre,
-                      'pre')
+                   x_pre, y_pre, d2ydx2_pre, th_pre,
+                   'pre')
 
     # Evaluate suction (upper) surface coefficients
     cf_suc = pcoef(xte, yte, rle,
-                      x_suc, y_suc, d2ydx2_suc, th_suc,
-                      'suc')
+                   x_suc, y_suc, d2ydx2_suc, th_suc,
+                   'suc')
 
     # Evaluate pressure (lower) surface points
 
@@ -151,10 +148,11 @@ def parsec_airfoil_gen(pparray,halfsinespacing=True, resolution=2000):
         halfsinespacing = [(0.5 * (1.0 - np.cos(x))) for x in beta]
         xx_pre = np.array(halfsinespacing[::-1])
         xx_suc = np.array(halfsinespacing)
-    else:
-        xx_pre = x * np.linspace(xte, xle, resolution)
-        xx_suc = x * np.linspace(xle, xte, resolution)
 
+    else:# Evaluate pressure (lower) surface points
+        xx_pre = np.linspace(xte,xle,101)
+        # Evaluate suction (upper) surface points
+        xx_suc = np.linspace(xle,xte,101)
 
     yy_pre = (cf_pre[0] * xx_pre ** (1 / 2) +
               cf_pre[1] * xx_pre ** (3 / 2) +
@@ -165,7 +163,7 @@ def parsec_airfoil_gen(pparray,halfsinespacing=True, resolution=2000):
               )
 
     # Evaluate suction (upper) surface points
-    #xx_suc = x * np.linspace(xle, xte, res)
+    # xx_suc = x * np.linspace(xle, xte, res)
     xx_suc = np.array(halfsinespacing)
     yy_suc = (cf_suc[0] * xx_suc ** (1 / 2) +
               cf_suc[1] * xx_suc ** (3 / 2) +
@@ -175,7 +173,7 @@ def parsec_airfoil_gen(pparray,halfsinespacing=True, resolution=2000):
               cf_suc[5] * xx_suc ** (11 / 2)
               )
 
-    ps_points = np.stack([xx_pre,yy_pre,np.zeros(len(xx_pre))]).T
+    ps_points = np.stack([xx_pre, yy_pre, np.zeros(len(xx_pre))]).T
     ss_points = np.stack([xx_suc, yy_suc, np.zeros(len(xx_suc))]).T
     return np.concatenate((ps_points, ss_points))
 
@@ -191,17 +189,19 @@ class Display(object):
         self.plt.xlabel('x')
         self.plt.ylabel('y')
         self.ax.grid(True)
-    def plot(self, X, Y,label=''):
-        h, = self.plt.plot(X, Y, '-', linewidth = 1)
+
+    def plot(self, X, Y, label=''):
+        h, = self.plt.plot(X, Y, '-', linewidth=1)
         self.h.append(h)
         self.label.append(label)
+
     def show(self):
-        self.plt.axis((-0.1,1.1)+self.plt.axis()[2:])
+        self.plt.axis((-0.1, 1.1) + self.plt.axis()[2:])
         self.ax.legend(self.h, self.label)
         self.plt.show()
 
-def demo():
 
+def demo():
     d = Display()
 
     R_LE = 0.01
@@ -214,9 +214,8 @@ def demo():
     d2y_dx2_SUC = -0.350
     th_SUC = -6
 
-    pparray = [R_LE,x_PRE,y_PRE,d2y_dx2_PRE,th_PRE,x_SUC,y_SUC,d2y_dx2_SUC,th_SUC]
+    pparray = [R_LE, x_PRE, y_PRE, d2y_dx2_PRE, th_PRE, x_SUC, y_SUC, d2y_dx2_SUC, th_SUC]
     profile_points = parsec_airfoil_gen(pparray)
-    X,Y = profile_points[::,0],profile_points[::,1]
+    X, Y = profile_points[::, 0], profile_points[::, 1]
     d.plot(X, Y)
     d.show()
-
