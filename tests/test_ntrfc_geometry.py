@@ -2,7 +2,6 @@ import numpy as np
 import pyvista as pv
 
 
-
 def test_calcConcaveHull():
     """
     in these simple geometries, each point must be found by calcConcaveHull
@@ -52,25 +51,31 @@ def test_parsec():
     d2y_dx2_SUC = -0.350
     th_SUC = -6
 
-    pparray = [R_LE,x_PRE,y_PRE,d2y_dx2_PRE,th_PRE,x_SUC,y_SUC,d2y_dx2_SUC,th_SUC]
+    pparray = [R_LE, x_PRE, y_PRE, d2y_dx2_PRE, th_PRE, x_SUC, y_SUC, d2y_dx2_SUC, th_SUC]
     profile_points = parsec_airfoil_gen(pparray)
-    X,Y = profile_points[::,0],profile_points[::,1]
+    X, Y = profile_points[::, 0], profile_points[::, 1]
 
 
 def test_naca():
     from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
     def rand_naca_code():
-        digits = np.random.choice([4,5])
-        if digits ==4:
-            d1,d2,d3,d4 = np.random.randint(0,6),np.random.randint(0,8),np.random.randint(0,6),np.random.randint(0,9)
-            digitstring = str(d1)+str(d2)+str(d3)+str(d4)
-        if digits ==5:
-            d1,d2,d3,d4,d5 = np.random.randint(0,5),np.random.randint(0,5),np.random.randint(0,6),np.random.randint(0,9),np.random.randint(0,9)
-            digitstring = str(d1)+str(d2)+str(d3)+str(d4)+str(d5)
+        digits = np.random.choice([4, 5])
+        if digits == 4:
+            d1, d2, d3, d4 = np.random.randint(0, 6), np.random.randint(0, 8), np.random.randint(0,
+                                                                                                 6), np.random.randint(
+                0, 9)
+            digitstring = str(d1) + str(d2) + str(d3) + str(d4)
+        if digits == 5:
+            d1, d2, d3, d4, d5 = np.random.randint(0, 5), np.random.randint(0, 5), np.random.randint(0,
+                                                                                                     6), np.random.randint(
+                0, 9), np.random.randint(0, 9)
+            digitstring = str(d1) + str(d2) + str(d3) + str(d4) + str(d5)
         return digitstring
+
     profNaca = [rand_naca_code() for i in range(6)]
-    for i,p in enumerate(profNaca):
-        X,Y = naca(p, 240, finite_TE=np.random.choice([True,False]), half_cosine_spacing=np.random.choice([True,False]))
+    for i, p in enumerate(profNaca):
+        X, Y = naca(p, 240, finite_TE=np.random.choice([True, False]),
+                    half_cosine_spacing=np.random.choice([True, False]))
 
 
 def test_extract_vk_hk(verbose=False):
@@ -85,8 +90,8 @@ def test_extract_vk_hk(verbose=False):
     # d1,d2,d3,d4 = np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9)
     # digitstring = str(d1)+str(d2)+str(d3)+str(d4)
     # manifold problems with other profiles with veronoi-mid and other unoptimized code. therefor tests only 0009
-    #todo: currently we cant test half_cosine_spacing profiles, as the resolution is too good for extract_vk_hk, this must be changed!
-    #todo: we should test finite_TE profiles with round TE. the current implementation is not validated for this
+    # todo: currently we cant test half_cosine_spacing profiles, as the resolution is too good for extract_vk_hk, this must be changed!
+    # todo: we should test finite_TE profiles with round TE. the current implementation is not validated for this
     X, Y = naca("6506", res, finite_TE=False, half_cosine_spacing=False)
     ind_hk_test = 0
     ind_vk_test = res
@@ -108,7 +113,7 @@ def test_extract_vk_hk(verbose=False):
         p.add_mesh(sortedPoly)
         p.show()
 
-    assert (ind_hk == ind_hk_test or ind_hk == ind_vk_test*2), "wrong hk-index chosen"
+    assert (ind_hk == ind_hk_test or ind_hk == ind_vk_test * 2), "wrong hk-index chosen"
     assert ind_vk == ind_vk_test, "wrong vk-index chosen"
 
 
@@ -123,14 +128,14 @@ def test_midline_from_sides():
     ind_hk = 0
     ind_vk = res
 
-    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2-1))).T
+    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2 - 1))).T
     poly = pv.PolyData(points)
-    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk, poly)
+    sspoly, pspoly = extractSidePolys(ind_hk, ind_vk, poly)
 
-    mids = midline_from_sides(ind_hk, ind_vk, poly.points, psPoly, ssPoly)
+    mids = midline_from_sides(ind_hk, ind_vk, poly.points, pspoly, sspoly)
 
     length = mids.length
-    testlength = vecAbs(ssPoly.points[0] - ssPoly.points[-1])
+    testlength = vecAbs(sspoly.points[0] - sspoly.points[-1])
 
     assert length == testlength, "midline not accurate"
 
@@ -169,12 +174,12 @@ def test_extractSidePolys():
     X, Y = naca(digitstring, res, finite_TE=False, half_cosine_spacing=True)
     ind_hk = 0
     ind_vk = res
-    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2- 1) )).T
+    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2 - 1))).T
 
     poly = pv.PolyData(points)
     ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk, poly)
-    #todo: this is probably not right. X[1:-1] or X[:-1]? i should not have to use a +1 here
-    assert ssPoly.number_of_points == psPoly.number_of_points+1, "number of sidepoints are not equal "
+    # todo: this is probably not right. X[1:-1] or X[:-1]? i should not have to use a +1 here
+    assert ssPoly.number_of_points == psPoly.number_of_points + 1, "number of sidepoints are not equal "
 
 
 def test_extract_geo_paras():
@@ -189,10 +194,10 @@ def test_extract_geo_paras():
     sortedPoly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sortedPoly.rotate_z(angle)
 
-    points, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
+    points, pspoly, sspoly, ind_vk, ind_hk, midspoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
         sortedPoly.points, alpha)
 
-    assert np.isclose(beta_leading , (angle + 90)), "wrong leading edge angle"
-    assert np.isclose(beta_trailing , (angle + 90)), "wrong leading edge angle"
-    assert np.isclose(midsPoly.length, 1)
+    assert np.isclose(beta_leading, (angle + 90)), "wrong leading edge angle"
+    assert np.isclose(beta_trailing, (angle + 90)), "wrong leading edge angle"
+    assert np.isclose(midspoly.length, 1)
     assert np.isclose(camber_angle, (angle + 90))

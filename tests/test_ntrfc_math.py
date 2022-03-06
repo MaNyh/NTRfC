@@ -98,9 +98,9 @@ def test_RotFromTwoVecs():
     a = np.array([1, 0, 0])
     b = np.array([0, 1, 0])
 
-    Rab = RotFromTwoVecs(b,a)
-    Rcontrol = Rz(np.pi/2)
-    assert all(np.isclose(Rab,Rcontrol).flatten())
+    Rab = RotFromTwoVecs(b, a)
+    Rcontrol = Rz(np.pi / 2)
+    assert all(np.isclose(Rab, Rcontrol).flatten())
 
 
 def test_posVec():
@@ -111,8 +111,8 @@ def test_posVec():
     alength = vecAbs(a)
     b = posVec(a)
     blength = vecAbs(b)
-    assert alength==blength
-    assert all(np.isclose(-1*a,b).flatten())
+    assert alength == blength
+    assert all(np.isclose(-1 * a, b).flatten())
 
 
 def test_findNearest():
@@ -121,28 +121,29 @@ def test_findNearest():
     import numpy as np
     res = 100
     line = pv.Line(resolution=res)
-    point = np.array([0,0,0])
-    near = findNearest(line.points,point)
-    assert near == int(res/2)
+    point = np.array([0, 0, 0])
+    near = findNearest(line.points, point)
+    assert near == int(res / 2)
+
 
 def test_eulersFromRPG():
     from ntrfc.utils.math.vectorcalc import eulersFromRPG, RotFromTwoVecs, vecAngle
     import numpy as np
     a = np.array([1, 0, 0])
     b = np.array([0, 1, 0])
-    cangle = vecAngle(a,b)
-    R = RotFromTwoVecs(a,b)
+    cangle = vecAngle(a, b)
+    R = RotFromTwoVecs(a, b)
 
     angle = eulersFromRPG(R)
-    assert angle[0]==cangle
+    assert angle[0] == cangle
 
 
 def test_randomOrthMat():
     from ntrfc.utils.math.vectorcalc import randomOrthMat
     import numpy as np
     o = randomOrthMat()
-    dot_o = np.dot(o,o.T)
-    assert all(np.isclose(dot_o,np.identity(3)).flatten())
+    dot_o = np.dot(o, o.T)
+    assert all(np.isclose(dot_o, np.identity(3)).flatten())
 
 
 def test_vecProjection():
@@ -174,9 +175,9 @@ def test_line_intersection():
     import numpy as np
     from ntrfc.utils.math.vectorcalc import line_intersection
 
-    intersect = line_intersection((-1,0),(1,0),
-                      (0,-1),(0,1))
-    assert all(intersect==np.array([0,0]))
+    intersect = line_intersection((-1, 0), (1, 0),
+                                  (0, -1), (0, 1))
+    assert all(intersect == np.array([0, 0]))
 
 
 def test_largedistance_indices():
