@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 """Tests for `ntrfc` package."""
-from preprocessing.case_creation.create_case import search_paras
-from utils.dictionaries.dict_utils import nested_dict_pairs_iterator
 
 
 def test_casestructure(tmpdir):
@@ -110,6 +108,8 @@ def test_create_case(tmpdir):
 def test_search_paras(tmpdir):
     import os
     from ntrfc.utils.filehandling.datafiles import get_directory_structure
+    from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
+    from ntrfc.preprocessing.case_creation.create_case import search_paras
 
 
     paramnameone ="parameter_name_one"
