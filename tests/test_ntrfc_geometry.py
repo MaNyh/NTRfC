@@ -74,7 +74,7 @@ def test_naca():
 
     profNaca = [rand_naca_code() for i in range(6)]
     for i, p in enumerate(profNaca):
-        X, Y = naca(p, 240, finite_TE=np.random.choice([True, False]),
+        X, Y = naca(p, 240, finite_te=np.random.choice([True, False]),
                     half_cosine_spacing=np.random.choice([True, False]))
 
 
@@ -92,7 +92,7 @@ def test_extract_vk_hk(verbose=False):
     # manifold problems with other profiles with veronoi-mid and other unoptimized code. therefor tests only 0009
     # todo: currently we cant test half_cosine_spacing profiles, as the resolution is too good for extract_vk_hk, this must be changed!
     # todo: we should test finite_TE profiles with round TE. the current implementation is not validated for this
-    X, Y = naca("6506", res, finite_TE=False, half_cosine_spacing=False)
+    X, Y = naca("6506", res, finite_te=False, half_cosine_spacing=False)
     ind_hk_test = 0
     ind_vk_test = res
 
@@ -124,7 +124,7 @@ def test_midline_from_sides():
     from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
 
     res = 240
-    X, Y = naca('0009', res, finite_TE=False, half_cosine_spacing=True)
+    X, Y = naca('0009', res, finite_te=False, half_cosine_spacing=True)
     ind_hk = 0
     ind_vk = res
 
@@ -171,7 +171,7 @@ def test_extractSidePolys():
     digit_string = str(d1) + str(d2) + str(d3) + str(d4)
 
     res = 240
-    X, Y = naca(digit_string, res, finite_TE=False, half_cosine_spacing=True)
+    X, Y = naca(digit_string, res, finite_te=False, half_cosine_spacing=True)
     ind_hk = 0
     ind_vk = res
     points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2 - 1))).T
@@ -190,7 +190,7 @@ def test_extract_geo_paras():
     angle = 20  # deg
     alpha = 1
     res = 200
-    xs, ys = naca(naca_code, res, finite_TE=False, half_cosine_spacing=True)
+    xs, ys = naca(naca_code, res, finite_te=False, half_cosine_spacing=True)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle)
 

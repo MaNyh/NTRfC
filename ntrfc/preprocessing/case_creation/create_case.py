@@ -4,7 +4,7 @@ import re
 import shutil
 
 from ntrfc.utils.filehandling.datafiles import inplace_change, get_directory_structure
-from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, setInDict
+from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, set_in_dict
 from ntrfc.database.case_templates.case_templates import CASE_TEMPLATES
 
 
@@ -23,7 +23,7 @@ def search_paras(case_structure, line, pair, siglim, varsignature):
         else:
             span = lookup_var.span()
             parameter = line[span[0] + siglim[0]:span[1] + siglim[1]]
-            setInDict(case_structure, list(pair[:-1]) + [parameter], "PARAM")
+            set_in_dict(case_structure, list(pair[:-1]) + [parameter], "PARAM")
             match = line[span[0]:span[1]]
             line = line.replace(match, "")
     return case_structure
@@ -60,18 +60,18 @@ def check_settings_necessarities(case_structure, settings_dict):
     return defined, undefined, used, unused
 
 
-def create_case(input, output, templatename, paras):
+def create_case(input_files, output_files, template_name, paras):
     """
-
-    :param templatename: str - template-name
-    :param settings: dict - dict-settings
-    :param path_to_sim: path - path to case-directory
+    :param input_files: list of template-files
+    :param output_files: list of outputfiles (same as input)
+    :param template_name: str - template-name
+    :param paras: dict - dict-settings
     :return:
     """
 
-    found = templatename in CASE_TEMPLATES.keys()
+    found = template_name in CASE_TEMPLATES.keys()
     assert found, "template unknown. check ntrfc.database.casetemplates directory"
-    template = CASE_TEMPLATES[templatename]
+    template = CASE_TEMPLATES[template_name]
     case_structure = get_directory_structure(template.path)
 
     variables = find_vars_opts(case_structure[template.name], template.path)
@@ -84,7 +84,7 @@ def create_case(input, output, templatename, paras):
 
     assert len(undefined) == 0, "undefined parameters"
 
-    for templatefile, simfile in zip(input, output):
+    for templatefile, simfile in zip(input_files, output_files):
         shutil.copyfile(templatefile, simfile)
         for parameter in used:
             inplace_change(simfile, f"<var {parameter} var>", str(paras[parameter]))
@@ -110,7 +110,7 @@ def find_vars_opts(case_structure, path_to_sim):
 
     for pair in all_pairs:
         # if os.path.isfile(os.path.join(path_to_sim,*pair)):
-        setInDict(datadict, pair[:-1], {})
+        set_in_dict(datadict, pair[:-1], {})
         filepath = os.path.join(*pair[:-1])
         with open(os.path.join(path_to_sim, filepath), "r") as fhandle:
             for line in fhandle.readlines():

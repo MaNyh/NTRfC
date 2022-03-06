@@ -1,5 +1,5 @@
 from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, delete_keys_from_dict, compare_dictionaries, \
-    setInDict, getFromDict, merge
+    set_in_dict, get_from_dict, merge
 
 
 def test_nested_dict_pairs_iterator():
@@ -31,7 +31,7 @@ def test_compare_dictionaries():
 
 def test_setInDict():
     dict = {"toplevel": {"value_1": 0, "value_2": 2}}
-    setInDict(dict, ["toplevel", "value_2"], 3)
+    set_in_dict(dict, ["toplevel", "value_2"], 3)
     assert dict["toplevel"]["value_2"] == 3
 
 
@@ -43,7 +43,7 @@ def test_getFromDict():
     """
     dict = {"toplevel": {"midlevel": {"value_1": 1, "value_2": 0}}}
 
-    assert getFromDict(dict, ["toplevel", "midlevel", "value_2"]) == 0
+    assert get_from_dict(dict, ["toplevel", "midlevel", "value_2"]) == 0
 
 
 def test_merge():

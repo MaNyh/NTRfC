@@ -37,11 +37,11 @@ import numpy as np
 import pyvista as pv
 
 
-def linspace(start, stop, np):
+def linspace(start, stop, nop):
     """
     Emulate Matlab linspace
     """
-    return [start + (stop - start) * i / (np - 1) for i in range(np)]
+    return [start + (stop - start) * i / (nop - 1) for i in range(nop)]
 
 
 def interpolate(xa, ya, queryPoints):
@@ -98,9 +98,9 @@ def interpolate(xa, ya, queryPoints):
         klo = 0
         khi = n - 1
 
-        while (khi - klo > 1):
+        while khi - klo > 1:
             k = (khi + klo) >> 1
-            if (xa[k] > queryPoints[i]):
+            if xa[k] > queryPoints[i]:
                 khi = k
             else:
                 klo = k
@@ -115,7 +115,7 @@ def interpolate(xa, ya, queryPoints):
     return results
 
 
-def naca4(number, n, finite_TE=False, half_cosine_spacing=False):
+def naca4(number, n, finite_te=False, half_cosine_spacing=False):
     """
     Returns 2*n+1 points in [0 1] for the given 4 digit NACA number string
     """
@@ -129,7 +129,7 @@ def naca4(number, n, finite_TE=False, half_cosine_spacing=False):
     a2 = -0.3516
     a3 = +0.2843
 
-    if finite_TE:
+    if finite_te:
         a4 = -0.1015  # For finite thick TE
     else:
         a4 = -0.1036  # For zero thick TE
@@ -153,7 +153,7 @@ def naca4(number, n, finite_TE=False, half_cosine_spacing=False):
         yl = [-xx for xx in yt]
 
         xc = xc1 + xc2
-        zc = [0] * len(xc)
+        # zc = [0] * len(xc)
     else:
         yc1 = [m / pow(p, 2) * xx * (2 * p - xx) for xx in xc1]
         yc2 = [m / pow(1 - p, 2) * (1 - 2 * p + xx) * (1 - xx) for xx in xc2]
@@ -171,13 +171,13 @@ def naca4(number, n, finite_TE=False, half_cosine_spacing=False):
         xl = [xx + yy * sin(zz) for xx, yy, zz in zip(x, yt, theta)]
         yl = [xx - yy * cos(zz) for xx, yy, zz in zip(zc, yt, theta)]
 
-    X = xu[::-1] + xl[1:]
-    Z = yu[::-1] + yl[1:]
+    x = xu[::-1] + xl[1:]
+    z = yu[::-1] + yl[1:]
 
-    return X, Z
+    return x, z
 
 
-def naca5(number, n, finite_TE=False, half_cosine_spacing=False):
+def naca5(number, n, finite_te=False, half_cosine_spacing=False):
     """
     Returns 2*n+1 points in [0 1] for the given 5 digit NACA number string
     """
@@ -195,7 +195,7 @@ def naca5(number, n, finite_TE=False, half_cosine_spacing=False):
     a2 = -0.3516
     a3 = +0.2843
 
-    if finite_TE:
+    if finite_te:
         a4 = -0.1015  # For finite thickness trailing edge
     else:
         a4 = -0.1036  # For zero thickness trailing edge
@@ -226,7 +226,7 @@ def naca5(number, n, finite_TE=False, half_cosine_spacing=False):
         xl = x
         yl = [-x for x in yt]
 
-        zc = [0] * len(xc)
+        # zc = [0] * len(xc)
     else:
         yc1 = [k1 / 6.0 * (pow(xx, 3) - 3 * m * pow(xx, 2) + pow(m, 2) * (3 - m) * xx) for xx in xc1]
         yc2 = [k1 / 6.0 * pow(m, 3) * (1 - xx) for xx in xc2]
@@ -244,17 +244,17 @@ def naca5(number, n, finite_TE=False, half_cosine_spacing=False):
         xl = [xx + yy * sin(zz) for xx, yy, zz in zip(x, yt, theta)]
         yl = [xx - yy * cos(zz) for xx, yy, zz in zip(zc, yt, theta)]
 
-    X = xu[::-1] + xl[1:]
-    Z = yu[::-1] + yl[1:]
+    x = xu[::-1] + xl[1:]
+    z = yu[::-1] + yl[1:]
 
-    return X, Z
+    return x, z
 
 
-def naca(number, n, finite_TE=False, half_cosine_spacing=True):
+def naca(number, n, finite_te=False, half_cosine_spacing=True):
     if len(number) == 4:
-        X, Y = naca4(number, n, finite_TE, half_cosine_spacing)
+        X, Y = naca4(number, n, finite_te, half_cosine_spacing)
     elif len(number) == 5:
-        X, Y = naca5(number, n, finite_TE, half_cosine_spacing)
+        X, Y = naca5(number, n, finite_te, half_cosine_spacing)
     else:
         raise Exception
 
@@ -264,7 +264,7 @@ def naca(number, n, finite_TE=False, half_cosine_spacing=True):
     """
     fix for trailing_edge finite_TE
     """
-    if finite_TE:
+    if finite_te:
         points = np.stack((X, Y, np.zeros(len(X)))).T
         pointa = np.array([X[0], Y[0], 0])
         pointb = np.array([X[-1], Y[-1], 0])
@@ -311,11 +311,11 @@ class Display(object):
         self.plt.show()
 
 
-def demo(profNaca=['0009', '2414', '6409'], nPoints=640, finite_TE=False, half_cosine_spacing=True):
+def demo(profNaca, no_points=640, finite_te=False, half_cosine_spacing=True):
     profNaca = ['0009', '0012', '2414', '2415', '6409', '0006', '0008', '0010', '0012', '0015']
     d = Display()
     for i, p in enumerate(profNaca):
-        X, Y = naca(p, nPoints, finite_TE, half_cosine_spacing)
+        X, Y = naca(p, no_points, finite_te, half_cosine_spacing)
         d.plot(X, Y, p)
     d.show()
 
@@ -338,7 +338,7 @@ def demo_2():
     profNaca = [rand_naca_code() for i in range(6)]
     d = Display()
     for i, p in enumerate(profNaca):
-        X, Y = naca(p, 240, finite_TE=np.random.choice([True, False]),
+        X, Y = naca(p, 240, finite_te=np.random.choice([True, False]),
                     half_cosine_spacing=np.random.choice([True, False]))
         d.plot(X, Y, p)
     d.show()
@@ -348,13 +348,12 @@ def main():
     import os
     from argparse import ArgumentParser, RawDescriptionHelpFormatter
     from textwrap import dedent
-    parser = ArgumentParser( \
-        formatter_class=RawDescriptionHelpFormatter, \
-        description=dedent('''\
+    parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
+                            description=dedent('''
             Script to create NACA4 and NACA5 profiles
             If no argument is provided, a demo is displayed.
-            '''), \
-        epilog=dedent('''\
+            '''),
+                            epilog=dedent('''
             Examples:
                 Get help
                     python {0} -h
@@ -369,20 +368,20 @@ def main():
                 Generate points for several profiles
                     python {0} -p "2412 23112" -d -s
             '''.format(os.path.basename(__file__))))
-    parser.add_argument('-p', '--profile', type=str, \
+    parser.add_argument('-p', '--profile', type=str,
                         help='Profile name or set of profiles names separated by spaces. Example: "0009", "0009 2414 6409"')
-    parser.add_argument('-n', '--nbPoints', type=int, default=120, \
+    parser.add_argument('-n', '--nbPoints', type=int, default=120,
                         help='Number of points used to discretize chord. Profile will have 2*nbPoints+1 dots. Default is 120.')
-    parser.add_argument('-s', '--half_cosine_spacing', action='store_true', \
-                        help='Half cosine based spacing, instead of a linear spacing of chord. ' \
+    parser.add_argument('-s', '--half_cosine_spacing', action='store_true',
+                        help='Half cosine based spacing, instead of a linear spacing of chord. '
                              'This option is recommended to have a smooth leading edge.')
-    parser.add_argument('-f', '--finite_TE', action='store_true', \
+    parser.add_argument('-f', '--finite_TE', action='store_true',
                         help='Finite thickness trailing edge. Default is False, corresponding to zero thickness trailing edge.')
-    parser.add_argument('-d', '--display', action='store_true', \
+    parser.add_argument('-d', '--display', action='store_true',
                         help='Flag used to display the profile(s).')
     args = parser.parse_args()
     if args.profile is None:
-        demo(nPoints=args.nbPoints, finite_TE=args.finite_TE, half_cosine_spacing=args.half_cosine_spacing)
+        demo(640, no_points=args.nbPoints, finite_te=args.finite_TE, half_cosine_spacing=args.half_cosine_spacing)
     else:
         if args.display:
             d = Display()

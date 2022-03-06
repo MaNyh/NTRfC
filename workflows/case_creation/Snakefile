@@ -34,4 +34,5 @@ rule create_case:
         simulation=paramspace.instance
     run:
         from ntrfc.preprocessing.case_creation.create_case import create_case
-        create_case(input, output,params["case_type"],params["simulation"])
+
+        create_case(input,output,params["case_type"],params["simulation"])
