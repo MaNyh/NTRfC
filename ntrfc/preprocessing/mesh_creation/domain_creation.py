@@ -121,11 +121,11 @@ def create_2d_blocklines(basedir, profile_set):
             ss_le = closest_node_index(midsPoly[chord_start], ssPoly)
             ps_le = closest_node_index(midsPoly[chord_start], psPoly)
 
-            ss_le_ogrid = closest_node_index(ss_le, ogridline.points)
-            ps_le_ogrid = closest_node_index(ps_le, ogridline.points)
+            # ss_le_ogrid = closest_node_index(ss_le, ogridline.points)
+            # ps_le_ogrid = closest_node_index(ps_le, ogridline.points)
 
-            yupper_le = closest_node_index(ss_le_ogrid, y_upper)
-            ylower_le = closest_node_index(ps_le_ogrid, y_lower)
+            # yupper_le = closest_node_index(ss_le_ogrid, y_upper)
+            # ylower_le = closest_node_index(ps_le_ogrid, y_lower)
 
             a = 1
             # angle_
