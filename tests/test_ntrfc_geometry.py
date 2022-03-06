@@ -1,12 +1,12 @@
-import numpy as np
-import pyvista as pv
 
 
-def test_calcConcaveHull():
+def test_calc_concavehull():
     """
     in these simple geometries, each point must be found by calcConcaveHull
     """
-    from ntrfc.utils.geometry.pointcloud_methods import calcConcaveHull
+    from ntrfc.utils.geometry.pointcloud_methods import calc_concavehull
+    import numpy as np
+    import pyvista as pv
 
     square = pv.Plane()
     boxedges = square.extract_feature_edges()
@@ -19,7 +19,7 @@ def test_calcConcaveHull():
     xs_raw = boxpoints[:, 0]
     ys_raw = boxpoints[:, 1]
 
-    xs, ys = calcConcaveHull(xs_raw, ys_raw, 10)
+    xs, ys = calc_concavehull(xs_raw, ys_raw, 10)
 
     assert len(xs) == len(xs_raw)
     assert any([yi in ys_raw for yi in ys])
@@ -32,7 +32,7 @@ def test_calcConcaveHull():
     xs_raw = polypoints[:, 0]
     ys_raw = polypoints[:, 1]
 
-    xs, ys = calcConcaveHull(xs_raw, ys_raw, 10)
+    xs, ys = calc_concavehull(xs_raw, ys_raw, 10)
 
     assert len(xs) == len(xs_raw)
     assert any([yi in ys_raw for yi in ys])
@@ -53,11 +53,14 @@ def test_parsec():
 
     pparray = [R_LE, x_PRE, y_PRE, d2y_dx2_PRE, th_PRE, x_SUC, y_SUC, d2y_dx2_SUC, th_SUC]
     profile_points = parsec_airfoil_gen(pparray)
-    X, Y = profile_points[::, 0], profile_points[::, 1]
+    x, y = profile_points[::, 0], profile_points[::, 1]
+    assert len(x) == len(y)
 
 
 def test_naca():
     from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    import numpy as np
+
     def rand_naca_code():
         digits = np.random.choice([4, 5])
         if digits == 4:
@@ -72,8 +75,8 @@ def test_naca():
             digitstring = str(d1) + str(d2) + str(d3) + str(d4) + str(d5)
         return digitstring
 
-    profNaca = [rand_naca_code() for i in range(6)]
-    for i, p in enumerate(profNaca):
+    prof_naca = [rand_naca_code() for i in range(6)]
+    for i, p in enumerate(prof_naca):
         X, Y = naca(p, 240, finite_te=np.random.choice([True, False]),
                     half_cosine_spacing=np.random.choice([True, False]))
 
@@ -85,13 +88,15 @@ def test_extract_vk_hk(verbose=False):
     """
     from ntrfc.utils.geometry.pointcloud_methods import extract_vk_hk
     from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    import numpy as np
+    import pyvista as pv
+
     res = 400
 
     # d1,d2,d3,d4 = np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9)
     # digitstring = str(d1)+str(d2)+str(d3)+str(d4)
     # manifold problems with other profiles with veronoi-mid and other unoptimized code. therefor tests only 0009
-    # todo: currently we cant test half_cosine_spacing profiles, as the resolution is too good for extract_vk_hk, this must be changed!
-    # todo: we should test finite_TE profiles with round TE. the current implementation is not validated for this
+    # todo: currently we cant test half_cosine_spacing profiles, as the resolution is too good for extract_vk_hk
     X, Y = naca("6506", res, finite_te=False, half_cosine_spacing=False)
     ind_hk_test = 0
     ind_vk_test = res
@@ -122,13 +127,15 @@ def test_midline_from_sides():
     from ntrfc.utils.math.vectorcalc import vecAbs
     from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
     from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
+    import numpy as np
+    import pyvista as pv
 
     res = 240
-    X, Y = naca('0009', res, finite_te=False, half_cosine_spacing=True)
+    x, y = naca('0009', res, finite_te=False, half_cosine_spacing=True)
     ind_hk = 0
     ind_vk = res
 
-    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2 - 1))).T
+    points = np.stack((x[:-1], y[:-1], np.zeros(res * 2 - 1))).T
     poly = pv.PolyData(points)
     sspoly, pspoly = extractSidePolys(ind_hk, ind_vk, poly)
 
@@ -166,6 +173,8 @@ def test_midLength():
 def test_extractSidePolys():
     from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
     from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    import numpy as np
+    import pyvista as pv
 
     d1, d2, d3, d4 = np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9)
     digit_string = str(d1) + str(d2) + str(d3) + str(d4)
@@ -185,6 +194,8 @@ def test_extractSidePolys():
 def test_extract_geo_paras():
     from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
     from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    import numpy as np
+    import pyvista as pv
 
     naca_code = "0009"
     angle = 20  # deg

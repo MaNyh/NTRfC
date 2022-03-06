@@ -7,7 +7,7 @@ from ntrfc.utils.math.vectorcalc import calc_largedistant_idx, vecAngle
 from ntrfc.utils.pyvista_utils.line import polyline_from_points, refine_spline
 
 
-def calcConcaveHull(x, y, alpha):
+def calc_concavehull(x, y, alpha):
     """
     origin: https://stackoverflow.com/questions/50549128/boundary-enclosing-a-given-set-of-points/50714300#50714300
     """
@@ -270,7 +270,7 @@ def extract_geo_paras(points, alpha, verbose=False):
     :return: points, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing
     """
 
-    xs, ys = calcConcaveHull(points[:, 0], points[:, 1], alpha)
+    xs, ys = calc_concavehull(points[:, 0], points[:, 1], alpha)
     points = np.stack((xs, ys, np.zeros(len(xs)))).T
     sortedPoly = pv.PolyData(points)
 
