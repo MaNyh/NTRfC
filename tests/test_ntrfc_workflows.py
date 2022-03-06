@@ -7,7 +7,6 @@ import snakemake
 from py._path.local import LocalPath as TmpDir
 
 
-
 def test_snakefile(tmpdir: TmpDir) -> None:
     """
     this test is working, but its not suitable for long-term-development
@@ -19,16 +18,16 @@ def test_snakefile(tmpdir: TmpDir) -> None:
 
     workdir: Path = Path(tmpdir)
     # Get the path to the snakefile
-    deploy("case_creation",workdir)
+    deploy("case_creation", workdir)
     # Run Snakemake
     result: bool = snakemake.snakemake(
-        snakefile=str(os.path.join(tmpdir,"Snakefile")),
+        snakefile=str(os.path.join(tmpdir, "Snakefile")),
         resources={"mem_gb": 8},
         workdir=str(workdir),
-        #lint=True,
+        # lint=True,
         dryrun=True,
         quiet=False,
-        #log_handler=[logger.log_handler],
+        # log_handler=[logger.log_handler],
         ignore_ambiguity=True,
     )
 

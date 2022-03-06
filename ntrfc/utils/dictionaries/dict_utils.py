@@ -1,6 +1,7 @@
 from functools import reduce
 import operator
 
+
 def delete_keys_from_dict(dictionary, key_list):
     """
     delets set of keys from dictionary
@@ -25,6 +26,7 @@ def nested_dict_pairs_iterator(dict_obj):
             # If value is not dict type then yield the value
             yield (key, value)
 
+
 def setInDict(dataDict, mapList, value):
     """
     sets value to nested dict
@@ -35,13 +37,13 @@ def setInDict(dataDict, mapList, value):
     getFromDict(dataDict, mapList[:-1])[mapList[-1]] = value
 
 
-def getFromDict(dataDict, mapList):
+def getFromDict(data_dict, map_list):
     """
     returns value to nested dict
     dataDict: dictionary
     mapList: list of keys to access value
     """
-    return reduce(operator.getitem, mapList, dataDict)
+    return reduce(operator.getitem, map_list, data_dict)
 
 
 def merge(a, b, path=None):
@@ -52,7 +54,7 @@ def merge(a, b, path=None):
             if isinstance(a[key], dict) and isinstance(b[key], dict):
                 merge(a[key], b[key], path + [str(key)])
             elif a[key] == b[key]:
-                pass # same leaf value
+                pass  # same leaf value
             else:
                 raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
         else:
@@ -60,11 +62,11 @@ def merge(a, b, path=None):
     return a
 
 
-def appendInDictList(dataDict, mapList, value):
+def appendInDictList(data_dict, map_list, value):
     """
     appends value to nested dict with list-values
     """
-    getFromDict(dataDict, mapList[:-1])[mapList[-1]].append(value)
+    getFromDict(data_dict, map_list[:-1])[map_list[-1]].append(value)
 
 
 def nested_val_set(dic, keys, value):
@@ -73,7 +75,7 @@ def nested_val_set(dic, keys, value):
     dic[keys[-1]] = value
 
 
-def compare_dictionaries(dict_1, dict_2,path=""):
+def compare_dictionaries(dict_1, dict_2, path=""):
     """Compare two dictionaries recursively to find non mathcing elements
     https://stackoverflow.com/questions/27265939/comparing-python-dictionaries-and-nested-dictionaries
     Args:
@@ -93,9 +95,9 @@ def compare_dictionaries(dict_1, dict_2,path=""):
             key_err += 1
         else:
             if isinstance(dict_1[k], dict) and isinstance(dict_2[k], dict):
-                ke,ve =compare_dictionaries(dict_1[k],dict_2[k], path)
-                key_err+=ke
-                value_err +=ve
+                ke, ve = compare_dictionaries(dict_1[k], dict_2[k], path)
+                key_err += ke
+                value_err += ve
             else:
                 if dict_1[k] != dict_2[k]:
                     value_err += 1
@@ -104,5 +106,4 @@ def compare_dictionaries(dict_1, dict_2,path=""):
         path = old_path + "[%s]" % k
         if not k in dict_1.keys():
             key_err += 1
-    return key_err ,value_err
-
+    return key_err, value_err

@@ -98,19 +98,19 @@ def test_extract_vk_hk(verbose=False):
 
     points = np.stack((X, Y, np.zeros(len(X)))).T
 
-    profilepoints = pv.PolyData(points)
+    profile_points = pv.PolyData(points)
 
     random_angle = np.random.randint(-40, 40)
-    profilepoints.rotate_z(random_angle)
+    profile_points.rotate_z(random_angle)
 
-    sortedPoly = pv.PolyData(profilepoints)
-    ind_hk, ind_vk = extract_vk_hk(sortedPoly, verbose=verbose)
+    sorted_poly = pv.PolyData(profile_points)
+    ind_hk, ind_vk = extract_vk_hk(sorted_poly, verbose=verbose)
 
     if verbose:
         p = pv.Plotter()
-        p.add_mesh(sortedPoly.points[ind_hk], color="yellow", point_size=20)
-        p.add_mesh(sortedPoly.points[ind_vk], color="red", point_size=20)
-        p.add_mesh(sortedPoly)
+        p.add_mesh(sorted_poly.points[ind_hk], color="yellow", point_size=20)
+        p.add_mesh(sorted_poly.points[ind_vk], color="red", point_size=20)
+        p.add_mesh(sorted_poly)
         p.show()
 
     assert (ind_hk == ind_hk_test or ind_hk == ind_vk_test * 2), "wrong hk-index chosen"
@@ -168,10 +168,10 @@ def test_extractSidePolys():
     from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
 
     d1, d2, d3, d4 = np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9)
-    digitstring = str(d1) + str(d2) + str(d3) + str(d4)
+    digit_string = str(d1) + str(d2) + str(d3) + str(d4)
 
     res = 240
-    X, Y = naca(digitstring, res, finite_TE=False, half_cosine_spacing=True)
+    X, Y = naca(digit_string, res, finite_TE=False, half_cosine_spacing=True)
     ind_hk = 0
     ind_vk = res
     points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2 - 1))).T
@@ -191,13 +191,13 @@ def test_extract_geo_paras():
     alpha = 1
     res = 200
     xs, ys = naca(naca_code, res, finite_TE=False, half_cosine_spacing=True)
-    sortedPoly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
-    sortedPoly.rotate_z(angle)
+    sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
+    sorted_poly.rotate_z(angle)
 
-    points, pspoly, sspoly, ind_vk, ind_hk, midspoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
-        sortedPoly.points, alpha)
+    points, ps_poly, ss_poly, ind_vk, ind_hk, mids_poly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
+        sorted_poly.points, alpha)
 
     assert np.isclose(beta_leading, (angle + 90)), "wrong leading edge angle"
     assert np.isclose(beta_trailing, (angle + 90)), "wrong leading edge angle"
-    assert np.isclose(midspoly.length, 1)
+    assert np.isclose(mids_poly.length, 1)
     assert np.isclose(camber_angle, (angle + 90))

@@ -8,17 +8,18 @@ def test_casestructure(tmpdir):
     from ntrfc.utils.filehandling.datafiles import get_directory_structure, create_dirstructure
     from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
 
-    test_structure = {"directory":{"dir1_file1": "",
-                                   "dir1_file2": "",
-                                   }}
+    test_structure = {"directory": {"dir1_file1": "",
+                                    "dir1_file2": "",
+                                    }}
 
-    directories = [os.path.join(*i[:-1])for i in list(nested_dict_pairs_iterator(test_structure))]
+    directories = [os.path.join(*i[:-1]) for i in list(nested_dict_pairs_iterator(test_structure))]
 
-    create_dirstructure(directories,tmpdir)
+    create_dirstructure(directories, tmpdir)
 
     case_structure = get_directory_structure(tmpdir)
 
-    assert test_structure["directory"].keys()==case_structure[tmpdir.basename]["directory"].keys(), "error collecting case_structure"
+    assert test_structure["directory"].keys() == case_structure[tmpdir.basename][
+        "directory"].keys(), "error collecting case_structure"
 
 
 def test_findvarsopts(tmpdir):
@@ -26,8 +27,8 @@ def test_findvarsopts(tmpdir):
     from ntrfc.preprocessing.case_creation.create_case import find_vars_opts
     from ntrfc.utils.filehandling.datafiles import get_directory_structure
 
-    paramnameone ="parameter_name_one"
-    paramnametwo ="parameter_name_two"
+    paramnameone = "parameter_name_one"
+    paramnametwo = "parameter_name_two"
 
     filecontent = f"""
     <PARAM {paramnameone} PARAM>
@@ -36,12 +37,13 @@ def test_findvarsopts(tmpdir):
 
     filename = "simstuff.txt"
 
-    with open(os.path.join(tmpdir,filename),"w") as fhandle:
+    with open(os.path.join(tmpdir, filename), "w") as fhandle:
         fhandle.write(filecontent)
     case_structure = get_directory_structure(tmpdir)
 
     variables = find_vars_opts(case_structure, tmpdir.dirname)
-    assert (variables[tmpdir.basename][filename][paramnameone] == "PARAM" and variables[tmpdir.basename][filename][paramnametwo] == "PARAM"), "not all variablees were found in test-run"
+    assert (variables[tmpdir.basename][filename][paramnameone] == "PARAM" and variables[tmpdir.basename][filename][
+        paramnametwo] == "PARAM"), "not all variablees were found in test-run"
 
 
 def test_template_installations():
@@ -97,10 +99,10 @@ def test_create_case(tmpdir):
 
     input = [f"{template.path}/{file}" for file in templatefiles]
     output = [f"{tmpdir}/{template.name}/{file}" for file in templatefiles]
-    paras = {k:v["default"] for k,v in templateschema["properties"].items()}
-    os.mkdir(os.path.join(tmpdir,template.name))
-    create_dirstructure(directories,os.path.join(tmpdir,template.name))
-    create_case(input,output,template.name,paras)
+    paras = {k: v["default"] for k, v in templateschema["properties"].items()}
+    os.mkdir(os.path.join(tmpdir, template.name))
+    create_dirstructure(directories, os.path.join(tmpdir, template.name))
+    create_case(input, output, template.name, paras)
     check = [os.path.isfile(fpath) for fpath in output]
     assert all(check), "not all files have been created"
 
@@ -111,16 +113,15 @@ def test_search_paras(tmpdir):
     from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
     from ntrfc.preprocessing.case_creation.create_case import search_paras
 
-
-    paramnameone ="parameter_name_one"
-    paramnametwo ="parameter_name_two"
+    paramnameone = "parameter_name_one"
+    paramnametwo = "parameter_name_two"
 
     filecontent = f"""
     <PARAM {paramnameone} PARAM>
     <PARAM {paramnametwo} PARAM>
     """
     filename = "paramfile.txt"
-    with open(os.path.join(tmpdir,filename),"w") as fhandle:
+    with open(os.path.join(tmpdir, filename), "w") as fhandle:
         fhandle.write(filecontent)
     case_structure = get_directory_structure(tmpdir)
 
@@ -128,4 +129,4 @@ def test_search_paras(tmpdir):
     all_pairs = list(nested_dict_pairs_iterator(case_structure))
     for line in filecontent:
         for pair in all_pairs:
-            search_paras(case_structure, line, pair, (len("<PARAM "),len(" PARAM>")), varsignature)
+            search_paras(case_structure, line, pair, (len("<PARAM "), len(" PARAM>")), varsignature)
