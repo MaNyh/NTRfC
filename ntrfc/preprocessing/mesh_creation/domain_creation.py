@@ -11,15 +11,14 @@ import os
 import matplotlib.pyplot as plt
 
 
-def create_2d_domain(basedir,profile_set,geometry):
-
+def create_2d_domain(basedir, profile_set, geometry):
     for profile_name in profile_set:
         pitch = geometry["pitch"]
-        x_inlet= geometry["x_inlet"]
-        x_outlet= geometry["x_outlet"]
-        blade_shift= geometry["blade_shift"]
+        x_inlet = geometry["x_inlet"]
+        x_outlet = geometry["x_outlet"]
+        blade_shift = geometry["blade_shift"]
 
-        profile_pickle = os.path.join(basedir,"01_profile",profile_name+"_profile.pkl")
+        profile_pickle = os.path.join(basedir, "01_profile", profile_name + "_profile.pkl")
 
         profile_dict = read_pickle(profile_pickle)
         beta_meta_01 = profile_dict["beta_meta_01"]
@@ -36,7 +35,7 @@ def create_2d_domain(basedir,profile_set,geometry):
         x_ps = psPoly[::, 0]
         y_ps = psPoly[::, 1]
 
-        #stagger_angle = np.rad2deg(np.arctan((y_mids[-1] - y_mids[-0]) / (x_mids[-1] - x_mids[-0])))
+        # stagger_angle = np.rad2deg(np.arctan((y_mids[-1] - y_mids[-0]) / (x_mids[-1] - x_mids[-0])))
 
         x_mpsl, y_mpsl = calcMidPassageStreamLine(x_mids, y_mids, beta_meta_01, beta_meta_02,
                                                   x_inlet, x_outlet, pitch)
@@ -60,10 +59,10 @@ def create_2d_domain(basedir,profile_set,geometry):
         outletPoly = pv.Line(*outlet_pts)
 
         geometry_paras = {
-                          "inlet": inletPoly.points,
-                          "outlet": outletPoly.points,
-                          "per_y_upper": per_y_upper.points,
-                          "per_y_lower": per_y_lower.points,}
+            "inlet": inletPoly.points,
+            "outlet": outletPoly.points,
+            "per_y_upper": per_y_upper.points,
+            "per_y_lower": per_y_lower.points, }
 
         domain_dir = os.path.join(basedir, "02_domain")
         write_pickle(os.path.join(domain_dir, profile_name + "_domain.pkl"), geometry_paras)
@@ -77,17 +76,13 @@ def create_2d_domain(basedir,profile_set,geometry):
         plt.plot(x_ps, y_ps, color="#FFAA44")
         plt.xlabel('x')
         plt.ylabel('y')
-        plt.savefig(os.path.join(domain_dir, profile_name+'_domain.pdf'))
+        plt.savefig(os.path.join(domain_dir, profile_name + '_domain.pdf'))
 
 
-
-def create_2d_blocklines(basedir,profile_set):
-
-
-
+def create_2d_blocklines(basedir, profile_set):
     for profile_name in profile_set:
-        profile_dict = read_pickle(os.path.join(basedir,"01_profile",profile_name+"_profile.pkl"))
-        domain_dict =  read_pickle(os.path.join(basedir,"02_domain",profile_name+"_domain.pkl"))
+        profile_dict = read_pickle(os.path.join(basedir, "01_profile", profile_name + "_profile.pkl"))
+        domain_dict = read_pickle(os.path.join(basedir, "02_domain", profile_name + "_domain.pkl"))
 
         sortedPoints = profile_dict["sortedPoints"]
         midsPoly = profile_dict["midsPoly"]
@@ -120,20 +115,20 @@ def create_2d_blocklines(basedir,profile_set):
         ogridhelpersurface.points += ogrid_size * ogridhelpersurface.point_normals
         ogridline = ogridhelpersurface.slice(normal="z")
         ogridline.points[:, 2] = 0
-        domain_dir = os.path.join(basedir,"03_meshgeometry")
+        domain_dir = os.path.join(basedir, "03_meshgeometry")
 
         for chord_start in range(len(midsPoly)):
-            ss_le = closest_node_index(midsPoly[chord_start],ssPoly)
-            ps_le = closest_node_index(midsPoly[chord_start],psPoly)
+            ss_le = closest_node_index(midsPoly[chord_start], ssPoly)
+            ps_le = closest_node_index(midsPoly[chord_start], psPoly)
 
-            ss_le_ogrid = closest_node_index(ss_le,ogridline.points)
-            ps_le_ogrid = closest_node_index(ps_le,ogridline.points)
+            ss_le_ogrid = closest_node_index(ss_le, ogridline.points)
+            ps_le_ogrid = closest_node_index(ps_le, ogridline.points)
 
-            yupper_le = closest_node_index(ss_le_ogrid,y_upper)
-            ylower_le = closest_node_index(ps_le_ogrid,y_lower)
+            yupper_le = closest_node_index(ss_le_ogrid, y_upper)
+            ylower_le = closest_node_index(ps_le_ogrid, y_lower)
 
-            a=1
-            #angle_
+            a = 1
+            # angle_
 
         ps_x0_blade = closest_node_index(cstart_1, psPoly)
         ps_x1_blade = closest_node_index(cstart_2, psPoly)
@@ -153,8 +148,8 @@ def create_2d_blocklines(basedir,profile_set):
         ss_x0_ogrid_line = pv.Line(ogridline.points[ss_x0_ogrid_idx], ssPoly[ss_x0_blade])
         ss_x1_ogrid_line = pv.Line(ogridline.points[ss_x1_ogrid_idx], ssPoly[ss_x1_blade])
 
-        yperlow_x0_ps_idx = np.argmin((cstart_1[0]-y_lower[::,0])**2)
-        yperlow_x1_ps_idx = np.argmin((cstart_2[0]-y_lower[::,0])**2)
+        yperlow_x0_ps_idx = np.argmin((cstart_1[0] - y_lower[::, 0]) ** 2)
+        yperlow_x1_ps_idx = np.argmin((cstart_2[0] - y_lower[::, 0]) ** 2)
 
         ylower_ogrid_x0 = pv.Line(y_lower[yperlow_x0_ps_idx], ogridline.points[ss_x0_ogrid_idx])
         yupper_ogrid_x0 = pv.Line(y_upper[yperlow_x0_ps_idx], ogridline.points[ps_x0_ogrid_idx])
@@ -162,20 +157,21 @@ def create_2d_blocklines(basedir,profile_set):
         ylower_ogrid_x1 = pv.Line(y_lower[yperlow_x1_ps_idx], ogridline.points[ss_x1_ogrid_idx])
         yupper_ogrid_x1 = pv.Line(y_upper[yperlow_x1_ps_idx], ogridline.points[ps_x1_ogrid_idx])
 
+        msp_xx, msp_yy = calcMidPassageStreamLine(midsPoly[::, 0], midsPoly[::, 1],
+                                                  profile_dict["beta_meta_01"],
+                                                  profile_dict["beta_meta_02"],
+                                                  pv.PolyData(inlet).bounds[0], pv.PolyData(outlet).bounds[0], 0)
 
-        msp_xx,msp_yy = calcMidPassageStreamLine(midsPoly[::,0],midsPoly[::,1],
-                                       profile_dict["beta_meta_01"],
-                                       profile_dict["beta_meta_02"],
-                                       pv.PolyData(inlet).bounds[0],pv.PolyData(outlet).bounds[0],0)
+        mspPoly = lines_from_points(np.stack([msp_xx, msp_yy, np.zeros(len(msp_yy))]).T)
 
-        mspPoly = lines_from_points(np.stack([msp_xx,msp_yy,np.zeros(len(msp_yy))]).T)
-
-        le_ogrid = pv.Line(midsPoly[0],midsPoly[0]-vecDir(midsPoly[1]-midsPoly[0])*ogrid_size)
-        te_ogrid = pv.Line(midsPoly[-1],midsPoly[-1]-vecDir(midsPoly[-2]-midsPoly[-1])*ogrid_size)
-        ogrid_inlet_dist = vecAbs(mspPoly.points[0]-le_ogrid.points[-1])
-        ogrid_outlet_dist = vecAbs(mspPoly.points[-1]-te_ogrid.points[-1])
-        ogrid_inlet = pv.Line(le_ogrid.points[-1],le_ogrid.points[-1]-vecDir(midsPoly[1]-midsPoly[0])*ogrid_inlet_dist)
-        ogrid_oulet = pv.Line(te_ogrid.points[-1],te_ogrid.points[-1]-vecDir(midsPoly[-2]-midsPoly[-1])*ogrid_outlet_dist)
+        le_ogrid = pv.Line(midsPoly[0], midsPoly[0] - vecDir(midsPoly[1] - midsPoly[0]) * ogrid_size)
+        te_ogrid = pv.Line(midsPoly[-1], midsPoly[-1] - vecDir(midsPoly[-2] - midsPoly[-1]) * ogrid_size)
+        ogrid_inlet_dist = vecAbs(mspPoly.points[0] - le_ogrid.points[-1])
+        ogrid_outlet_dist = vecAbs(mspPoly.points[-1] - te_ogrid.points[-1])
+        ogrid_inlet = pv.Line(le_ogrid.points[-1],
+                              le_ogrid.points[-1] - vecDir(midsPoly[1] - midsPoly[0]) * ogrid_inlet_dist)
+        ogrid_oulet = pv.Line(te_ogrid.points[-1],
+                              te_ogrid.points[-1] - vecDir(midsPoly[-2] - midsPoly[-1]) * ogrid_outlet_dist)
 
         plt.figure()
         plt.plot(inlet[::, 0], inlet[::, 1], color="#6c3376")
@@ -198,46 +194,42 @@ def create_2d_blocklines(basedir,profile_set):
         plt.plot(yupper_ogrid_x1.points[::, 0], yupper_ogrid_x1.points[::, 1], color="#FF22CC")
         plt.xlabel('x')
         plt.ylabel('y')
-        plt.savefig(os.path.join(domain_dir, profile_name+'_blocklines.pdf'))
+        plt.savefig(os.path.join(domain_dir, profile_name + '_blocklines.pdf'))
 
-
-        writeTecplot1DFile(os.path.join(domain_dir,profile_name+"_domain.geom"),['x', 'z'],
+        writeTecplot1DFile(os.path.join(domain_dir, profile_name + "_domain.geom"), ['x', 'z'],
                            ["inlet", "outlet", "y_upper", "y_lower", "psPoly", "ssPoly"],
-                           [[inlet[::,0],inlet[::,1]],
-                            [outlet[::,0],outlet[::,1]],
-                            [y_upper[::,0],y_upper[::,1]],
-                            [y_lower[::,0],y_lower[::,1]],
-                            [psPoly[::,0],psPoly[::,1]],
-                            [ssPoly[::,0],ssPoly[::,1]]],
-                           profile_name+"Domainboundaries")
+                           [[inlet[::, 0], inlet[::, 1]],
+                            [outlet[::, 0], outlet[::, 1]],
+                            [y_upper[::, 0], y_upper[::, 1]],
+                            [y_lower[::, 0], y_lower[::, 1]],
+                            [psPoly[::, 0], psPoly[::, 1]],
+                            [ssPoly[::, 0], ssPoly[::, 1]]],
+                           profile_name + "Domainboundaries")
 
-        writeTecplot1DFile(os.path.join(domain_dir,profile_name+"_blocks.geom"),['x', 'z'],
+        writeTecplot1DFile(os.path.join(domain_dir, profile_name + "_blocks.geom"), ['x', 'z'],
                            ["le_ogrid",
                             "te_ogrid",
                             "ogrid_inlet",
                             "ogrid_oulet",
                             "ogridline",
-                           "ps_x0_ogrid_line",
+                            "ps_x0_ogrid_line",
                             "ps_x1_ogrid_line",
                             "ss_x0_ogrid_line",
                             "ss_x1_ogrid_line",
-                           "ylower_ogrid_x0",
+                            "ylower_ogrid_x0",
                             "yupper_ogrid_x0",
                             "ylower_ogrid_x1",
                             "yupper_ogrid_x1"],
-                           [[le_ogrid.points[::,0],le_ogrid.points[::,1]],
-                            [te_ogrid.points[::,0],te_ogrid.points[::,1]],
-                            [ogrid_inlet.points[::,0],ogrid_inlet.points[::,1]],
-                            [ogrid_oulet.points[::,0],ogrid_oulet.points[::,1]],
-                            [ogridline.points[::,0],ogridline.points[::,1]],
-                            [ps_x0_ogrid_line.points[::,0],ps_x0_ogrid_line.points[::,1]],
-                            [ps_x1_ogrid_line.points[::,0],ps_x1_ogrid_line.points[::,1]],
-                            [ss_x0_ogrid_line.points[::,0],ss_x0_ogrid_line.points[::,1]],
-                            [ss_x1_ogrid_line.points[::,0],ss_x1_ogrid_line.points[::,1]],
-                            [ylower_ogrid_x0.points[::,0],ylower_ogrid_x0.points[::,1]],
-                            [yupper_ogrid_x0.points[::,0],yupper_ogrid_x0.points[::,1]],
-                            [ylower_ogrid_x1.points[::,0],ylower_ogrid_x1.points[::,1]]],
-                           profile_name+"Blockboundaries")
-
-
-
+                           [[le_ogrid.points[::, 0], le_ogrid.points[::, 1]],
+                            [te_ogrid.points[::, 0], te_ogrid.points[::, 1]],
+                            [ogrid_inlet.points[::, 0], ogrid_inlet.points[::, 1]],
+                            [ogrid_oulet.points[::, 0], ogrid_oulet.points[::, 1]],
+                            [ogridline.points[::, 0], ogridline.points[::, 1]],
+                            [ps_x0_ogrid_line.points[::, 0], ps_x0_ogrid_line.points[::, 1]],
+                            [ps_x1_ogrid_line.points[::, 0], ps_x1_ogrid_line.points[::, 1]],
+                            [ss_x0_ogrid_line.points[::, 0], ss_x0_ogrid_line.points[::, 1]],
+                            [ss_x1_ogrid_line.points[::, 0], ss_x1_ogrid_line.points[::, 1]],
+                            [ylower_ogrid_x0.points[::, 0], ylower_ogrid_x0.points[::, 1]],
+                            [yupper_ogrid_x0.points[::, 0], yupper_ogrid_x0.points[::, 1]],
+                            [ylower_ogrid_x1.points[::, 0], ylower_ogrid_x1.points[::, 1]]],
+                           profile_name + "Blockboundaries")
