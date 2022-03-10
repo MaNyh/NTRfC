@@ -1,6 +1,6 @@
 pip==21.3.1
 pytest==6.2.4
-snakemake==6.12.3
+snakemake==7.1.1
 matplotlib==3.3.4
 numpy==1.20.0
 scipy==1.6.1
