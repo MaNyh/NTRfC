@@ -17,7 +17,7 @@ FoamFile
 
 application     rhoPimpleFoam;
 
-startFrom       <PARAM startfrom PARAM>;
+startFrom       <OPTION startfrom OPTION>;
 
 startTime       0;
 
@@ -25,7 +25,7 @@ stopAt		    endTime;
 
 endTime         0.6;
 
-deltaT          <PARAM timestep PARAM>;
+deltaT          <OPTION timestep OPTION>;
 
 writeControl    timeStep;
 

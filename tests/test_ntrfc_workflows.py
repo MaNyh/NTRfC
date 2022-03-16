@@ -27,6 +27,7 @@ def test_snakefile(tmpdir: TmpDir) -> None:
         # lint=True,
         dryrun=True,
         quiet=False,
+        verbose=True,
         # log_handler=[logger.log_handler],
         ignore_ambiguity=True,
     )

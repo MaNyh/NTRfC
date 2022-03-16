@@ -4,11 +4,11 @@ import re
 import shutil
 
 from ntrfc.utils.filehandling.datafiles import inplace_change, get_directory_structure
-from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, set_in_dict
+from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator, set_in_dict, merge
 from ntrfc.database.case_templates.case_templates import CASE_TEMPLATES
 
 
-def search_paras(case_structure, line, pair, siglim, varsignature):
+def search_paras(case_structure, line, pair, siglim, varsignature, sign):
     """
 
     """
@@ -19,17 +19,18 @@ def search_paras(case_structure, line, pair, siglim, varsignature):
         if not lookup_var:
             lookforvar = False
             filename = os.path.join(*pair[:-1])
-            assert "PARAM" not in line, f"parameter is not defined correct \n file: {filename}\n line: {line}"
+            assert sign not in line, f"parameter is not defined correct \n file: {filename}\n line: {line}"
         else:
             span = lookup_var.span()
             parameter = line[span[0] + siglim[0]:span[1] + siglim[1]]
-            set_in_dict(case_structure, list(pair[:-1]) + [parameter], "PARAM")
+            # update
+            set_in_dict(case_structure, list(pair[:-1]) + [parameter], sign)
             match = line[span[0]:span[1]]
             line = line.replace(match, "")
     return case_structure
 
 
-def check_settings_necessarities(case_structure, settings_dict):
+def settings_sanity(case_structure, settings_dict):
     """
 
     : params: case_structure dict
@@ -38,7 +39,7 @@ def check_settings_necessarities(case_structure, settings_dict):
     necessarities = list(nested_dict_pairs_iterator(case_structure))
     necessarity_vars = []
     for item in necessarities:
-        if item[-1] == "PARAM":
+        if item[-1] == "PARAM" or item[-1] == "OPTION":
             necessarity_vars.append(item[-2])
 
     defined_variables = list(settings_dict.keys())
@@ -60,12 +61,12 @@ def check_settings_necessarities(case_structure, settings_dict):
     return defined, undefined, used, unused
 
 
-def create_case(input_files, output_files, template_name, paras):
+def create_case(input_files, output_files, template_name, simparams):
     """
     :param input_files: list of template-files
     :param output_files: list of outputfiles (same as input)
     :param template_name: str - template-name
-    :param paras: dict - dict-settings
+    :param simparams: dict - dict-settings - passed via filenames
     :return:
     """
 
@@ -74,23 +75,39 @@ def create_case(input_files, output_files, template_name, paras):
     template = CASE_TEMPLATES[template_name]
     case_structure = get_directory_structure(template.path)
 
-    variables = find_vars_opts(case_structure[template.name], template.path)
+    param_sign = "PARAM"
+    option_sign = "OPTION"
 
-    defined, undefined, used, unused = check_settings_necessarities(variables, paras)
+    parameters = find_vars_opts(case_structure[template.name], template.path, param_sign)
+    options = find_vars_opts(case_structure[template.name], template.path, option_sign)
+    case_settings = merge(parameters, options)
+
+    allparams = merge(parameters,options)
+    defined, undefined, used, unused = settings_sanity(case_settings, simparams)
     print("found ", str(len(defined)), " defined parameters")
     print("found ", str(len(undefined)), " undefined parameters")
     print("used ", str(len(used)), " parameters")
     print("unused ", str(len(unused)), " parameters")
 
-    assert len(undefined) == 0, "undefined parameters"
+    assert len(undefined) == 0, f"undefined parameters: {undefined}"
+    assert len(unused) == 0, f"unused parameters: {unused}"
+
+    necessarities = list(nested_dict_pairs_iterator(case_settings))
+    paramtypes = {}
+    for item in necessarities:
+        if item[-1] == "PARAM":
+            paramtypes[item[-2]]="PARAM"
+        elif item[-1] == "OPTION":
+            paramtypes[item[-2]] = "OPTION"
 
     for templatefile, simfile in zip(input_files, output_files):
         shutil.copyfile(templatefile, simfile)
         for parameter in used:
-            inplace_change(simfile, f"<var {parameter} var>", str(paras[parameter]))
+            sign = paramtypes[parameter]
+            inplace_change(simfile, f"<{sign} {parameter} {sign}>", str(simparams[parameter]))
 
 
-def find_vars_opts(case_structure, path_to_sim):
+def find_vars_opts(case_structure, path_to_sim, sign):
     """
     : param case_structure: dict - case-structure. can carry parameters
     : param sign: str - sign of a parameter (Velocity -> U etc.)
@@ -101,12 +118,12 @@ def find_vars_opts(case_structure, path_to_sim):
     # allowing names like JOB_NUMBERS, only capital letters and underlines - no digits, no whitespaces
     datadict = copy.deepcopy(case_structure)
     all_pairs = list(nested_dict_pairs_iterator(case_structure))
-    varsignature = r"<PARAM [a-z]{3,}(_{1,1}[a-z]{3,}){,} PARAM>"
+    varsignature = r"<PLACEHOLDER [a-z]{3,}(_{1,1}[a-z]{3,}){,} PLACEHOLDER>".replace("PLACEHOLDER", sign)
     # int
     # float
     # string
     # todo move into param-module
-    siglim = (len("<PARAM "), -(len(" PARAM>")))
+    siglim = (len(f"< {sign}"), -(len(f" {sign}>")))
 
     for pair in all_pairs:
         # if os.path.isfile(os.path.join(path_to_sim,*pair)):
@@ -114,5 +131,5 @@ def find_vars_opts(case_structure, path_to_sim):
         filepath = os.path.join(*pair[:-1])
         with open(os.path.join(path_to_sim, filepath), "r") as fhandle:
             for line in fhandle.readlines():
-                datadict = search_paras(datadict, line, pair, siglim, varsignature)
+                datadict = search_paras(datadict, line, pair, siglim, varsignature, sign)
     return datadict

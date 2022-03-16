@@ -4,49 +4,62 @@ description: case configuration file
 
 type: object
 properties:
+
     tke_inlet:
+        description: used in parameterspace
         type: number
         default: 0.1
     omega_inlet:
+        description: used in parameterspace
         type: number
         default: 0.1
     pressure_inlet:
+        description: used in parameterspace
         type: number
         default: 100000
     pressure_outlet:
+        description: used in parameterspace
         type: number
         default: 130000
     temperature_inlet:
+        description: used in parameterspace
         type: number
         default: 293.15
     velocity_inlet:
+        description: used in parameterspace
         type: string
         default: "(40 30 0)"
+    pitch:
+        description: used in parameterspace
+        type: number
+        default: 0.0765
+
+
     molarweight:
+        description: not used in parameterspace
         type: number
         default: 29
     dynvisc:
+        description: not used in parameterspace
         type: number
         default: 0.000001
     timestep:
+        description: not used in parameterspace
         type: number
         default: 0.000001
     turbulence_model:
+        description: not used in parameterspace
         type: string
         pattern: "sst_turbulence_model"
         default: "sst_turbulence_model"
     startfrom:
+        description: not used in parameterspace
         type: string
         pattern: "latestTime|startTime"
         default: "latestTime"
-    pitch:
-        type: number
-        default: 0.0765
     zspan:
+        description: not used in parameterspace
         type: number
         default: 0.0025
-    processors:
-        type: number
-        default: 1
 
 additionalProperties: false

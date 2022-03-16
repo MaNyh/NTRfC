@@ -3,6 +3,9 @@ import shutil
 
 
 def deploy(workflow_name, dest):
+    """
+    copies (part of) a workflow to a destination
+    """
     import ntrfc
     assert os.path.isdir(dest), "destination is not a direcotry"
     assert len(os.listdir(dest)) == 0, "destination is not empty"

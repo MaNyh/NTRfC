@@ -2,16 +2,22 @@ from snakemake.utils import validate
 from snakemake.utils import Paramspace
 import pandas as pd
 
-
 from ntrfc.database.case_templates.case_templates import CASE_TEMPLATES
 
 configfile : "casesettings.yaml"
-validate(config,"config.schema.yaml")
-TEMPLATE = CASE_TEMPLATES[config["case_params"]["case_type"]]
-PARAMS=pd.read_csv("caseparams.tsv", sep="\t")
-validate(PARAMS, TEMPLATE.schema)
-paramspace = Paramspace(PARAMS)
 
+TEMPLATE = CASE_TEMPLATES[config["case_params"]["case_type"]]
+PARAMS = pd.read_csv("caseparams.tsv",sep="\t")
+
+
+def validate_configuration(config):
+    validate(config,"config.schema.yaml")
+    # todo: the next line is not working. currently TEMPLATE.schema does not have the right format
+    validate(PARAMS, TEMPLATE.schema)
+    paramspace = Paramspace(PARAMS)
+    return paramspace, config
+
+paramspace, config = validate_configuration(config)
 
 rule all:
     input:
@@ -31,8 +37,12 @@ rule create_case:
         case_type = config["case_params"]["case_type"],
         # automatically translate the wildcard values into an instance of the param space
         # in the form of a dict (here: {"alpha": ..., "beta": ..., "gamma": ...})
-        simulation=paramspace.instance
+        simparams = paramspace.instance
     run:
         from ntrfc.preprocessing.case_creation.create_case import create_case
+        from ntrfc.utils.dictionaries.dict_utils import merge
 
-        create_case(input,output,params["case_type"],params["simulation"])
+        print(params["simparams"])
+        print(config["case_options"])
+        simconfig = merge(params["simparams"],config["case_options"])
+        create_case(input,output,params["case_type"],simconfig)
