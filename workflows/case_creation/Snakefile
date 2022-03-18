@@ -12,7 +12,6 @@ PARAMS = pd.read_csv("caseparams.tsv",sep="\t")
 
 def validate_configuration(config):
     validate(config,"config.schema.yaml")
-    # todo: the next line is not working. currently TEMPLATE.schema does not have the right format
     validate(PARAMS, TEMPLATE.schema)
     paramspace = Paramspace(PARAMS)
     return paramspace, config
@@ -42,7 +41,5 @@ rule create_case:
         from ntrfc.preprocessing.case_creation.create_case import create_case
         from ntrfc.utils.dictionaries.dict_utils import merge
 
-        print(params["simparams"])
-        print(config["case_options"])
         simconfig = merge(params["simparams"],config["case_options"])
         create_case(input,output,params["case_type"],simconfig)
