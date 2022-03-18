@@ -61,5 +61,9 @@ properties:
         description: not used in parameterspace
         type: number
         default: 0.0025
+    processors:
+        description: not used in parameterspace
+        type: number
+        default: 1
 
 additionalProperties: false
