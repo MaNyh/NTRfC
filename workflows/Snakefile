@@ -1,0 +1,4 @@
+include: "rules/create_cases.smk"
+
+rule all:
+    input : *get_casefiles()

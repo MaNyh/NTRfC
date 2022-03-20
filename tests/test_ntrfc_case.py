@@ -58,7 +58,8 @@ def test_create_case(tmpdir):
 
     """
     import os
-    from ntrfc.database.case_templates.case_templates import CASE_TEMPLATES, deploy
+    from ntrfc.database.case_templates.case_templates import CASE_TEMPLATES
+    from database.case_templates.case_creation import deploy
     from ntrfc.utils.filehandling.datafiles import yaml_dict_read
     from ntrfc.utils.filehandling.datafiles import create_dirstructure
 
