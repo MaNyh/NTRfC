@@ -82,6 +82,7 @@ def get_directory_structure(rootdir):
     return dir
 
 
+
 def get_filelist_fromdir(path):
     filelist = []
     for r, d, f in os.walk(path):

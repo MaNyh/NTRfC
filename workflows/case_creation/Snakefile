@@ -6,40 +6,34 @@ from ntrfc.database.case_templates.case_templates import CASE_TEMPLATES
 
 configfile : "casesettings.yaml"
 
-TEMPLATE = CASE_TEMPLATES[config["case_params"]["case_type"]]
-PARAMS = pd.read_csv("caseparams.tsv",sep="\t")
-
-
 def validate_configuration(config):
     validate(config,"config.schema.yaml")
-    validate(PARAMS, TEMPLATE.schema)
+    template = CASE_TEMPLATES[config["case_params"]["case_type"]]
+    PARAMS = pd.read_csv("caseparams.tsv",sep="\t")
+    validate(PARAMS, template.schema)
     paramspace = Paramspace(PARAMS)
-    return paramspace, config
+    return template, paramspace, config
 
-paramspace, config = validate_configuration(config)
+template, paramspace, config = validate_configuration(config)
 
 rule all:
     input:
         # Aggregate over entire parameter space (or a subset thereof if needed)
         # of course, something like this can happen anywhere in the workflow (not
         # only at the end).
-        *[f"01_Simulations/{instance_pattern}/{file}" for instance_pattern in paramspace.instance_patterns for file in TEMPLATE.files]
+        *[f"01_Simulations/{instance_pattern}/{file}" for instance_pattern in paramspace.instance_patterns for file in template.files]
 
 rule create_case:
     input:
-        [f"{TEMPLATE.path}/{file}" for file in TEMPLATE.files]
+        [f"{template.path}/{file}" for file in template.files]
     output:
         # format a wildcard pattern like "alpha~{alpha}/beta~{beta}/gamma~{gamma}"
         # into a file path, with alpha, beta, gamma being the columns of the data frame
-        *[f"01_Simulations/{paramspace.wildcard_pattern}/{file}" for file in TEMPLATE.files]
+        *[f"01_Simulations/{paramspace.wildcard_pattern}/{file}" for file in template.files]
     params:
-        case_type = config["case_params"]["case_type"],
         # automatically translate the wildcard values into an instance of the param space
         # in the form of a dict (here: {"alpha": ..., "beta": ..., "gamma": ...})
         simparams = paramspace.instance
     run:
-        from ntrfc.preprocessing.case_creation.create_case import create_case
-        from ntrfc.utils.dictionaries.dict_utils import merge
-
-        simconfig = merge(params["simparams"],config["case_options"])
-        create_case(input,output,params["case_type"],simconfig)
+        from ntrfc.database.case_templates.case_templates import deploy
+        deploy(input,output,params["simparams"],config["case_options"])
