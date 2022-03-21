@@ -62,7 +62,7 @@ def find_variables_infile(file, sign):
                 lookup_var = re.search(varsignature, line)
                 if not lookup_var:
                     lookaround = False
-                    assert sign not in line, f"parameter is not defined correct \n file: {filepath}\n line: {line}"
+                    assert sign not in line, f"parameter is not defined correct \n file: {file}\n line: {line}"
                 else:
                     span = lookup_var.span()
                     parameter = line[span[0] + siglim[0]:span[1] + siglim[1]]
