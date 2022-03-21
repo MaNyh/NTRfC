@@ -10,7 +10,7 @@ from ntrfc.utils.dictionaries.dict_utils import nested_dict_pairs_iterator
 from ntrfc.utils.filehandling.datafiles import inplace_change, get_filelist_fromdir
 
 
-def get_directory_structure2(rootdir):
+def get_directory_structure(rootdir):
     """
     Creates a nested dictionary that represents the folder structure of rootdir
     """
@@ -35,7 +35,7 @@ def find_vars(path_to_sim, sign):
     : param path_to_sim: path - path-like object
     return : ?
     """
-    case_structure = get_directory_structure2(path_to_sim)
+    case_structure = get_directory_structure(path_to_sim)
     all_files = [i[:-1] for i in list(nested_dict_pairs_iterator(case_structure))]
 
     sim_variables = {}
@@ -83,7 +83,7 @@ def deploy(deply_sources,deploy_targets, deploy_params, deploy_options):
         for parameter in deploy_params:
             inplace_change(target, f"<PARAM {parameter} PARAM>", str(deploy_params[parameter]))
         for option in deploy_options:
-            inplace_change(target, f"<OPTION {option} OPTION>", str(deploy_options[parameter]))
+            inplace_change(target, f"<OPTION {option} OPTION>", str(deploy_options[option]))
 
 
 class case_template:
@@ -93,8 +93,9 @@ class case_template:
 
     def __init__(self, name):
         self.name = name
-        self.path = importlib_resources.files("ntrfc") / f"database/case_templates/{name}"
-        self.schema = importlib_resources.files("ntrfc") / f"database/case_templates/{name}.schema.yaml"
+        self.path = importlib_resources.files("ntrfc") / f"../cases/{name}"
+        self.param_schema = importlib_resources.files("ntrfc") / f"../cases/{name}_param.schema.yaml"
+        self.option_schema = importlib_resources.files("ntrfc") / f"../cases/{name}_option.schema.yaml"
         self.files = [os.path.relpath(fpath, self.path) for fpath in get_filelist_fromdir(self.path)]
 
         self.params = find_vars(self.path, self.psign)

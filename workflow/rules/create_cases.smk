@@ -1,25 +1,25 @@
 from snakemake.utils import validate
 from snakemake.utils import Paramspace
+from snakemake import load_configfile
+
 import pandas as pd
 
-from ntrfc.database.case_templates.case_templates import CASE_TEMPLATES
+from ntrfc.database.case_templates import CASE_TEMPLATES
 
-configfile : "config/casesettings.yaml"
 
-def validate_configuration(config):
-    validate(config,"../schemas/config.schema.yaml")
-    template = CASE_TEMPLATES[config["case_params"]["case_type"]]
-    PARAMS = pd.read_csv("config/caseparams.tsv",sep="\t")
-    validate(PARAMS, template.schema)
-    paramspace = Paramspace(PARAMS)
-    return template, paramspace, config
+template = CASE_TEMPLATES[config["case_params"]["case_type"]]
 
-template, paramspace, config = validate_configuration(config)
+params = pd.read_csv("config/case_params.tsv",sep="\t")
+validate(params, template.param_schema)
+paramspace = Paramspace(params)
+
+option_config = load_configfile("config/case_options.yaml")
+validate(option_config,template.option_schema)
+
 
 def get_casefiles():
     return [f"results/simulations/{instance_pattern}/{file}" for instance_pattern in paramspace.instance_patterns for file
       in template.files]
-
 
 
 rule create_case:
@@ -34,6 +34,6 @@ rule create_case:
         # in the form of a dict (here: {"alpha": ..., "beta": ..., "gamma": ...})
         simparams = paramspace.instance
     run:
-        from ntrfc.database.case_templates.case_creation import deploy
+        from ntrfc.database.case_creation import deploy
 
-        deploy(input,output,params["simparams"],config["case_options"])
+        deploy(input,output,params["simparams"],option_config)

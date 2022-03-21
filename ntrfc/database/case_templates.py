@@ -1,4 +1,4 @@
-from ntrfc.database.case_templates.case_creation import case_template, dynamic_case_template
+from ntrfc.database.case_creation import case_template
 
 """
 avail_templates is used to create a dictionary of with case_templates-Objects

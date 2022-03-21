@@ -1,0 +1,10 @@
+from snakemake.utils import validate
+
+configfile : "config/workflowsettings.yaml"
+validate(config,"schemas/config.schema.yaml")
+
+
+include: "rules/create_cases.smk"
+
+rule all:
+    input : *get_casefiles()

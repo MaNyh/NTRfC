@@ -18,7 +18,7 @@ def test_snakefile(tmpdir: TmpDir) -> None:
 
     workdir: Path = Path(tmpdir)
     # Get the path to the snakefile
-    deploy("case_creation", workdir)
+    deploy(workdir)
     # Run Snakemake
     result: bool = snakemake.snakemake(
         snakefile=str(os.path.join(tmpdir, "Snakefile")),

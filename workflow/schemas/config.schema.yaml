@@ -14,5 +14,3 @@ properties:
     required:
         - case_type
 
-required:
-    - case_params
