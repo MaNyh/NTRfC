@@ -1,0 +1,3 @@
+case_params:
+    case_type: "openfoamCompressorCascadeRas"
+    paramfile: "caseparams.tsv"

@@ -1,0 +1,19 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+
+description: snakemake configuration file
+
+type: object
+
+properties:
+  case_params:
+    type: object
+    properties:
+      case_type:
+        type: string
+        pattern : openfoamCompressorCascadeRas
+
+    required:
+        - case_type
+
+required:
+    - case_params
