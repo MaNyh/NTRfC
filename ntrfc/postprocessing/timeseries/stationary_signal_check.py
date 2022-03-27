@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from postprocessing.timeseries.integral_scales import integralscales
+from ntrfc.postprocessing.timeseries.integral_scales import integralscales
 
 
 def chunks(somelist, numchunks):
