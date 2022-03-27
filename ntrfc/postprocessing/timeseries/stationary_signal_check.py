@@ -3,7 +3,6 @@ from matplotlib import pyplot as plt
 
 from ntrfc.postprocessing.timeseries.integral_scales import integralscales
 
-
 def chunks(somelist, numchunks):
     def split(list_a, chunk_size):
         for i in range(0, len(list_a), chunk_size):
@@ -22,8 +21,10 @@ def parsed_timeseries_analysis(timesteps, signal, resolvechunks=20, verbose=True
     scales = (timescale,lengthscale)
     if stationarity==True:
         plt.figure()
-        plt.plot(timesteps, signal, color="k" )
-        plt.vlines(stationarity_timestep, ymin=0, ymax=2, linewidth=4, color="k", linestyles="dashed")
+        plt.plot(timesteps, signal,color="black")
+        plt.vlines(stationarity_timestep, ymin=-10, ymax=10, linewidth=4, color="k", linestyles="dashed")
+        plt.axvspan(stationarity_timestep, max(timesteps), facecolor='grey', alpha=0.5)
+
         plt.xlim(0, timesteps[-1])
         plt.ylim(-10, 10)
         plt.show()  #
@@ -45,16 +46,16 @@ def parsed_timeseries_analysis(timesteps, signal, resolvechunks=20, verbose=True
         if not newstationarity:
             # when no further stationarity found, return status
             # when done, return last status
-            if verbose:
-                plt.figure()
-                plt.plot(timesteps, signal)
-                plt.plot(ctime, csig, color="black", linewidth=0.1)
-                plt.vlines(stationarity_timestep, ymin=-10, ymax=10, linewidth=4, color="k", linestyles="dashed")
-                plt.axvspan(stationarity_timestep, max(timesteps), facecolor='grey', alpha=0.5)
 
-                plt.xlim(0, timesteps[-1])
-                plt.ylim(-10, 10)
-                plt.show()  #
+            plt.figure()
+            plt.plot(timesteps, signal)
+            plt.plot(ctime, csig, color="black", linewidth=0.1)
+            plt.vlines(stationarity_timestep, ymin=-10, ymax=10, linewidth=4, color="k", linestyles="dashed")
+            plt.axvspan(stationarity_timestep, max(timesteps), facecolor='grey', alpha=0.5)
+
+            plt.xlim(0, timesteps[-1])
+            plt.ylim(-10, 10)
+            plt.show()  #
             return stationarity, scales, stationarity_timestep
 
     plt.figure()
@@ -83,64 +84,76 @@ def check_signal_stationarity(resolvechunks, signal, timesteps, verbose = True):
     var = np.std(signal)
     vars = np.std(checksigchunks, axis=1)
 
-    sigma = var**.5
-    tolerance = var
-
-    const_mean = np.allclose(mean, means,rtol=0.08)
-
-    const_val = np.allclose(mean, signal,rtol=0.08)
-
-    const_var = np.allclose(var,vars,rtol=3)
-
+    # todo: now it is only mean, val and var that is being investigated.
+    # it makes sense to also investigate the behaviour of the autocorrelation
+    # but as the signal is divided into chunks, one has to
+    const_mean = np.allclose(mean, means,rtol=0.06)
+    const_val = np.allclose(mean, signal,rtol=0.06)
+    const_var = np.allclose(var,vars,rtol=2)
     #
     if const_mean and const_var:
         timescale, lengthscale = integralscales(signal, timesteps)
         timescales, lengthscales = zip(*[integralscales(s, t) for s, t in zip(checksigchunks, checktimechunks)])
-
+        # as in ries2018, a scale can only be computed when enough scales are within the signal
         if (timesteps[-1]-timesteps[0])/timescale<30:
             print("warning")
     else:
         timescale, lengthscale = 0,0
         timescales, lengthscales = np.zeros(resolvechunks),np.zeros(resolvechunks)
 
-    const_tscales = np.allclose(timescales, timescale,rtol=tolerance)
-    const_lscales = np.allclose(lengthscales, lengthscale,rtol=tolerance)
+    const_tscales = np.allclose(timescales, timescale,rtol=0.1)
 
-    if const_mean == const_val == const_var == True:
-        # constant signal
+    """
+    from itertools import product
+    const_mean_allowed = [{"const_mean":True}]
+    const_val_allowed = [{"const_val":True},{"const_val":False}]
+    const_var_allowed = [{"const_var":True},{"const_var":False}]
+    const_tscale_allowed = [{"const_tscale":True},{"const_tscale":False}]
+
+    combinations = list(product(const_mean_allowed,const_var_allowed,const_val_allowed,const_tscale_allowed))
+    """
+
+    if const_mean and const_var and const_val and const_tscales:
+        # constant. scales are computed but not valid
         signal_type = "constant"
         stationarity = True
         stationarity_timestep = timesteps[0]
-    elif const_mean == const_var == True and const_val == False:
-        # stationary signal
-        signal_type = "stationary structured"
+    elif const_mean and const_var and const_val and not const_tscales:
+        # constant. scales are not computed
+        signal_type = "constant"
         stationarity = True
         stationarity_timestep = timesteps[0]
-    elif const_mean == True and (const_var == True or const_val == True):
-        # stationary signal
-        signal_type = "stationary unstructured"
+    elif const_mean and const_var and not const_val and const_tscales:
+        # selfcorrelating stationary
+        signal_type = "selfcorrelating stationary"
         stationarity = True
         stationarity_timestep = timesteps[0]
-    elif const_var == const_val == True and const_mean == False:
-        # nonstationary signal
-        signal_type = "nonstationary"
-        stationarity = False
-        stationarity_timestep = -1
-    elif const_var == True and const_val == False and const_mean == False:
-        # nonstationary signal
-        signal_type = "nonstationary"
-        stationarity = False
-        stationarity_timestep = -1
-    elif const_var == False and const_val == True and const_mean == False:
-        # nonstationary signal
-        signal_type = "nonstationary"
-        stationarity = False
-        stationarity_timestep = -1
-    elif const_var == False and const_val == False and const_mean == False:
-        # nonstationary signal
-        signal_type = "nonstationary"
-        stationarity = False
-        stationarity_timestep = -1
+    elif const_mean and const_var and not const_val and not const_tscales:
+        # weak stationary
+        signal_type = "weak stationary"
+        stationarity = True
+        stationarity_timestep = timesteps[0]
+    elif const_mean and not const_var and const_val and const_tscales:
+        # weak stationary
+        signal_type = "weak stationary"
+        stationarity = True
+        stationarity_timestep = timesteps[0]
+    elif const_mean and not const_var and const_val and not const_tscales:
+        # weak stationary
+        signal_type = "weak constant"
+        stationarity = True
+        stationarity_timestep = timesteps[0]
+    # elif const_mean and not const_var and not const_val and const_tscales:
+    #     # weak stationary
+    #     signal_type = "nonstationary"
+    #     stationarity = False
+    #     stationarity_timestep = timesteps[0]
+    # elif const_mean and not const_var and not const_val and not const_tscales:
+    #     # weak stationary
+    #     signal_type = nonstationary"
+    #     stationarity = False
+    #     stationarity_timestep = -1
+
     else:
         # nonstationary signal
         signal_type = "nonstationary"
