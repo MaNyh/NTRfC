@@ -12,15 +12,6 @@ def chunks(somelist, numchunks):
     return list(split(somelist, numchunks))
 
 
-def timeseries_analysis(timesteps, signal):
-    ts = timesteps.copy()
-    stationarity, timescale = check_isconstant(signal)
-    if stationarity and not timescale:
-        return stationarity, timescale
-    stationarity, timescale = check_stationarity(ts, signal)
-    return stationarity, timescale
-
-
 def parsed_timeseries_analysis(timesteps, signal, resolvechunks=20, verbose=True):
     checksigchunks = chunks(signal, int(len(signal) / resolvechunks))
     checktimechunks = chunks(timesteps, int(len(timesteps) / resolvechunks))
