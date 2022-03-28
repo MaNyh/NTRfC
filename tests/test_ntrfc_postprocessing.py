@@ -31,7 +31,7 @@ def sine_signal(numtimesteps, time):
 
 
 def noise_signal(numtimesteps, time):
-    mu, sigma = 0, 0.2  # mean and standard deviation
+    mu, sigma = 0, 0.02  # mean and standard deviation
     s = np.random.normal(mu, sigma, size=numtimesteps)
 
     Dt = time / numtimesteps
@@ -74,14 +74,14 @@ def tanh_sin_signal(numtimesteps, time):
 
 def tanh_sin_noise_signal(numtimesteps, time):
     timesteps = np.linspace(0, time, numtimesteps)
-    stationary = time/4
+    stationary = time/10
     tanhsignal = np.tanh(timesteps * stationary ** -1)
 
     timesteps = np.linspace(0, 1, numtimesteps) * time
-    omega = 1000
-    signal = np.sin(timesteps * omega) + 1
+    omega = 100
+    signal = np.sin(timesteps * omega)*0.3 + 1
 
-    mu, sigma = 0, 0.2  # mean and standard deviation
+    mu, sigma = 0, 0.1  # mean and standard deviation
     s = np.random.normal(mu, sigma, size=numtimesteps)
 
     Dt = time / numtimesteps
@@ -89,7 +89,7 @@ def tanh_sin_noise_signal(numtimesteps, time):
     dt = time / 1000
     timescale = int(dt / Dt)
     weights = np.repeat(1.0, timescale) / timescale
-    noise = np.convolve(s, weights, 'same') + 1
+    noise = np.convolve(s, weights, 'same')
 
     omega = 1000
     timesteps = np.linspace(0, time, numtimesteps)
@@ -111,11 +111,11 @@ def sine_abate_signal(numtimesteps, time):
 
 def complex_signal(numtimesteps, time):
     timesteps = np.linspace(0, time, numtimesteps)
-    stationary = time/4
+    stationary = time/10
     tanhsignal = np.tanh(timesteps * stationary ** -1)
 
     timesteps = np.linspace(0, 1, numtimesteps) * time
-    omega = 1000
+    omega = 10
     signal = np.sin(timesteps * omega) + 1
 
     mu, sigma = 0, 0.2  # mean and standard deviation
@@ -145,32 +145,31 @@ def complex_signal(numtimesteps, time):
 
 
 def test_analize_stationarity(verbose=True):
-    tight_tolerance = 1e-2
     loose_tolerance = 1
     signals = {"constant": constant_signal(1000, 1),
                "ramp": ramp_signal(1000, 1),
                "rampconst": ramptoconst_signal(10000, 1),
                "sine": sine_signal(10000, 1),
-               "noise": noise_signal(10000, 1),
-               "convergentsine_signal": convergentsine_signal(10000, 10),
-               "tanh":tanh_signal(10000,20),
-               "tanh_sin":tanh_sin_signal(10000,10),
-               "tanh_sin_noise": tanh_sin_noise_signal(10000, 2.8),
-               "sine_abate":sine_abate_signal(20000, 4),
-               "complex":complex_signal(40000,60)
+               "noise": noise_signal(100000, 10),
+               "convergentsine_signal": convergentsine_signal(10000, 40),
+               "tanh":tanh_signal(20000,20),
+               "tanh_sin":tanh_sin_signal(20000,32),
+               "tanh_sin_noise": tanh_sin_noise_signal(40000, 480),
+               "sine_abate":sine_abate_signal(30000, 4),
+               "complex":complex_signal(50000,480)
                }
 
     expections = {"constant": (True, (0, 0), [0,0]),
                   "ramp": (False, (0, 0), [-1,-1]),
                   "rampconst": (True, (0, 0), [0.45,0.55]),
-                  "sine": (True, (0.0005, 0.0005), [0,0]),
-                  "noise": (True, (0.0005, 0.0005), [0,0]),
-                  "convergentsine_signal": (True, (0.0005, 0.0005), [5,5.5]),
-                  "tanh":(True,(0,0),[3.5,4.5]),
-                  "tanh_sin":(True,(0.0005,0.0005),[4,4.75]),
-                  "tanh_sin_noise":(True,(0.0005,0.0005),[0.8,1.2]),
+                  "sine": (True, (0.005, 0.005), [0,0]),
+                  "noise": (True, (0.005, 0.005), [0,0]),
+                  "convergentsine_signal": (True, (0.0005, 0.0005), [15.5,16.5]),
+                  "tanh":(True,(0,0),[4.5,5.5]),
+                  "tanh_sin":(True,(0.0005,0.0005),[15.5,16.5]),
+                  "tanh_sin_noise":(True,(0.0005,0.0005),[110,130]),
                   "sine_abate":(True,(0.00025,0.00025),[0.35,1]),
-                  "complex":(True,(0.00025,0.0025),[20,26])
+                  "complex":(True,(0.00025,0.0025),[90,130])
                   }
 
     for name, sig in signals.items():

@@ -1,5 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import matplotlib
+#matplotlib.use('TkAgg')
 
 from ntrfc.postprocessing.timeseries.integral_scales import integralscales
 
@@ -22,7 +24,7 @@ def parsed_timeseries_analysis(timesteps, signal, resolvechunks=20, verbose=True
     if stationarity==True:
         csig=signal
         ctime=timesteps
-        plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps)
+        plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps,signal_type)
 
         return stationarity, timescale, stationarity_timestep
 
@@ -30,12 +32,13 @@ def parsed_timeseries_analysis(timesteps, signal, resolvechunks=20, verbose=True
         csig = np.concatenate([*checksigchunks[resolvechunks - i:]])
         ctime = np.concatenate([*checktimechunks[resolvechunks - i:]])
 
-        signal_type,newstationarity,newstationarity_timestep, newtimescale,newlengthscale = check_signal_stationarity(resolvechunks, csig, ctime)
+        new_signal_type,newstationarity,newstationarity_timestep, newtimescale,newlengthscale = check_signal_stationarity(resolvechunks, csig, ctime)
 
         if newstationarity:
             newscales = (timescale, lengthscale)
             stationarity=True
             scales = newscales
+            signal_type=new_signal_type
             stationarity_timestep = newstationarity_timestep
 
 
@@ -43,15 +46,15 @@ def parsed_timeseries_analysis(timesteps, signal, resolvechunks=20, verbose=True
             # when no further stationarity found, return status
             # when done, return last status
 
-            plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps)
+            plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps,signal_type)
 
             return stationarity, scales, stationarity_timestep
 
-    plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps)
+    plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps,signal_type)
     return stationarity, scales, stationarity_timestep
 
 
-def plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps):
+def plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps, signaltype):
     plt.figure()
     plt.plot(timesteps, signal)
     plt.plot(ctime, csig, color="black", linewidth=4)
@@ -61,6 +64,10 @@ def plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, times
     if ymax-ymin<0.01:
         ymax=0.5+np.mean(signal)
         ymin =-0.5+np.mean(signal)
+    else:
+        ymin -=1
+        ymax += 1
+
     if sts==0.0 or sts:
         plt.vlines(sts, ymin=ymin, ymax=ymax,
                    linewidth=4, color="k", linestyles="dashed")
@@ -69,9 +76,9 @@ def plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, times
     else:
         plt.axvspan(0, timesteps[-1],
                     facecolor='red', alpha=0.5)
-
+    plt.title(signaltype)
     plt.ylim(ymin, ymax)
-    plt.show()  #
+    plt.show()
 
 
 def check_signal_stationarity(resolvechunks, signal, timesteps, verbose = True):
@@ -93,9 +100,9 @@ def check_signal_stationarity(resolvechunks, signal, timesteps, verbose = True):
     # todo: now it is only mean, val and var that is being investigated.
     # it makes sense to also investigate the behaviour of the autocorrelation
     # but as the signal is divided into chunks, one has to
-    const_mean = np.allclose(mean, means,rtol=0.05)
-    const_val = np.allclose(mean, signal,rtol=0.05)
-    const_var = np.allclose(var,vars,rtol=0.4)
+    const_mean = np.allclose(mean, means,rtol=0.02)
+    const_val = np.allclose(mean, signal,rtol=0.02)
+    const_var = np.allclose(var,vars,rtol=0.02)
     #
     if const_mean and const_var:
         timescale, lengthscale = integralscales(signal, timesteps)
@@ -107,7 +114,7 @@ def check_signal_stationarity(resolvechunks, signal, timesteps, verbose = True):
         timescale, lengthscale = 0,0
         timescales, lengthscales = np.zeros(resolvechunks),np.zeros(resolvechunks)
 
-    const_tscales = np.allclose(timescales, timescale,rtol=0.1)
+    const_tscales = np.allclose(timescales, timescale,rtol=0.02)
 
     """
     from itertools import product
