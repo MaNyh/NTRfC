@@ -20,14 +20,10 @@ def parsed_timeseries_analysis(timesteps, signal, resolvechunks=20, verbose=True
     signal_type, stationarity, stationarity_timestep, timescale, lengthscale = check_signal_stationarity(resolvechunks, signal, timesteps)
     scales = (timescale,lengthscale)
     if stationarity==True:
-        plt.figure()
-        plt.plot(timesteps, signal,color="black")
-        plt.vlines(stationarity_timestep, ymin=-10, ymax=10, linewidth=4, color="k", linestyles="dashed")
-        plt.axvspan(stationarity_timestep, max(timesteps), facecolor='grey', alpha=0.5)
+        csig=signal
+        ctime=timesteps
+        plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps)
 
-        plt.xlim(0, timesteps[-1])
-        plt.ylim(-10, 10)
-        plt.show()  #
         return stationarity, timescale, stationarity_timestep
 
     for i in range(min_chunk, resolvechunks + 1):
@@ -47,25 +43,35 @@ def parsed_timeseries_analysis(timesteps, signal, resolvechunks=20, verbose=True
             # when no further stationarity found, return status
             # when done, return last status
 
-            plt.figure()
-            plt.plot(timesteps, signal)
-            plt.plot(ctime, csig, color="black", linewidth=0.1)
-            plt.vlines(stationarity_timestep, ymin=-10, ymax=10, linewidth=4, color="k", linestyles="dashed")
-            plt.axvspan(stationarity_timestep, max(timesteps), facecolor='grey', alpha=0.5)
+            plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps)
 
-            plt.xlim(0, timesteps[-1])
-            plt.ylim(-10, 10)
-            plt.show()  #
             return stationarity, scales, stationarity_timestep
 
+    plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps)
+    return stationarity, scales, stationarity_timestep
+
+
+def plot_stationarity_analisys(csig, ctime, signal, stationarity_timestep, timesteps):
     plt.figure()
     plt.plot(timesteps, signal)
     plt.plot(ctime, csig, color="black", linewidth=4)
-    plt.vlines(stationarity_timestep, ymin=0, ymax=2, linewidth=4, color="k", linestyles="dashed")
     plt.xlim(0, timesteps[-1])
-    plt.ylim(-10, 10)
+    sts = stationarity_timestep if stationarity_timestep>=0 else None
+    ymin,ymax = min(signal),max(signal)
+    if ymax-ymin<0.01:
+        ymax=0.5+np.mean(signal)
+        ymin =-0.5+np.mean(signal)
+    if sts==0.0 or sts:
+        plt.vlines(sts, ymin=ymin, ymax=ymax,
+                   linewidth=4, color="k", linestyles="dashed")
+        plt.axvspan(sts, timesteps[-1],
+                    facecolor='green', alpha=0.5)
+    else:
+        plt.axvspan(0, timesteps[-1],
+                    facecolor='red', alpha=0.5)
+
+    plt.ylim(ymin, ymax)
     plt.show()  #
-    return stationarity, scales, stationarity_timestep
 
 
 def check_signal_stationarity(resolvechunks, signal, timesteps, verbose = True):
@@ -79,17 +85,17 @@ def check_signal_stationarity(resolvechunks, signal, timesteps, verbose = True):
     # a correlating signal has a time and length scale, a mean, a constant variation and autocorrelation
 
     mean = np.mean(signal)
-    means = np.mean(checksigchunks, axis=1)
+    means = np.array([np.mean(i) for i in checksigchunks]) #np.mean(checksigchunks, axis=1)
 
     var = np.std(signal)
-    vars = np.std(checksigchunks, axis=1)
+    vars = np.array([np.std(i) for i in checksigchunks])#np.std(checksigchunks, axis=1)
 
     # todo: now it is only mean, val and var that is being investigated.
     # it makes sense to also investigate the behaviour of the autocorrelation
     # but as the signal is divided into chunks, one has to
-    const_mean = np.allclose(mean, means,rtol=0.06)
-    const_val = np.allclose(mean, signal,rtol=0.06)
-    const_var = np.allclose(var,vars,rtol=2)
+    const_mean = np.allclose(mean, means,rtol=0.05)
+    const_val = np.allclose(mean, signal,rtol=0.05)
+    const_var = np.allclose(var,vars,rtol=0.4)
     #
     if const_mean and const_var:
         timescale, lengthscale = integralscales(signal, timesteps)

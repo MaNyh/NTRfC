@@ -62,7 +62,7 @@ def tanh_signal(numtimesteps, time):
 
 def tanh_sin_signal(numtimesteps, time):
     timesteps = np.linspace(0, time, numtimesteps)
-    stationary = time/3
+    stationary = time/4
     tanhsignal = np.tanh(timesteps * stationary ** -1)
 
     timesteps = np.linspace(0, 1, numtimesteps) * time
@@ -102,9 +102,9 @@ def tanh_sin_noise_signal(numtimesteps, time):
 
 def sine_abate_signal(numtimesteps, time):
     timesteps = np.linspace(0, time, numtimesteps)
-    stationary = time/4
+    stationary = time/24
     abate = np.e ** (-timesteps * stationary ** -1)
-    omega = 1000
+    omega = 50
     sinesignal = abate / max(abate) * np.sin(timesteps * omega)*0.4+1
     return timesteps, sinesignal
 
@@ -156,7 +156,7 @@ def test_analize_stationarity(verbose=True):
                "tanh":tanh_signal(10000,20),
                "tanh_sin":tanh_sin_signal(10000,10),
                "tanh_sin_noise": tanh_sin_noise_signal(10000, 2.8),
-               "sine_abate":sine_abate_signal(40000, 100),
+               "sine_abate":sine_abate_signal(20000, 4),
                "complex":complex_signal(40000,60)
                }
 
@@ -165,11 +165,11 @@ def test_analize_stationarity(verbose=True):
                   "rampconst": (True, (0, 0), [0.45,0.55]),
                   "sine": (True, (0.0005, 0.0005), [0,0]),
                   "noise": (True, (0.0005, 0.0005), [0,0]),
-                  "convergentsine_signal": (True, (0.0005, 0.0005), [1.2,1.8]),
+                  "convergentsine_signal": (True, (0.0005, 0.0005), [5,5.5]),
                   "tanh":(True,(0,0),[3.5,4.5]),
-                  "tanh_sin":(True,(0.0005,0.0005),[4.5,5.5]),
+                  "tanh_sin":(True,(0.0005,0.0005),[4,4.75]),
                   "tanh_sin_noise":(True,(0.0005,0.0005),[0.8,1.2]),
-                  "sine_abate":(True,(0.00025,0.00025),[40,60]),
+                  "sine_abate":(True,(0.00025,0.00025),[0.35,1]),
                   "complex":(True,(0.00025,0.0025),[20,26])
                   }
 
