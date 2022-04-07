@@ -27,6 +27,10 @@ Installation
 install using 'pip install ntrfc'
 or install using 'python -m setup install'
 
+when installing from conda, you will run into issues with vtk while using a pip installation of ntrfc.
+simply run:
+    'conda install -c conda-forge vtk'
+
 as a dev use "pip install -e ntrfc" for a linked install.
 this way you dont have to reinstall the package after altering the sourcecode.
 

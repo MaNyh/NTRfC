@@ -5,7 +5,6 @@ description: snakemake configuration file
 type: object
 
 properties:
-  case_params:
     type: object
     properties:
       case_type:
@@ -15,5 +14,3 @@ properties:
     required:
         - case_type
 
-required:
-    - case_params
