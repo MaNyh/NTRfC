@@ -4,7 +4,7 @@
 def test_massflow_plane():
     import numpy as np
     import pyvista as pv
-    from ntrfc.pyvista_utils.surface import massflow_plane
+    from ntrfc.utils.pyvista_utils.surface import massflow_plane
 
     plane = pv.Plane()
     numcells = plane.number_of_cells
@@ -19,7 +19,7 @@ def test_massflow_plane():
 def test_areaave_plane():
     import numpy as np
     import pyvista as pv
-    from ntrfc.pyvista_utils.surface import areaave_plane
+    from ntrfc.utils.pyvista_utils.surface import areaave_plane
 
     plane = pv.Plane()
     plane["U"] = np.ones(plane.number_of_cells)
