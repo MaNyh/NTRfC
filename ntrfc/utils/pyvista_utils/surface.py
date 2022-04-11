@@ -55,3 +55,28 @@ def calc_dist_from_surface(surface_primary, surface_secondary, verbose=False):
         p.show()
 
     return h0n
+
+
+def massflow_plane(mesh):
+    if not "Normals" in mesh.array_names:
+        mesh = mesh.compute_normals()
+    if not "Area" in mesh.array_names:
+        mesh = mesh.compute_cell_sizes()
+    mesh = mesh.point_data_to_cell_data()
+    normals = mesh.cell_normals
+    rhos = mesh["rho"]
+    areas = mesh["Area"]
+    velocities = mesh["U"]
+
+    massflow = np.array(
+        [vecAbs(vecProjection(velocities[i], normals[i])) for i in range(mesh.number_of_cells)]) ** 2 * rhos * areas
+
+    return massflow
+
+
+def test_massflow_plane():
+    import pyvista as pv
+
+    plane = pv.Plane()
+    numcells = plane.number_of_cells
+    plane["U"] = np.array([1,0,0])
