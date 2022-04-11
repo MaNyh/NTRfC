@@ -7,6 +7,8 @@ import pytest
 import pyvista as pv
 import numpy as np
 
+from utils.pyvista_utils.surface import massflow_plane, areaave_plane
+
 
 @pytest.fixture
 def response():
@@ -145,3 +147,25 @@ def test_create_dirstructure(tmpdir):
     create_dirstructure(dirstructure, tmpdir)
     checks = [os.path.isdir(path) for path in [os.path.join(tmpdir, relpath) for relpath in dirstructure]]
     assert all(checks), "not all directories have been created"
+
+
+def test_massflow_plane():
+    import pyvista as pv
+
+    plane = pv.Plane()
+    numcells = plane.number_of_cells
+    plane["U"] = plane.cell_normals
+    plane["rho"] = np.ones(numcells)
+
+    mflow = massflow_plane(plane)
+
+    assert mflow==1.0, "something is wrong"
+
+
+def test_areaave_plane():
+    plane = pv.Plane()
+    plane["U"] = np.ones(plane.number_of_cells)
+
+    plane_ave = areaave_plane(plane,"U")
+
+    assert plane_ave==1.0, "something is not right"

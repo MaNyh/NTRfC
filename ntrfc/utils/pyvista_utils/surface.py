@@ -1,6 +1,6 @@
 import numpy as np
 import pyvista as pv
-
+from ntrfc.utils.math.vectorcalc import vecAbs, vecProjection
 
 def calc_dist_from_surface(surface_primary, surface_secondary, verbose=False):
     """
@@ -71,12 +71,15 @@ def massflow_plane(mesh):
     massflow = np.array(
         [vecAbs(vecProjection(velocities[i], normals[i])) for i in range(mesh.number_of_cells)]) ** 2 * rhos * areas
 
-    return massflow
+    return np.sum(massflow)
 
 
-def test_massflow_plane():
-    import pyvista as pv
+def areaave_plane(mesh, valname):
+    array=mesh[valname]
+    if not "Area" in mesh.array_names:
+        mesh = mesh.compute_cell_sizes()
+    areas = mesh["Area"]
+    area_ave = np.sum((array.T*areas).T)/np.sum(areas)
+    return area_ave
 
-    plane = pv.Plane()
-    numcells = plane.number_of_cells
-    plane["U"] = np.array([1,0,0])
+
