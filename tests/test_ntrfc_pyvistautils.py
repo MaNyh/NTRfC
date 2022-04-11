@@ -30,6 +30,7 @@ def test_areaave_plane():
 
 def test_massflowave_plane():
     import pyvista as pv
+    import numpy as np
     from ntrfc.utils.pyvista_utils.plane import massflowave_plane
 
     plane = pv.Plane()
