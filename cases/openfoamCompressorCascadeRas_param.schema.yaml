@@ -28,7 +28,7 @@ properties:
     velocity_inlet:
         description: used in parameterspace
         type: string
-        default: "40 30 0"
+        default: "40_30_0"
     pitch:
         description: used in parameterspace
         type: number
