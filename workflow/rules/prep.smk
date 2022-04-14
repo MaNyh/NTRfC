@@ -18,6 +18,12 @@ def get_Simulationdir(path):
                 dirlist.append(os.path.join(r, folder))
     return dirlist
 
+def get_polymesh():
+    return [f"{dir}/polyMesh" for dir in get_constantlist_fromdir("results/simulations")]
+
+def get_setsdir():
+    return [f"{dir}/polyMesh/sets" for dir in get_constantlist_fromdir("results/simulations")]
+
 script = """
 module load GCC/11.2.0  OpenMPI/4.1.1 OpenFOAM/v2112;
 set +u;
