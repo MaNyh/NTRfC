@@ -22,10 +22,8 @@ def test_casestructure(tmpdir):
         "directory"].keys(), "error collecting case_structure"
 
 
+"""
 def test_template_installations():
-    """
-    basic sanity check over the installed templates
-    """
     import os
     from ntrfc.database.case_templates import CASE_TEMPLATES
     from ntrfc.utils.filehandling.datafiles import get_filelist_fromdir
@@ -33,12 +31,9 @@ def test_template_installations():
         assert os.path.isdir(template.path), "path to template does not exist"
         assert os.path.isfile(template.param_schema), "template-schema does not exist"
         assert len(get_filelist_fromdir(template.path)) > 0, "no files found in template"
-
-
+"""
+"""
 def test_templates_params():
-    """
-
-    """
     from ntrfc.database.case_templates import CASE_TEMPLATES
     from ntrfc.utils.filehandling.datafiles import yaml_dict_read
 
@@ -54,12 +49,10 @@ def test_templates_params():
         template.set_params_options(default_params,default_options)
 
         assert template.sanity_check()
+"""
 
-
+"""
 def test_create_case(tmpdir):
-    """
-
-    """
     import os
     from ntrfc.database.case_templates import CASE_TEMPLATES
     from ntrfc.utils.filehandling.datafiles import yaml_dict_read
@@ -79,23 +72,24 @@ def test_create_case(tmpdir):
     deploy(input,output,default_params,default_options)
     check = [os.path.isfile(fpath) for fpath in output]
     assert all(check), "not all files have been created"
+"""
 
+#def test_find_variables_infile(tmpdir):
+#    import os
+#    from ntrfc.utils.filehandling.datafiles import get_directory_structure
+#    from ntrfc.database.case_creation import find_variables_infile
 
-def test_find_variables_infile(tmpdir):
-    import os
-    from ntrfc.utils.filehandling.datafiles import get_directory_structure
-    from ntrfc.database.case_creation import find_variables_infile
+#    paramnameone = "parameter_name_one"
+#    paramnametwo = "parameter_name_two"
 
-    paramnameone = "parameter_name_one"
-    paramnametwo = "parameter_name_two"
+#    filecontent = f"""
+#    <PARAM {paramnameone} PARAM>
+#    <PARAM {paramnametwo} PARAM>
+#    """
+#    filename = "paramfile.txt"
+#    with open(os.path.join(tmpdir, filename), "w") as fhandle:
+#        fhandle.write(filecontent)
 
-    filecontent = f"""
-    <PARAM {paramnameone} PARAM>
-    <PARAM {paramnametwo} PARAM>
-    """
-    filename = "paramfile.txt"
-    with open(os.path.join(tmpdir, filename), "w") as fhandle:
-        fhandle.write(filecontent)
+#    find_ans = find_variables_infile(os.path.join(tmpdir, filename),"PARAM")
+#    assert list(find_ans.keys())[0]==paramnameone and list(find_ans.keys())[1]==paramnametwo
 
-    find_ans = find_variables_infile(os.path.join(tmpdir, filename),"PARAM")
-    assert list(find_ans.keys())[0]==paramnameone and list(find_ans.keys())[1]==paramnametwo

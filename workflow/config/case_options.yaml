@@ -1,4 +1,0 @@
-processors: 12
-zspan: 0.0025
-startfrom: latestTime
-timestep: 0.000001
