@@ -192,7 +192,7 @@ def test_extractSidePolys():
 
 
 def test_extract_geo_paras():
-    from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
+    from ntrfc.utils.geometry.pointcloud_methods import extract_profilepoints
     from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
     import numpy as np
     import pyvista as pv
@@ -205,8 +205,8 @@ def test_extract_geo_paras():
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle)
 
-    points, ps_poly, ss_poly, ind_vk, ind_hk, mids_poly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
-        sorted_poly.points, alpha)
+    points, ps_poly, ss_poly, ind_vk, ind_hk, mids_poly, beta_leading, beta_trailing, camber_angle = extract_profilepoints(
+        sorted_poly, alpha)
 
     assert np.isclose(beta_leading, (angle + 90)), "wrong leading edge angle"
     assert np.isclose(beta_trailing, (angle + 90)), "wrong leading edge angle"

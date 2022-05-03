@@ -243,22 +243,30 @@ def extractSidePolys(ind_hk, ind_vk, sortedPoly):
         y_ps = ys[ind_vk:] + ys[:ind_hk + 1]
         x_ps = xs[ind_vk:] + xs[:ind_hk + 1]
 
-    psl_helper = polyline_from_points(np.stack((x_ps, y_ps, np.zeros(len(x_ps)))).T)
-    ssl_helper = polyline_from_points(np.stack((x_ss, y_ss, np.zeros(len(x_ss)))).T)
+    ss_ids = []
+    ps_ids = []
 
-    if psl_helper.length > ssl_helper.length:
+    for ix,iy in zip(x_ss,y_ss):
+        if ix in xs and iy in ys:
+            xid = np.where(xs == ix)[0][0]
+            yid = np.where(ys == iy)[0][0]
+            if xid==yid:
+                ss_ids.append(xid)
 
-        psPoly = pv.PolyData(ssl_helper.points)
-        ssPoly = pv.PolyData(psl_helper.points)
-    else:
+    for ix, iy in zip(x_ps, y_ps):
+        if ix in xs and iy in ys:
+            xid = np.where(xs == ix)[0][0]
+            yid = np.where(ys == iy)[0][0]
+            if xid == yid:
+                ps_ids.append(xid)
 
-        psPoly = pv.PolyData(psl_helper.points)
-        ssPoly = pv.PolyData(ssl_helper.points)
+    psPoly = sortedPoly.extract_points(ps_ids)
+    ssPoly = sortedPoly.extract_points(ss_ids)
 
     return ssPoly, psPoly
 
 
-def extract_geo_paras(points, alpha, verbose=False):
+def extract_profilepoints(poly, alpha, verbose=False):
     """
     This function is extracting profile-data as stagger-angle, midline, psPoly, ssPoly and more from a set of points
     Be careful, you need a suitable alpha-parameter in order to get the right geometry
@@ -269,10 +277,19 @@ def extract_geo_paras(points, alpha, verbose=False):
     :param verbose: bool for plots
     :return: points, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing
     """
-
+    points = poly.points
+    oxs,oys = points[:,0],points[:,1]
     xs, ys = calc_concavehull(points[:, 0], points[:, 1], alpha)
+
+    bladeids = []
+    for ix,iy in zip(xs,ys):
+        if ix in oxs and iy in oys:
+            xid = np.where(oxs == ix)[0][0]
+            yid = np.where(oys == iy)[0][0]
+            if xid==yid:
+                bladeids.append(xid)
     points = np.stack((xs, ys, np.zeros(len(xs)))).T
-    sortedPoly = pv.PolyData(points)
+    sortedPoly = poly.extract_points(bladeids)
 
     ind_hk, ind_vk = extract_vk_hk(sortedPoly)
     psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly)
@@ -297,7 +314,7 @@ def extract_geo_paras(points, alpha, verbose=False):
         p.add_legend()
         p.show()
 
-    return points, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle
+    return sortedPoly,psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle
 
 
 def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t):
