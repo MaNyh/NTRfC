@@ -144,7 +144,7 @@ def test_midline_from_sides():
     length = mids.length
     testlength = vecAbs(sspoly.points[0] - sspoly.points[-1])
 
-    assert length == testlength, "midline not accurate"
+    assert np.isclose(length,testlength,rtol=1e-3), "midline not accurate"
 
 
 def test_midLength():
@@ -167,7 +167,7 @@ def test_midLength():
     fake_hk = mid
     circle = pv.PolyData(np.stack([x, y, np.zeros(len(x))]).T)
     length = mid_length(fake_vk, fake_hk, circle)
-    assert np.isclose(2 * radius, length, rtol=1e-4), "length should be two times the size of the defined test-circle"
+    assert np.isclose(2 * radius, length, rtol=1e-3), "length should be two times the size of the defined test-circle"
 
 
 def test_extractSidePolys():
