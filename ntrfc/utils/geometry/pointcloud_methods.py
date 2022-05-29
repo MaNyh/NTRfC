@@ -243,18 +243,20 @@ def extractSidePolys(ind_hk, ind_vk, sortedPoly):
         y_ps = ys[ind_vk:] + ys[:ind_hk + 1]
         x_ps = xs[ind_vk:] + xs[:ind_hk + 1]
 
-    psl_helper = polyline_from_points(np.stack((x_ps, y_ps, np.zeros(len(x_ps)))).T)
-    ssl_helper = polyline_from_points(np.stack((x_ss, y_ss, np.zeros(len(x_ss)))).T)
+    side_one = polyline_from_points(np.stack((x_ps, y_ps, np.zeros(len(x_ps)))).T)
+    side_two = polyline_from_points(np.stack((x_ss, y_ss, np.zeros(len(x_ss)))).T)
 
-    if psl_helper.length > ssl_helper.length:
+    if side_one.length > side_two.length:
 
-        psPoly = pv.PolyData(ssl_helper.points)
-        ssPoly = pv.PolyData(psl_helper.points)
+        psPoly = pv.PolyData(side_two.points)
+        ssPoly = pv.PolyData(side_one.points)
     else:
 
-        psPoly = pv.PolyData(psl_helper.points)
-        ssPoly = pv.PolyData(ssl_helper.points)
+        psPoly = pv.PolyData(side_one.points)
+        ssPoly = pv.PolyData(side_two.points)
 
+    ssPoly=ssPoly.sample(sortedPoly)
+    psPoly=psPoly.sample(sortedPoly)
     return ssPoly, psPoly
 
 
