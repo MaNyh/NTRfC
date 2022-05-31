@@ -131,41 +131,25 @@ def mid_length(ind_1, ind_2, sorted_poly):
 
 
 def midline_from_sides(ind_hk, ind_vk, points, ps_poly, ss_poly):
-    """
-    takes LE, TE-indices as well as pointset and polydata of the sides
-    returns polydata of the midline
-    :param ind_hk:
-    :param ind_vk:
-    :param points:
-    :param ps_poly:
-    :param ss_poly:
-    :return:
-    """
     x_ps, y_ps = ps_poly.points[::, 0], ps_poly.points[::, 1]
-    x_ss, y_ss = ss_poly.points[::, 0][1:], ss_poly.points[::, 1][1:]
+    x_ss, y_ss = ss_poly.points[::, 0], ss_poly.points[::, 1]
 
     midsres = 100
-
     if x_ps[0] < x_ps[-1]:
         ax, ay = refine_spline(x_ps[::-1], y_ps[::-1], midsres)
     else:
         ax, ay = refine_spline(x_ps, y_ps, midsres)
-
     if x_ss[0] < x_ss[-1]:
         bx, by = refine_spline(x_ss[::-1], y_ss[::-1], midsres)
     else:
         bx, by = refine_spline(x_ss, y_ss, midsres)
-
-    xmids, ymids = (ax + bx) / 2, (ay + by) / 2
-
-    #reverse and delete end and beginning
-    xmids = np.array(xmids)
-    ymids = np.array(ymids)
-    #set new end and beginning points
-    xmids[-1] = points[ind_vk][0]
-    ymids[-1] = points[ind_vk][1]
-    xmids[0] = points[ind_hk][0]
-    ymids[0] = points[ind_hk][1]
+    xmids, ymids = ((ax + bx) / 2, (ay + by) / 2)
+    xmids = np.array(xmids)[::-1][1:-1]
+    ymids = np.array(ymids)[::-1][1:-1]
+    xmids[0] = points[ind_vk][0]
+    ymids[0] = points[ind_vk][1]
+    xmids[-1] = points[ind_hk][0]
+    ymids[-1] = points[ind_hk][1]
     midsPoly = polyline_from_points(np.stack((xmids, ymids, np.zeros(len(ymids)))).T)
     return midsPoly
 
@@ -243,54 +227,40 @@ def extract_vk_hk(sorted_poly, verbose=False):
 
 
 def extractSidePolys(ind_hk, ind_vk, sortedPoly):
-    """
-    must be fed with a sortedPoly and the indices of LE and TE
-    :param ind_hk: index LE
-    :param ind_vk: index TE
-    :param sortedPoly: pyvista PolyData of the profile
-    :return: returns ypyvista PolyData of the sides
-    """
     xs, ys = list(sortedPoly.points[::, 0]), list(sortedPoly.points[::, 1])
 
     if ind_vk < ind_hk:
         x_ss = xs[ind_vk:ind_hk + 1]
         y_ss = ys[ind_vk:ind_hk + 1]
 
-        y_ps = (ys[ind_hk:] + ys[:ind_vk + 1])[::-1]
-        x_ps = (xs[ind_hk:] + xs[:ind_vk + 1])[::-1]
+        y_ps = ys[ind_hk:] + ys[:ind_vk + 1]
+        x_ps = xs[ind_hk:] + xs[:ind_vk + 1]
 
     else:
         x_ss = xs[ind_hk:ind_vk + 1]
         y_ss = ys[ind_hk:ind_vk + 1]
 
-        y_ps = (ys[ind_vk:] + ys[:ind_hk + 1])[::-1]
-        x_ps = (xs[ind_vk:] + xs[:ind_hk + 1])[::-1]
+        y_ps = ys[ind_vk:] + ys[:ind_hk + 1]
+        x_ps = xs[ind_vk:] + xs[:ind_hk + 1]
 
-    ss_ids = []
-    ps_ids = []
+    side_one = polyline_from_points(np.stack((x_ps, y_ps, np.zeros(len(x_ps)))).T)
+    side_two = polyline_from_points(np.stack((x_ss, y_ss, np.zeros(len(x_ss)))).T)
 
-    for ix,iy in zip(x_ss,y_ss):
-        if ix in xs and iy in ys:
-            xid = np.where(xs == ix)[0][0]
-            yid = np.where(ys == iy)[0][0]
-            if xid==yid:
-                ss_ids.append(xid)
+    if side_one.length > side_two.length:
 
-    for ix, iy in zip(x_ps, y_ps):
-        if ix in xs and iy in ys:
-            xid = np.where(xs == ix)[0][0]
-            yid = np.where(ys == iy)[0][0]
-            if xid == yid:
-                ps_ids.append(xid)
+        psPoly = pv.PolyData(side_two.points)
+        ssPoly = pv.PolyData(side_one.points)
+    else:
 
-    ss_ids = ss_ids[1:]
-    psPoly = sortedPoly.extract_points(ps_ids)
-    ssPoly = sortedPoly.extract_points(ss_ids)
+        psPoly = pv.PolyData(side_one.points)
+        ssPoly = pv.PolyData(side_two.points)
 
+    ssPoly=ssPoly.sample(sortedPoly)
+    psPoly=psPoly.sample(sortedPoly)
     return ssPoly, psPoly
 
 
-def extract_profilepoints(poly, alpha, verbose=False):
+def extract_geo_paras(points, alpha, verbose=False):
     """
     This function is extracting profile-data as stagger-angle, midline, psPoly, ssPoly and more from a set of points
     Be careful, you need a suitable alpha-parameter in order to get the right geometry
@@ -301,19 +271,10 @@ def extract_profilepoints(poly, alpha, verbose=False):
     :param verbose: bool for plots
     :return: points, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing
     """
-    points = poly.points
-    oxs,oys = points[:,0],points[:,1]
-    xs, ys = calc_concavehull(points[:, 0], points[:, 1], alpha)
 
-    bladeids = []
-    for ix,iy in zip(xs,ys):
-        if ix in oxs and iy in oys:
-            xid = np.where(oxs == ix)[0][0]
-            yid = np.where(oys == iy)[0][0]
-            if xid==yid:
-                bladeids.append(xid)
+    xs, ys = calc_concavehull(points[:, 0], points[:, 1], alpha)
     points = np.stack((xs, ys, np.zeros(len(xs)))).T
-    sortedPoly = poly.extract_points(bladeids)
+    sortedPoly = pv.PolyData(points)
 
     ind_hk, ind_vk = extract_vk_hk(sortedPoly)
     psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly)
@@ -324,9 +285,9 @@ def extract_profilepoints(poly, alpha, verbose=False):
     vk_tangent = np.stack((xmids[0] - xmids[1], ymids[0] - ymids[1], 0)).T
     hk_tangent = np.stack((xmids[-2] - xmids[-1], ymids[-2] - ymids[-1], 0)).T
     camber = np.stack((xmids[0] - xmids[-1], ymids[0] - ymids[-1], 0)).T[::-1]
-    beta_leading = vecAngle(vk_tangent, np.array([1, 0, 0])) / np.pi * 180
-    beta_trailing = vecAngle(hk_tangent, np.array([1, 0, 0])) / np.pi * 180
-    camber_angle = vecAngle(camber, np.array([1, 0, 0])) / np.pi * 180
+    beta_leading = vecAngle(vk_tangent, np.array([0, 1, 0])) / np.pi * 180
+    beta_trailing = vecAngle(hk_tangent, np.array([0, 1, 0])) / np.pi * 180
+    camber_angle = vecAngle(camber, np.array([0, 1, 0])) / np.pi * 180
 
     if verbose:
         p = pv.Plotter()
@@ -338,7 +299,7 @@ def extract_profilepoints(poly, alpha, verbose=False):
         p.add_legend()
         p.show()
 
-    return sortedPoly,psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle
+    return points, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle
 
 
 def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t):
