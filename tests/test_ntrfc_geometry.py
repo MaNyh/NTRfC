@@ -137,7 +137,7 @@ def test_midline_from_sides():
 
     points = np.stack((x[:-1], y[:-1], np.zeros(res * 2 - 1))).T
     poly = pv.PolyData(points)
-    sspoly, pspoly = extractSidePolys(ind_hk, ind_vk, poly)
+    sspoly, pspoly = extractSidePolys(ind_hk, ind_vk, poly,poly)
 
     mids = midline_from_sides(ind_hk, ind_vk, poly.points, pspoly, sspoly)
 
@@ -186,9 +186,11 @@ def test_extractSidePolys():
     points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2 - 1))).T
 
     poly = pv.PolyData(points)
-    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk, poly)
+    poly["A"]=np.ones(poly.number_of_points)
+    polyclean=pv.PolyData(points)
+    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk,polyclean,poly)
     # todo: this is probably not right. X[1:-1] or X[:-1]? i should not have to use a +1 here
-    assert ssPoly.number_of_points == psPoly.number_of_points + 1, "number of sidepoints are not equal "
+    assert ssPoly.number_of_points == psPoly.number_of_points +1, "number of sidepoints are not equal "
 
 
 def test_extract_geo_paras():
@@ -206,7 +208,7 @@ def test_extract_geo_paras():
     sorted_poly.rotate_z(angle)
 
     points, ps_poly, ss_poly, ind_vk, ind_hk, mids_poly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
-        sorted_poly.points, alpha)
+        sorted_poly, alpha)
 
     assert np.isclose(beta_leading, (angle + 90)), "wrong leading edge angle"
     assert np.isclose(beta_trailing, (angle + 90)), "wrong leading edge angle"
