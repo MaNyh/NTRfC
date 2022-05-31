@@ -6,7 +6,7 @@ import pyvista as pv
 def load_mesh(path_to_mesh):
     assert os.path.isfile(path_to_mesh), path_to_mesh + " is not a valid file"
     extension = os.path.splitext(path_to_mesh)[1]
-    if extension == ".vtk" or extension == ".vtp" or extension == ".vtu":
+    if extension == ".vtk" or extension == ".vtp" or extension == ".vtu" or extension == ".vtm":
         mesh = pv.read(path_to_mesh)
     elif extension == ".cgns":
         cgns = cgnsReader(path_to_mesh)
