@@ -9,7 +9,7 @@ def load_mesh(path_to_mesh):
     if extension == ".vtk" or extension == ".vtp" or extension == ".vtu" :
         mesh = pv.read(path_to_mesh)
     elif  extension == ".vtm":
-        multiBlockMesh = pv.read(cgns)
+        multiBlockMesh = pv.read(path_to_mesh)
         mesh = multiBlockMesh.combine()
     elif extension == ".cgns":
         cgns = cgnsReader(path_to_mesh)
