@@ -16,7 +16,12 @@ def load_mesh(path_to_mesh):
             mesh = pv.UnstructuredGrid(cgns)
         elif str(type(cgns)).find('vtkMultiBlockDataSet') != -1:
             multiBlockMesh = pv.MultiBlock(cgns)
-            mesh = multiBlockMesh.combine()
+            mesh = pv.UnstructuredGrid()
+            for domainId in range(multiBlockMesh.GetNumberOfBlocks()):
+                domain = multiBlockMesh.GetBlock(domainId)
+                for blockId in range(domain.GetNumberOfBlocks()):
+                    block = domain.GetBlock(blockId)
+                    mesh = mesh.merge(block)
     return mesh
 
 
