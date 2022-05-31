@@ -255,8 +255,8 @@ def extractSidePolys(ind_hk, ind_vk, sortedPoly,bladePoly):
         psPoly = pv.PolyData(side_one.points)
         ssPoly = pv.PolyData(side_two.points)
 
-    ssPoly=ssPoly.sample(bladePoly)
-    psPoly=psPoly.sample(bladePoly)
+    ssPoly=ssPoly.interpolate(bladePoly)
+    psPoly=psPoly.interpolate(bladePoly)
     return ssPoly, psPoly
 
 
