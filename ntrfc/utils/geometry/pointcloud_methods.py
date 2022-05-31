@@ -125,7 +125,7 @@ def mid_length(ind_1, ind_2, sorted_poly):
     :return: length
     """
 
-    ps_poly, ss_poly = extractSidePolys(ind_1, ind_2, sorted_poly)
+    ps_poly, ss_poly = extractSidePolys(ind_1, ind_2, sorted_poly,sorted_poly)
     mids_poly = midline_from_sides(ind_1, ind_2, sorted_poly.points, ps_poly, ss_poly)
     return mids_poly.length
 
@@ -174,7 +174,7 @@ def extract_vk_hk(sorted_poly, verbose=False):
         :param sorted_poly: pv.PolyData sorted
         :return: length
         """
-        psPoly, ssPoly = extractSidePolys(ind1, ind2, sorted_poly)
+        psPoly, ssPoly = extractSidePolys(ind1, ind2, sorted_poly,sorted_poly)
         midsPoly = midline_from_sides(ind1, ind2, sorted_poly.points, psPoly, ssPoly)
 
         return midsPoly.length
@@ -226,7 +226,7 @@ def extract_vk_hk(sorted_poly, verbose=False):
     return ind_hk, ind_vk
 
 
-def extractSidePolys(ind_hk, ind_vk, sortedPoly):
+def extractSidePolys(ind_hk, ind_vk, sortedPoly,bladePoly):
     xs, ys = list(sortedPoly.points[::, 0]), list(sortedPoly.points[::, 1])
 
     if ind_vk < ind_hk:
@@ -255,30 +255,30 @@ def extractSidePolys(ind_hk, ind_vk, sortedPoly):
         psPoly = pv.PolyData(side_one.points)
         ssPoly = pv.PolyData(side_two.points)
 
-    ssPoly=ssPoly.sample(sortedPoly)
-    psPoly=psPoly.sample(sortedPoly)
+    ssPoly=ssPoly.sample(bladePoly)
+    psPoly=psPoly.sample(bladePoly)
     return ssPoly, psPoly
 
 
-def extract_geo_paras(points, alpha, verbose=False):
+def extract_geo_paras(polyblade, alpha, verbose=False):
     """
     This function is extracting profile-data as stagger-angle, midline, psPoly, ssPoly and more from a set of points
     Be careful, you need a suitable alpha-parameter in order to get the right geometry
     The calculation of the leading-edge and trailing-edge index needs time and its not 100% reliable (yet)
     Keep in mind, to check the results!
-    :param points: array of points in 3d with the shape (n,3)
+    :param polyblade: pyvista polymesh of the blade
     :param alpha: nondimensional alpha-coefficient (calcConcaveHull)
     :param verbose: bool for plots
     :return: points, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing
     """
-
+    points = polyblade.points
     xs, ys = calc_concavehull(points[:, 0], points[:, 1], alpha)
-    points = np.stack((xs, ys, np.zeros(len(xs)))).T
-    sortedPoly = pv.PolyData(points)
+    sortedpoints = np.stack((xs, ys, np.zeros(len(xs)))).T
+    sortedPoly = pv.PolyData(sortedpoints)
 
     ind_hk, ind_vk = extract_vk_hk(sortedPoly)
-    psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly)
-    midsPoly = midline_from_sides(ind_hk, ind_vk, points, psPoly, ssPoly)
+    psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly,polyblade)
+    midsPoly = midline_from_sides(ind_hk, ind_vk, sortedpoints, psPoly, ssPoly)
 
     # compute angles from 2d-midline
     xmids, ymids = midsPoly.points[::, 0], midsPoly.points[::, 1]

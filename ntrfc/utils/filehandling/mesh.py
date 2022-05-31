@@ -6,7 +6,7 @@ import pyvista as pv
 def load_mesh(path_to_mesh):
     assert os.path.isfile(path_to_mesh), path_to_mesh + " is not a valid file"
     extension = os.path.splitext(path_to_mesh)[1]
-    if extension == ".vtk" or extension == ".vtp" or extension == ".vtu" or extension == ".vtm":
+    if extension == ".vtk" or extension == ".vtp" or extension == ".vtu":
         mesh = pv.read(path_to_mesh)
     elif extension == ".cgns":
         cgns = cgnsReader(path_to_mesh)
@@ -16,12 +16,7 @@ def load_mesh(path_to_mesh):
             mesh = pv.UnstructuredGrid(cgns)
         elif str(type(cgns)).find('vtkMultiBlockDataSet') != -1:
             multiBlockMesh = pv.MultiBlock(cgns)
-            mesh = pv.UnstructuredGrid()
-            for domainId in range(multiBlockMesh.GetNumberOfBlocks()):
-                domain = multiBlockMesh.GetBlock(domainId)
-                for blockId in range(domain.GetNumberOfBlocks()):
-                    block = domain.GetBlock(blockId)
-                    mesh = mesh.merge(block)
+            mesh = multiBlockMesh.combine()
     return mesh
 
 
