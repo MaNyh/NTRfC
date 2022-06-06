@@ -14,8 +14,7 @@ NTRfC
         :alt: Documentation Status
 
 
-
-Numerical Test Rig for Cascades. A workflow-library for cfd-analysis of cascade-flows
+Numerical Test Rig for Cascades.
 
 
 * Free software: MIT license
@@ -24,52 +23,16 @@ Numerical Test Rig for Cascades. A workflow-library for cfd-analysis of cascade-
 Installation
 --------
 
-install using 'pip install ntrfc'
+The easiest way to use this repository is to install ntrfc using 'pip install ntrfc'
 or install using 'python -m setup install'
 
 when installing from conda, you will run into issues with vtk while using a pip installation of ntrfc.
 simply run:
     'conda install -c conda-forge vtk'
 
-as a dev use "pip install -e ntrfc" for a linked install.
-this way you dont have to reinstall the package after altering the sourcecode.
+as a dev use "pip install -e ntrfc" for a linked install. this way you dont have to reinstall the package after altering the sourcecode.
+you might also want to install the dev-libraries in the requirements_dev.txt ('pip install -r requirements_dev.txt')
 
-use 'pip install -v requirements_dev' to install development-packages
-
-Features
---------
-
-database
-    - case_templates
-        templates can be installed via copying a structure of ascii-files in a directory and defining a schema
-postprocessing
-    - tbd
-preprocessing
-    - case_creation
-        tools for the definition of cases via templates
-    - geometry_creation
-        tools for the domain-definition of simulations. under construction
-    - mesh_creation
-        a library for meshing-scripts
-utils
-    - dictionaries
-        tools for dict-handling specialized for nested dicts
-    - filehandling
-        handling of different file-formats
-    - geometry
-        geometry-tools
-    - math
-        math-library
-    - pyvista_utils
-        mesh-handling and visualization
-
-    workflows:
-        -case_creation
-            create a (set of) simulation(s) using a template and configuration files
-
-
-    examples:
-        - gwk_compressor_casecreation
 
 Credits
 -------
