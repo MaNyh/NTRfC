@@ -125,7 +125,7 @@ def mid_length(ind_1, ind_2, sorted_poly):
     :return: length
     """
 
-    ps_poly, ss_poly = extractSidePolys(ind_1, ind_2, sorted_poly,sorted_poly)
+    ps_poly, ss_poly = extractSidePolys(ind_1, ind_2, sorted_poly, sorted_poly)
     mids_poly = midline_from_sides(ind_1, ind_2, sorted_poly.points, ps_poly, ss_poly)
     return mids_poly.length
 
@@ -135,21 +135,17 @@ def midline_from_sides(ind_hk, ind_vk, points, ps_poly, ss_poly):
     x_ss, y_ss = ss_poly.points[::, 0], ss_poly.points[::, 1]
 
     midsres = 100
-    if x_ps[0] < x_ps[-1]:
+    if x_ps[0] > x_ps[-1]:
         ax, ay = refine_spline(x_ps[::-1], y_ps[::-1], midsres)
     else:
         ax, ay = refine_spline(x_ps, y_ps, midsres)
-    if x_ss[0] < x_ss[-1]:
+    if x_ss[0] > x_ss[-1]:
         bx, by = refine_spline(x_ss[::-1], y_ss[::-1], midsres)
     else:
         bx, by = refine_spline(x_ss, y_ss, midsres)
     xmids, ymids = ((ax + bx) / 2, (ay + by) / 2)
-    xmids = np.array(xmids)[::-1][1:-1]
-    ymids = np.array(ymids)[::-1][1:-1]
-    xmids[0] = points[ind_vk][0]
-    ymids[0] = points[ind_vk][1]
-    xmids[-1] = points[ind_hk][0]
-    ymids[-1] = points[ind_hk][1]
+
+
     midsPoly = polyline_from_points(np.stack((xmids, ymids, np.zeros(len(ymids)))).T)
     return midsPoly
 
@@ -174,7 +170,7 @@ def extract_vk_hk(sorted_poly, verbose=False):
         :param sorted_poly: pv.PolyData sorted
         :return: length
         """
-        psPoly, ssPoly = extractSidePolys(ind1, ind2, sorted_poly,sorted_poly)
+        psPoly, ssPoly = extractSidePolys(ind1, ind2, sorted_poly)
         midsPoly = midline_from_sides(ind1, ind2, sorted_poly.points, psPoly, ssPoly)
 
         return midsPoly.length
@@ -226,37 +222,37 @@ def extract_vk_hk(sorted_poly, verbose=False):
     return ind_hk, ind_vk
 
 
-def extractSidePolys(ind_hk, ind_vk, sortedPoly,bladePoly):
-    xs, ys = list(sortedPoly.points[::, 0]), list(sortedPoly.points[::, 1])
+def extractSidePolys(ind_hk, ind_vk, sortedPoly):
+    # xs, ys = list(sortedPoly.points[::, 0]), list(sortedPoly.points[::, 1])
+    indices = np.arange(0, sortedPoly.number_of_points)
+    if ind_vk > ind_hk:
+        side_one_idx = indices[ind_hk-1:ind_vk]
+        side_two_idx = np.concatenate((indices[:ind_hk + 1][::-1], indices[ind_vk:][::-1]))
 
-    if ind_vk < ind_hk:
-        x_ss = xs[ind_vk:ind_hk + 1]
-        y_ss = ys[ind_vk:ind_hk + 1]
+    side_one = pv.PolyData(sortedPoly.points[side_one_idx])  # polyblade.extract_cells(index_sort)
+    for arr in sortedPoly.array_names:
+        if side_one.number_of_points==len(sortedPoly[arr]):
+            side_one[arr]=sortedPoly.point_data[arr][side_one_idx]
 
-        y_ps = ys[ind_hk:] + ys[:ind_vk + 1]
-        x_ps = xs[ind_hk:] + xs[:ind_vk + 1]
+    side_two = pv.PolyData(sortedPoly.points[side_two_idx])  # polyblade.extract_cells(index_sort)
+    for arr in sortedPoly.array_names:
+        if side_two.number_of_points==len(sortedPoly[arr]):
+            side_two[arr]=sortedPoly.point_data[arr][side_two_idx]
+    # side_one = sortedPoly.extract_points(side_one_idx)
+    # side_two = sortedPoly.extract_points(side_two_idx)
 
+    side_one_spline = polyline_from_points(side_one.points)
+    side_two_spline = polyline_from_points(side_two.points)
+
+    if side_one_spline.length > side_two_spline.length:
+
+        psPoly = side_two
+        ssPoly = side_one
     else:
-        x_ss = xs[ind_hk:ind_vk + 1]
-        y_ss = ys[ind_hk:ind_vk + 1]
 
-        y_ps = ys[ind_vk:] + ys[:ind_hk + 1]
-        x_ps = xs[ind_vk:] + xs[:ind_hk + 1]
+        psPoly = side_one
+        ssPoly = side_two
 
-    side_one = polyline_from_points(np.stack((x_ps, y_ps, np.zeros(len(x_ps)))).T)
-    side_two = polyline_from_points(np.stack((x_ss, y_ss, np.zeros(len(x_ss)))).T)
-
-    if side_one.length > side_two.length:
-
-        psPoly = pv.PolyData(side_two.points)
-        ssPoly = pv.PolyData(side_one.points)
-    else:
-
-        psPoly = pv.PolyData(side_one.points)
-        ssPoly = pv.PolyData(side_two.points)
-
-    ssPoly=ssPoly.interpolate(bladePoly)
-    psPoly=psPoly.interpolate(bladePoly)
     return ssPoly, psPoly
 
 
@@ -273,12 +269,19 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
     """
     points = polyblade.points
     xs, ys = calc_concavehull(points[:, 0], points[:, 1], alpha)
-    sortedpoints = np.stack((xs, ys, np.zeros(len(xs)))).T
-    sortedPoly = pv.PolyData(sortedpoints)
+
+    index_sort = [np.where(points[:, 0] == xs[i])[0][0] for i in range(len(xs)) if
+                  len(np.where(points[:, 0] == xs[i])) == 1 and np.where(points[:, 0] == xs[i]) == np.where(
+                      points[:, 1] == ys[i])]
+
+    sortedPoly = pv.PolyData(polyblade.points[index_sort])  # polyblade.extract_cells(index_sort)
+    for arr in polyblade.array_names:
+        if sortedPoly.number_of_points==len(polyblade[arr]):
+            sortedPoly[arr]=polyblade.point_data[arr][index_sort]
 
     ind_hk, ind_vk = extract_vk_hk(sortedPoly)
-    psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly,polyblade)
-    midsPoly = midline_from_sides(ind_hk, ind_vk, sortedpoints, psPoly, ssPoly)
+    psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly)
+    midsPoly = midline_from_sides(ind_hk, ind_vk, sortedPoly.points, psPoly, ssPoly)
 
     # compute angles from 2d-midline
     xmids, ymids = midsPoly.points[::, 0], midsPoly.points[::, 1]
