@@ -125,8 +125,8 @@ def mid_length(ind_1, ind_2, sorted_poly):
     :return: length
     """
 
-    ps_poly, ss_poly = extractSidePolys(ind_1, ind_2, sorted_poly, sorted_poly)
-    mids_poly = midline_from_sides(ind_1, ind_2, sorted_poly.points, ps_poly, ss_poly)
+    ps_poly, ss_poly = extractSidePolys(ind_1, ind_2, sorted_poly)
+    mids_poly = midline_from_sides(ps_poly, ss_poly)
     return mids_poly.length
 
 
@@ -174,7 +174,6 @@ def extract_vk_hk(sorted_poly, verbose=False):
         midsPoly = midline_from_sides(psPoly, ssPoly)
 
         return midsPoly.length
-
     xs, ys = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
     ind_1, ind_2 = calc_largedistant_idx(xs, ys)
     allowed_shift = 1
@@ -201,7 +200,7 @@ def extract_vk_hk(sorted_poly, verbose=False):
                 midLengths.append(checklength(ind_1_t, ind2_t, sorted_poly))
             else:
                 midLengths.append(0)
-        cids = midLengths.index(max(midLengths))
+        cids = midLengths.index(min(midLengths))
 
         ind_1_n, ind_2_n = combs[cids]
         midLength_new = checklength(ind_1_n, ind_2_n, sorted_poly)
@@ -213,24 +212,18 @@ def extract_vk_hk(sorted_poly, verbose=False):
         else:
             found = False
 
-    if sorted_poly.points[ind_1][0] > sorted_poly.points[ind_2][0]:
-        ind_vk = ind_2
-        ind_hk = ind_1
-    else:
-        ind_vk = ind_1
-        ind_hk = ind_2
-    return ind_hk, ind_vk
+    return ind_1, ind_2
 
 
-def extractSidePolys(ind_hk, ind_vk, sortedPoly):
+def extractSidePolys(ind_1, ind_2, sortedPoly):
     # xs, ys = list(sortedPoly.points[::, 0]), list(sortedPoly.points[::, 1])
     indices = np.arange(0, sortedPoly.number_of_points)
-    if ind_vk > ind_hk:
-        side_one_idx = indices[ind_hk-1:ind_vk]
-        side_two_idx = np.concatenate((indices[:ind_hk + 1][::-1], indices[ind_vk:][::-1]))
-    elif ind_vk < ind_hk:
-        side_one_idx = indices[ind_vk-1:ind_hk]
-        side_two_idx = np.concatenate((indices[:ind_vk + 1][::-1], indices[ind_hk:][::-1]))
+    if ind_2 > ind_1:
+        side_one_idx = indices[ind_1:ind_2+1]
+        side_two_idx = np.concatenate((indices[:ind_1][::-1], indices[ind_2:][::-1]))
+    if ind_1 > ind_2:
+        side_one_idx = indices[ind_2:ind_1+1]
+        side_two_idx = np.concatenate((indices[:ind_2+1][::-1], indices[ind_1:][::-1]))
 
     side_one = extract_points_fromsortedpoly(side_one_idx, sortedPoly)
     side_two = extract_points_fromsortedpoly(side_two_idx, sortedPoly)
@@ -273,8 +266,8 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
     xs, ys = calc_concavehull(points[:, 0], points[:, 1], alpha)
 
     index_sort = [np.where(points[:, 0] == xs[i])[0][0] for i in range(len(xs)) if
-                  len(np.where(points[:, 0] == xs[i])) == 1 and np.where(points[:, 0] == xs[i]) == np.where(
-                      points[:, 1] == ys[i])]
+                  len(np.where(points[:, 0] == xs[i])) == 1 and np.where(points[:, 0] == xs[i])[0][0] == np.where(
+                      points[:, 1] == ys[i])[0][0]]
 
     sortedPoly = pv.PolyData(polyblade.points[index_sort])  # polyblade.extract_cells(index_sort)
     for arr in polyblade.array_names:
@@ -304,7 +297,7 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
         p.add_legend()
         p.show()
 
-    return points, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle
+    return sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle
 
 
 def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t):
