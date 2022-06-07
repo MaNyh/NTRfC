@@ -1,5 +1,4 @@
 
-
 def test_calc_concavehull():
     """
     in these simple geometries, each point must be found by calcConcaveHull
@@ -77,8 +76,7 @@ def test_naca():
 
     prof_naca = [rand_naca_code() for i in range(6)]
     for i, p in enumerate(prof_naca):
-        X, Y = naca(p, 240, finite_te=np.random.choice([True, False]),
-                    half_cosine_spacing=np.random.choice([True, False]))
+        X, Y = naca(p, 240, half_cosine_spacing=np.random.choice([True, False]))
 
 
 def test_extract_vk_hk(verbose=False):
@@ -97,9 +95,9 @@ def test_extract_vk_hk(verbose=False):
     # digitstring = str(d1)+str(d2)+str(d3)+str(d4)
     # manifold problems with other profiles with veronoi-mid and other unoptimized code. therefor tests only 0009
     # todo: currently we cant test half_cosine_spacing profiles, as the resolution is too good for extract_vk_hk
-    X, Y = naca("6506", res, finite_te=False, half_cosine_spacing=False)
-    ind_hk_test = 0
-    ind_vk_test = res
+    X, Y = naca("6506", res, half_cosine_spacing=False)
+    ind_1 = 0
+    ind_2 = res
 
     points = np.stack((X, Y, np.zeros(len(X)))).T
 
@@ -118,11 +116,11 @@ def test_extract_vk_hk(verbose=False):
         p.add_mesh(sorted_poly)
         p.show()
 
-    assert (ind_hk == ind_hk_test or ind_hk == ind_vk_test * 2), "wrong hk-index chosen"
-    assert ind_vk == ind_vk_test, "wrong vk-index chosen"
+    assert (ind_hk == ind_1 or ind_hk == ind_2 * 2), "wrong hk-index chosen"
+    assert ind_vk == ind_2, "wrong vk-index chosen"
 
 
-def test_midline_from_sides():
+def test_midline_from_sides(verbose=False):
     from ntrfc.utils.geometry.pointcloud_methods import midline_from_sides
     from ntrfc.utils.math.vectorcalc import vecAbs
     from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
@@ -131,11 +129,11 @@ def test_midline_from_sides():
     import pyvista as pv
 
     res = 240
-    x, y = naca('0009', res, finite_te=False, half_cosine_spacing=True)
+    x, y = naca('0009', res, half_cosine_spacing=True)
     ind_hk = 0
     ind_vk = res
 
-    points = np.stack((x[:-1], y[:-1], np.zeros(res * 2 - 1))).T
+    points = np.stack((x[:], y[:], np.zeros(res * 2 +1))).T
     poly = pv.PolyData(points)
     sspoly, pspoly = extractSidePolys(ind_hk, ind_vk, poly)
 
@@ -143,7 +141,15 @@ def test_midline_from_sides():
 
     length = mids.length
     testlength = vecAbs(sspoly.points[0] - sspoly.points[-1])
+    if verbose:
+        poly["ids"] = np.arange(poly.number_of_points)
+        p = pv.Plotter()
+        p.add_mesh(poly)
+        p.add_mesh(mids)
+        p.add_mesh(poly.points[ind_hk], color="k")
+        p.add_mesh(poly.points[ind_vk], color="k")
 
+        p.show()
     assert length == testlength, "midline not accurate"
 
 
@@ -180,15 +186,14 @@ def test_extractSidePolys():
     digit_string = str(d1) + str(d2) + str(d3) + str(d4)
 
     res = 240
-    X, Y = naca(digit_string, res, finite_te=False, half_cosine_spacing=True)
+    X, Y = naca(digit_string, res, half_cosine_spacing=True)
     ind_hk = 0
     ind_vk = res
-    points = np.stack((X[:-1], Y[:-1], np.zeros(res * 2 - 1))).T
+    points = np.stack((X[:], Y[:], np.zeros(res * 2 + 1))).T
 
     poly = pv.PolyData(points)
-    poly["A"]=np.ones(poly.number_of_points)
-    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk,poly)
-    # todo: this is probably not right. X[1:-1] or X[:-1]? i should not have to use a +1 here
+    poly["A"] = np.ones(poly.number_of_points)
+    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk, poly)
     assert ssPoly.number_of_points == psPoly.number_of_points, "number of sidepoints are not equal "
 
 
@@ -202,7 +207,7 @@ def test_extract_geo_paras():
     angle = 20  # deg
     alpha = 1
     res = 200
-    xs, ys = naca(naca_code, res, finite_te=False, half_cosine_spacing=True)
+    xs, ys = naca(naca_code, res, half_cosine_spacing=True)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle)
 
