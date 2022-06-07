@@ -182,6 +182,7 @@ def extract_vk_hk(sorted_poly, verbose=False):
 
     checked_combs = {}
     found = True
+
     while (found):
 
         shifts = np.arange(-allowed_shift, allowed_shift + 1)
@@ -189,6 +190,7 @@ def extract_vk_hk(sorted_poly, verbose=False):
         ind_2_ts = (shifts + ind_2) % nopt
 
         combs = list(product(ind_1_ts, ind_2_ts))
+        # add combs entry to check weather the index combination was checked already
         for key in combs:
             if key not in checked_combs.keys():
                 checked_combs[key] = False
@@ -198,9 +200,10 @@ def extract_vk_hk(sorted_poly, verbose=False):
             if checked_combs[(ind_1_t, ind2_t)] == False:
                 checked_combs[(ind_1_t, ind2_t)] = True
                 midLengths.append(checklength(ind_1_t, ind2_t, sorted_poly))
+
             else:
                 midLengths.append(0)
-        cids = midLengths.index(min(midLengths))
+        cids = midLengths.index(max(midLengths))
 
         ind_1_n, ind_2_n = combs[cids]
         midLength_new = checklength(ind_1_n, ind_2_n, sorted_poly)
@@ -218,12 +221,21 @@ def extract_vk_hk(sorted_poly, verbose=False):
 def extractSidePolys(ind_1, ind_2, sortedPoly):
     # xs, ys = list(sortedPoly.points[::, 0]), list(sortedPoly.points[::, 1])
     indices = np.arange(0, sortedPoly.number_of_points)
-    if ind_2 > ind_1:
-        side_one_idx = indices[ind_1:ind_2+1]
-        side_two_idx = np.concatenate((indices[:ind_1][::-1], indices[ind_2:][::-1]))
-    if ind_1 > ind_2:
-        side_one_idx = indices[ind_2:ind_1+1]
-        side_two_idx = np.concatenate((indices[:ind_2+1][::-1], indices[ind_1:][::-1]))
+    # we have to split the spline differently, depending on weather the number of points is even or not
+    if len(indices)%2==0:
+        if ind_2 > ind_1:
+            side_one_idx = indices[ind_1:ind_2+1]
+            side_two_idx = np.concatenate((indices[:ind_1+1][::-1], indices[ind_2:][::-1]))
+        if ind_1 > ind_2:
+            side_one_idx = indices[ind_2:ind_1+1]
+            side_two_idx = np.concatenate((indices[:ind_2+1][::-1], indices[ind_1:][::-1]))
+    else:
+        if ind_2 > ind_1:
+            side_one_idx = indices[ind_1:ind_2+1]
+            side_two_idx = np.concatenate((indices[:ind_1][::-1], indices[ind_2:][::-1]))
+        if ind_1 > ind_2:
+            side_one_idx = indices[ind_2:ind_1+1]
+            side_two_idx = np.concatenate((indices[:ind_2][::-1], indices[ind_1:][::-1]))
 
     side_one = extract_points_fromsortedpoly(side_one_idx, sortedPoly)
     side_two = extract_points_fromsortedpoly(side_two_idx, sortedPoly)
@@ -294,6 +306,8 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
         p.add_mesh(ssPoly, color="black", label="ssPoly")
         p.add_mesh(midsPoly, color="black", label="midsPoly")
         p.add_mesh(pv.Line((0, 0, 0), (midsPoly.length, 0, 0)))
+        p.add_mesh(sortedPoly.points[ind_hk],color="red",point_size=5)
+        p.add_mesh(sortedPoly.points[ind_vk],color="orange",point_size=5)
         p.add_legend()
         p.show()
 
