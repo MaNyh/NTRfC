@@ -89,13 +89,13 @@ def test_extract_vk_hk(verbose=False):
     import numpy as np
     import pyvista as pv
 
-    res = 400
+    res = 240
 
     # d1,d2,d3,d4 = np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9),np.random.randint(0,9)
     # digitstring = str(d1)+str(d2)+str(d3)+str(d4)
     # manifold problems with other profiles with veronoi-mid and other unoptimized code. therefor tests only 0009
     # todo: currently we cant test half_cosine_spacing profiles, as the resolution is too good for extract_vk_hk
-    X, Y = naca("6506", res, half_cosine_spacing=False)
+    X, Y = naca("0009", res, half_cosine_spacing=False)
     ind_1 = 0
     ind_2 = res
 
@@ -103,7 +103,7 @@ def test_extract_vk_hk(verbose=False):
 
     profile_points = pv.PolyData(points)
 
-    random_angle = np.random.randint(-40, 40)
+    random_angle = 20#np.random.randint(-40, 40)
     profile_points.rotate_z(random_angle)
 
     sorted_poly = pv.PolyData(profile_points)
@@ -141,6 +141,7 @@ def test_midline_from_sides(verbose=False):
 
     length = mids.length
     testlength = vecAbs(sspoly.points[0] - sspoly.points[-1])
+
     if verbose:
         poly["ids"] = np.arange(poly.number_of_points)
         p = pv.Plotter()
@@ -148,8 +149,8 @@ def test_midline_from_sides(verbose=False):
         p.add_mesh(mids)
         p.add_mesh(poly.points[ind_hk], color="k")
         p.add_mesh(poly.points[ind_vk], color="k")
-
         p.show()
+
     assert length == testlength, "midline not accurate"
 
 
@@ -197,7 +198,7 @@ def test_extractSidePolys():
     assert ssPoly.number_of_points == psPoly.number_of_points, "number of sidepoints are not equal "
 
 
-def test_extract_geo_paras():
+def test_extract_geo_paras(verbose=False):
     from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
     from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
     import numpy as np
@@ -206,13 +207,23 @@ def test_extract_geo_paras():
     naca_code = "0009"
     angle = 20  # deg
     alpha = 1
-    res = 200
+    res = 240
     xs, ys = naca(naca_code, res, half_cosine_spacing=True)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle)
 
-    points, ps_poly, ss_poly, ind_vk, ind_hk, mids_poly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
+    poly, ps_poly, ss_poly, ind_vk, ind_hk, mids_poly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
         sorted_poly, alpha)
+
+    if verbose:
+        p = pv.Plotter()
+        p.add_mesh(ss_poly,color="g",label="ssPoly")
+        p.add_mesh(ps_poly,color="b",label="psPoly")
+        p.add_mesh(mids_poly)
+        p.add_mesh(poly.points[ind_hk], color="w",label="ind_hk")
+        p.add_mesh(poly.points[ind_vk], color="k",label="ind_vk")
+        p.add_legend()
+        p.show()
 
     assert np.isclose(beta_leading, (angle + 90)), "wrong leading edge angle"
     assert np.isclose(beta_trailing, (angle + 90)), "wrong leading edge angle"
