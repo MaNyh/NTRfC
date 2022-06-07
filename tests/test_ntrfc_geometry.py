@@ -137,9 +137,9 @@ def test_midline_from_sides():
 
     points = np.stack((x[:-1], y[:-1], np.zeros(res * 2 - 1))).T
     poly = pv.PolyData(points)
-    sspoly, pspoly = extractSidePolys(ind_hk, ind_vk, poly,poly)
+    sspoly, pspoly = extractSidePolys(ind_hk, ind_vk, poly)
 
-    mids = midline_from_sides(ind_hk, ind_vk, poly.points, pspoly, sspoly)
+    mids = midline_from_sides(pspoly, sspoly)
 
     length = mids.length
     testlength = vecAbs(sspoly.points[0] - sspoly.points[-1])
@@ -187,10 +187,9 @@ def test_extractSidePolys():
 
     poly = pv.PolyData(points)
     poly["A"]=np.ones(poly.number_of_points)
-    polyclean=pv.PolyData(points)
-    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk,polyclean,poly)
+    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk,poly)
     # todo: this is probably not right. X[1:-1] or X[:-1]? i should not have to use a +1 here
-    assert ssPoly.number_of_points == psPoly.number_of_points +1, "number of sidepoints are not equal "
+    assert ssPoly.number_of_points == psPoly.number_of_points, "number of sidepoints are not equal "
 
 
 def test_extract_geo_paras():
