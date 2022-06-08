@@ -256,11 +256,11 @@ def naca5(number, n, finite_te=False, half_cosine_spacing=False):
 
     return X,Z
 
-def naca(number, n, finite_te = False, half_cosine_spacing = False):
-    if len(number)==4:
-        return naca4(number, n, finite_te, half_cosine_spacing)
-    elif len(number)==5:
-        return naca5(number, n, finite_te, half_cosine_spacing)
+def naca(number, n, finite_te=False, half_cosine_spacing=True):
+    if len(number) == 4:
+        X, Y = naca4(number, n, finite_te, half_cosine_spacing)
+    elif len(number) == 5:
+        X, Y = naca5(number, n, finite_te, half_cosine_spacing)
     else:
         raise Exception
 
