@@ -258,8 +258,7 @@ def extractSidePolys(ind_1, ind_2, sortedPoly):
 def extract_points_fromsortedpoly(sorted_indices, sorted_poly):
     side_two = pv.PolyData(sorted_poly.points[sorted_indices])  # polyblade.extract_cells(index_sort)
     for arr in sorted_poly.array_names:
-        if side_two.number_of_points == len(sorted_poly[arr]):
-            side_two[arr] = sorted_poly.point_data[arr][sorted_indices]
+        side_two[arr] = sorted_poly.point_data[arr][sorted_indices]
     return side_two
 
 
