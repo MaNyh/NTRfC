@@ -38,45 +38,48 @@ def pyvista2gmsh_spline(sortedPoly,sspoly, pspoly, inletpoly, outletpoly, yupper
     # create curveloop
     blade = Entity.CurveLoop(bladecurves, mesh=my_mesh)
 
-    inletpts = []
-    inletcurves = []
-    for pt in inletpoly.points:
-        inletpts.append(Entity.Point(pt, mesh=my_mesh))
-    for i in range(len(inletpts)-1):
-        inletcurves.append(Entity.Curve([inletpts[i], inletpts[i+1]]))
-    #inlet = Entity.Spline(inletpts, mesh=my_mesh)
-
-    outletpts = []
-    outletcurves = []
-    for pt in outletpoly.points:
-        outletpts.append(Entity.Point(pt, mesh=my_mesh))
-    for i in range(len(inletpts)-1):
-        outletcurves.append(Entity.Curve([outletpts[i],outletpts[i+1]]))
 
     yupperpolypts = []
     yupperpolycurves = []
     for pt in yupperpoly.points:
         yupperpolypts.append(Entity.Point(pt, mesh=my_mesh))
-    for i in range(len(inletpts)-1):
-        yupperpolycurves.append(Entity.Curve([yupperpolypts[i],yupperpolypts[i+1]]))
+    yupperpolypts.reverse()
+    for i in range(len(yupperpolypts)-1):
+        yupperpolycurves.append(Entity.Curve([yupperpolypts[i],yupperpolypts[i+1]], mesh=my_mesh))
 
     ylowerpts = []
     ylowerpolycurves = []
     for pt in ylowerpoly.points:
         ylowerpts.append(Entity.Point(pt, mesh=my_mesh))
+    for i in range(len(ylowerpts)-1):
+        ylowerpolycurves.append(Entity.Curve([ylowerpts[i],ylowerpts[i+1]], mesh=my_mesh))
+
+    inletpts = [ylowerpts[-1],yupperpolypts[0]]
+    inletcurves = []
+    # for pt in inletpoly.points:
+    #     inletpts.append(Entity.Point(pt, mesh=my_mesh))
     for i in range(len(inletpts)-1):
-        ylowerpolycurves.append(Entity.Curve([ylowerpts[i],ylowerpts[i+1]]))
+        inletcurves.append(Entity.Curve([inletpts[i], inletpts[i+1]], mesh=my_mesh))
+    #inlet = Entity.Spline(inletpts, mesh=my_mesh)
+
+    outletpts = [yupperpolypts[-1],ylowerpts[0]]
+    outletcurves = []
+    # for pt in outletpoly.points:
+    #     outletpts.append(Entity.Point(pt, mesh=my_mesh))
+    outletpts.reverse()
+    for i in range(len(outletpts)-1):
+        outletcurves.append(Entity.Curve([outletpts[i],outletpts[i+1]], mesh=my_mesh))
+
 
 
     # create surface
     domaincurveloop = Entity.CurveLoop([*inletcurves,*yupperpolycurves,*outletcurves,*ylowerpolycurves], mesh=my_mesh)
-    domainface = Entity.PlaneSurface([domaincurveloop], mesh=my_mesh)
-    bladeface = Entity.PlaneSurface([blade], mesh=my_mesh)
+    domainface = Entity.PlaneSurface([domaincurveloop,blade], mesh=my_mesh)
 
     # create fields
     f1 = Field.MathEval(mesh=my_mesh)
     grading = 1.1
-    he = 0.005
+    he = 0.01
     f1.F = '(abs(y-0.5)*({grading}-1)+{he})/{grading}'.format(grading=grading,
                                                               he=he)
     # create minimum field
