@@ -60,10 +60,10 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
 
     outletPoly = pv.Line(*outlet_pts)
 
-    return sortedPoly, per_y_upper, per_y_lower, inletPoly, outletPoly
+    return sortedPoly, psPoly, ssPoly,  per_y_upper, per_y_lower, inletPoly, outletPoly
 
 
-def cascade_3d_domain(sortedPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan, avdr=1, verbose=False):
+def cascade_3d_domain(psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan, avdr=1, verbose=False):
 
     x_lower =inletPoly.bounds[0]
     x_upper =outletPoly.bounds[0]
@@ -101,6 +101,7 @@ def cascade_3d_domain(sortedPoly, per_y_upper, per_y_lower, inletPoly, outletPol
     sortedPoly=sortedPoly.clip_surface(per_z_lower)
     sortedPoly=sortedPoly.clip_surface(per_z_upper,invert=False)
 
+
     if verbose:
         p = pv.Plotter()
         p.add_mesh(sortedPoly,color="r")
@@ -108,11 +109,9 @@ def cascade_3d_domain(sortedPoly, per_y_upper, per_y_lower, inletPoly, outletPol
         p.add_mesh(per_y_lower,opacity=0.9)
         p.add_mesh(inletPoly,opacity=0.9,color="white")
         p.add_mesh(outletPoly,opacity=0.9,color="white")
-        # p.add_mesh(per_z_lower,opacity=0.9)
-        # p.add_mesh(per_z_upper,opacity=0.9,color="r")
         p.show()
 
-    return sortedPoly,per_y_upper,per_y_lower,inletPoly,outletPoly,per_z_lower,per_z_upper
+    return sortedPoly,per_y_upper.extract_feature_edges(),per_y_lower.extract_feature_edges(),inletPoly.extract_feature_edges(),outletPoly.extract_feature_edges(),per_z_lower,per_z_upper
 
 
 
@@ -121,6 +120,7 @@ def gmsh_3d_domain(bladesurface_3d,y_lower_3d,y_upper_3d,inlet_3d,outlet_3d,z_lo
     # create Mesh class instance
     my_mesh = Mesh()
     yper_surface = Entity.SurfaceEntity()
+    faces = []
     for cid in range(y_lower_3d.number_of_cells):
         cface = y_lower_3d.extract_cells(cid)
         faces.append(cface)
