@@ -1,7 +1,5 @@
 import numpy as np
 import pyvista as pv
-from py2gmsh import (Mesh, Entity, Field)
-
 
 from ntrfc.utils.pyvista_utils.line import polyline_from_points
 from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras, calcMidPassageStreamLine
@@ -68,70 +66,56 @@ def cascade_3d_domain(psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outle
     x_lower =inletPoly.bounds[0]
     x_upper =outletPoly.bounds[0]
 
-    merged_per = per_y_upper.merge(per_y_lower)
-    y_lower =merged_per.bounds[2]
-    y_upper =merged_per.bounds[3]
+    def compute_transform(point,span,avdr,x_lower,x_upper,sign=1):
+        l = abs(x_lower-x_upper)
+        x = abs(point[0]-x_upper) / l
+        return np.array([0,0,sign*span*(1+avdr*x)])+point
 
-    avdr_zdiff_inletoutlet = zspan / 2 * avdr
+    def transform(avdr, poly, x_lower, x_upper, zspan,sign):
+        poly_copy = poly.copy()
+        for idx, pt in enumerate(poly_copy.points):
+            poly_copy.points[idx] = compute_transform(pt, zspan, avdr, x_lower, x_upper, sign)
+        return poly_copy
 
-    domainwidth = abs(y_upper - y_lower)
-    # construct a unit-vector-like spline
-    per_z_lower = pv.Line((x_lower, y_upper ,zspan / 2 ), (x_upper,y_upper, avdr_zdiff_inletoutlet))
-    per_z_upper = pv.Line((x_lower, y_upper, -zspan / 2 ), (x_upper, y_upper, -avdr_zdiff_inletoutlet))
+    psPoly_lowz = transform(avdr, psPoly, x_lower, x_upper, zspan, -1)
+    psPoly_highz = transform(avdr, psPoly, x_lower, x_upper, zspan, 1)
 
-    per_z_lower = per_z_lower.extrude((0, domainwidth, 0))
-    per_z_upper = per_z_upper.extrude((0, domainwidth, 0))
-    per_z_lower.points-=np.array([0,domainwidth,0])
-    per_z_upper.points-=np.array([0,domainwidth,0])
+    ssPoly_lowz = transform(avdr, ssPoly, x_lower, x_upper, zspan, -1)
+    ssPoly_highz = transform(avdr, ssPoly, x_lower, x_upper, zspan, 1)
 
-    max_zdiff= 2*avdr_zdiff_inletoutlet
-    per_y_upper=polyline_from_points(per_y_upper.points)
-    per_y_lower=polyline_from_points(per_y_lower.points)
-    sortedPoly=polyline_from_points(np.array([*sortedPoly.points,sortedPoly.points[0]]))
-    sortedPoly.translate((0,0,-max_zdiff/2),inplace=True).extrude((0,0,max_zdiff),inplace=True)
-    per_y_upper.translate((0,0,-max_zdiff/2),inplace=True).extrude((0,0,max_zdiff),inplace=True)
-    per_y_lower.translate((0,0,-max_zdiff/2),inplace=True).extrude((0,0,max_zdiff),inplace=True)
-    inletPoly.translate((0,0,-zspan/2),inplace=True).extrude((0,0,zspan),inplace=True)
-    outletPoly.translate((0,0,-max_zdiff/2),inplace=True).extrude((0,0,max_zdiff),inplace=True)
+    per_y_upper_lowz = transform(avdr, per_y_upper, x_lower, x_upper, zspan, -1)
+    per_y_upper_highz = transform(avdr, per_y_upper, x_lower, x_upper, zspan, 1)
 
-    per_y_upper=per_y_upper.clip_surface(per_z_lower)
-    per_y_lower=per_y_lower.clip_surface(per_z_lower)
-    per_y_upper=per_y_upper.clip_surface(per_z_upper,invert=False)
-    per_y_lower=per_y_lower.clip_surface(per_z_upper,invert=False)
-    sortedPoly=sortedPoly.clip_surface(per_z_lower)
-    sortedPoly=sortedPoly.clip_surface(per_z_upper,invert=False)
+    per_y_lower_lowz = transform(avdr, per_y_lower, x_lower, x_upper, zspan, -1)
+    per_y_lower_highz = transform(avdr, per_y_lower, x_lower, x_upper, zspan, 1)
 
+    inletPoly_lowz = transform(avdr, inletPoly, x_lower, x_upper, zspan, -1)
+    inletPoly_highz = transform(avdr, inletPoly, x_lower, x_upper, zspan, 1)
+
+    outletPoly_lowz = transform(avdr, outletPoly, x_lower, x_upper, zspan, -1)
+    outletPoly_highz = transform(avdr, outletPoly, x_lower, x_upper, zspan, 1)
 
     if verbose:
         p = pv.Plotter()
-        p.add_mesh(sortedPoly,color="r")
-        p.add_mesh(per_y_upper,opacity=0.9)
-        p.add_mesh(per_y_lower,opacity=0.9)
-        p.add_mesh(inletPoly,opacity=0.9,color="white")
-        p.add_mesh(outletPoly,opacity=0.9,color="white")
+        p.add_mesh(psPoly_lowz,color="r")
+        p.add_mesh(psPoly_highz,opacity=0.9)
+        p.add_mesh(ssPoly_lowz,opacity=0.9)
+        p.add_mesh(ssPoly_highz,opacity=0.9,color="white")
+        p.add_mesh(per_y_upper_lowz,opacity=0.9,color="white")
+        p.add_mesh(per_y_upper_highz,opacity=0.9,color="white")
+        p.add_mesh(per_y_lower_lowz,opacity=0.9,color="white")
+        p.add_mesh(per_y_lower_highz,opacity=0.9,color="white")
+        p.add_mesh(inletPoly_lowz,opacity=0.9,color="white")
+        p.add_mesh(inletPoly_highz,opacity=0.9,color="white")
+        p.add_mesh(outletPoly_lowz,opacity=0.9,color="white")
+        p.add_mesh(outletPoly_highz,opacity=0.9,color="white")
         p.show()
 
     return sortedPoly,per_y_upper.extract_feature_edges(),per_y_lower.extract_feature_edges(),inletPoly.extract_feature_edges(),outletPoly.extract_feature_edges(),per_z_lower,per_z_upper
 
 
 
-def gmsh_3d_domain(bladesurface_3d,y_lower_3d,y_upper_3d,inlet_3d,outlet_3d,z_lower_3d,z_upper_3d):
-    filename = "bla.geo"
-    # create Mesh class instance
-    my_mesh = Mesh()
-    yper_surface = Entity.SurfaceEntity()
-    faces = []
-    for cid in range(y_lower_3d.number_of_cells):
-        cface = y_lower_3d.extract_cells(cid)
-        faces.append(cface)
-        cfaceedges = cface.extract_all_edges()
-        facecurveset = []
-        for eidc in range(cfaceedges.number_of_cells):
-            edge=cfaceedges.extract_cells(eidc)
-            facecurveset.append(Entity.Curve([edge.points[0], edge.points[0]]))
 
-        ll1 = Entity.CurveLoop(facecurveset, mesh=my_mesh)
 
-        # create surface
-        s1 = Entity.PlaneSurface([ll1], mesh=my_mesh)
-    return 0
+
+

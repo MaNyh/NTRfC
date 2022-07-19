@@ -1,5 +1,5 @@
 from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
-from ntrfc.utils.geometry.domaingen_cascade import cascade_2d_domain,cascade_3d_domain,gmsh_3d_domain
+from ntrfc.utils.geometry.domaingen_cascade import cascade_2d_domain,cascade_3d_domain
 import pyvista as pv
 
 
@@ -15,14 +15,13 @@ sortedPoly,psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cas
 # p.add_mesh(outletPoly)
 # p.show()
 #
-# sortedPoly_3d,per_y_upper_3d,per_y_lower_3d,inletPoly_3d,outletPoly_3d ,per_z_lower,per_z_upper= cascade_3d_domain(sortedPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, 0.5, 2, verbose=False)
+sortedPoly_3d,per_y_upper_3d,per_y_lower_3d,inletPoly_3d,outletPoly_3d ,per_z_lower,per_z_upper= cascade_3d_domain(psPoly, ssPoly,  per_y_upper, per_y_lower, inletPoly, outletPoly, 0.04, 0.5, verbose=False)
 
-#gmsh_3d_domain(sortedPoly_3d,per_y_upper_3d,per_y_lower_3d,inletPoly_3d,outletPoly_3d,per_z_lower,per_z_upper )
 
 
 # todo: use py
 from py2gmsh import (Mesh, Entity, Field)
-def pyvista2gmsh_spline(sortedPoly,sspoly, pspoly, inletpoly, outletpoly, yupperpoly, ylowerpoly):
+def pyvista2gmsh_spline(sspoly, pspoly, yupperpoly, ylowerpoly):
     my_mesh = Mesh()
     bladepts = []
     sortedpoints_ps_to_ss = [*pspoly.points, *sspoly.points[::-1]]
@@ -56,16 +55,11 @@ def pyvista2gmsh_spline(sortedPoly,sspoly, pspoly, inletpoly, outletpoly, yupper
 
     inletpts = [ylowerpts[-1],yupperpolypts[0]]
     inletcurves = []
-    # for pt in inletpoly.points:
-    #     inletpts.append(Entity.Point(pt, mesh=my_mesh))
     for i in range(len(inletpts)-1):
         inletcurves.append(Entity.Curve([inletpts[i], inletpts[i+1]], mesh=my_mesh))
-    #inlet = Entity.Spline(inletpts, mesh=my_mesh)
 
     outletpts = [yupperpolypts[-1],ylowerpts[0]]
     outletcurves = []
-    # for pt in outletpoly.points:
-    #     outletpts.append(Entity.Point(pt, mesh=my_mesh))
     outletpts.reverse()
     for i in range(len(outletpts)-1):
         outletcurves.append(Entity.Curve([outletpts[i],outletpts[i+1]], mesh=my_mesh))
@@ -99,5 +93,5 @@ def pyvista2gmsh_spline(sortedPoly,sspoly, pspoly, inletpoly, outletpoly, yupper
 def gmsh_save_mesh(gmeshmesh,filename):
     gmeshmesh.writeGeo(filename)
 
-blade_gmshgeo = pyvista2gmsh_spline(sortedPoly,psPoly, ssPoly,inletPoly, outletPoly ,per_y_upper, per_y_lower )
+blade_gmshgeo = pyvista2gmsh_spline(psPoly, ssPoly, per_y_upper, per_y_lower )
 gmsh_save_mesh(blade_gmshgeo,"blade.geo")
