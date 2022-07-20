@@ -275,7 +275,7 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
     """
     points = polyblade.points
     xs, ys = calc_concavehull(points[:, 0], points[:, 1], alpha)
-
+    #use only real points. dont make up new points which have new rounding errors
     index_sort = [np.where(points[:, 0] == xs[i])[0][0] for i in range(len(xs)) if
                   len(np.where(points[:, 0] == xs[i])) == 1 and np.where(points[:, 0] == xs[i])[0][0] == np.where(
                       points[:, 1] == ys[i])[0][0]]
@@ -288,7 +288,6 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
     ind_hk, ind_vk = extract_vk_hk(sortedPoly)
     psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly)
     midsPoly = midline_from_sides(psPoly, ssPoly)
-
     # compute angles from 2d-midline
     xmids, ymids = midsPoly.points[::, 0], midsPoly.points[::, 1]
     vk_tangent = np.stack((xmids[0] - xmids[1], ymids[0] - ymids[1], 0)).T

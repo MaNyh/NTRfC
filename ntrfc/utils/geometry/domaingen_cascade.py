@@ -61,7 +61,7 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
     return sortedPoly, psPoly, ssPoly,  per_y_upper, per_y_lower, inletPoly, outletPoly
 
 
-def cascade_3d_domain(psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan, avdr=1, verbose=False):
+def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan, avdr=1, verbose=False):
 
     x_lower =inletPoly.bounds[0]
     x_upper =outletPoly.bounds[0]
@@ -76,6 +76,9 @@ def cascade_3d_domain(psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outle
         for idx, pt in enumerate(poly_copy.points):
             poly_copy.points[idx] = compute_transform(pt, zspan, avdr, x_lower, x_upper, sign)
         return poly_copy
+
+    sortedPoly_lowz = transform(avdr, sortedPoly, x_lower, x_upper, zspan, -1)
+    sortedPoly_high = transform(avdr, sortedPoly, x_lower, x_upper, zspan, 1)
 
     psPoly_lowz = transform(avdr, psPoly, x_lower, x_upper, zspan, -1)
     psPoly_highz = transform(avdr, psPoly, x_lower, x_upper, zspan, 1)
@@ -111,7 +114,10 @@ def cascade_3d_domain(psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outle
         p.add_mesh(outletPoly_highz,opacity=0.9,color="white")
         p.show()
 
-    return sortedPoly,per_y_upper.extract_feature_edges(),per_y_lower.extract_feature_edges(),inletPoly.extract_feature_edges(),outletPoly.extract_feature_edges(),per_z_lower,per_z_upper
+    return sortedPoly_lowz,sortedPoly_high,per_y_upper_lowz,per_y_upper_highz,\
+           per_y_lower_lowz,per_y_lower_highz,\
+           inletPoly_lowz,inletPoly_highz,\
+           outletPoly_lowz,outletPoly_highz
 
 
 
