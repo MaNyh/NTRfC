@@ -3,7 +3,7 @@ from ntrfc.utils.geometry.domaingen_cascade import cascade_2d_domain,cascade_3d_
 import pyvista as pv
 from py2gmsh import (Mesh, Entity, Field)
 
-profilepoints2d = naca("6504", 1024, finite_te=False, half_cosine_spacing=True)
+profilepoints2d = naca("6504", 260, finite_te=False, half_cosine_spacing=True)
 
 sortedPoly,psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cascade_2d_domain(profilepoints2d,-0.9,0.2,0.4,"m",0.001,1, verbose=False)
 
@@ -29,19 +29,58 @@ def pyvista2gmsh_3d(sortedPoly_lowz,sortedPoly_high,per_y_upper_lowz,per_y_upper
         numpts = len(gmshpoints)
         for idx in range(numpts):
             p1 = gmshpoints[idx]
-            p2 = gmshpoints[(idx + 1) % numpts]
+            p2 = gmshpoints[(idx+1) % numpts]
             gmshcurves.append(Entity.Curve([p1, p2], mesh=my_mesh))
         curveloop = Entity.CurveLoop(gmshcurves, mesh=my_mesh)
         return curveloop
 
-    lower_bladecurve = curveloop_gen([*sortedPoly_lowz.points], my_mesh=my_mesh)
-    upper_bladecurve = curveloop_gen([*sortedPoly_high.points], my_mesh=my_mesh)
-    lower_domain = curveloop_gen([per_y_lower_lowz.points[-1], per_y_lower_lowz.points[0], *per_y_upper_lowz.points,
-                                  per_y_upper_lowz.points[-1], per_y_upper_lowz.points[0], *per_y_lower_lowz.points], my_mesh=my_mesh)
-    upper_domain = curveloop_gen([per_y_lower_highz.points[-1], per_y_lower_highz.points[0], *per_y_upper_highz.points,
-                                  per_y_upper_highz.points[-1], per_y_lower_highz.points[0], *per_y_lower_highz.points], my_mesh=my_mesh)
-    domainface_low = Entity.PlaneSurface([lower_domain, lower_bladecurve], mesh=my_mesh)
-    domainface_high = Entity.PlaneSurface([upper_domain, upper_bladecurve], mesh=my_mesh)
+    def curves_gen(my_mesh, pointlist):
+        gmshpoints = []
+        sortedpoints_ps_to_ss_lower = pointlist
+        for pt in sortedpoints_ps_to_ss_lower:
+            gmshpoints.append(Entity.Point(pt, mesh=my_mesh))
+        gmshcurves = []
+        numpts = len(gmshpoints)
+        for idx in range(numpts-1):
+            p1 = gmshpoints[idx]
+            p2 = gmshpoints[(idx + 1) % numpts]
+            gmshcurves.append(Entity.Curve([p1, p2], mesh=my_mesh))
+        return gmshcurves
+
+    lower_blade_curve = curveloop_gen([*sortedPoly_lowz.points], my_mesh=my_mesh)
+    upper_blade_curve = curveloop_gen([*sortedPoly_high.points], my_mesh=my_mesh)
+
+    inlet_line_lowz= curves_gen(my_mesh,[per_y_lower_lowz.points[-1], per_y_upper_lowz.points[-1]])
+    per_y_upper_line_lowz =  curves_gen(my_mesh,[*per_y_upper_lowz.points[::-1]])
+    outlet_line_lowz = curves_gen(my_mesh,[per_y_upper_lowz.points[0], per_y_lower_lowz.points[0]])
+    per_y_lower_line_lowz = curves_gen(my_mesh,[*per_y_lower_lowz.points[::-1]])
+    lower_domain_curve = Entity.CurveLoop([*inlet_line_lowz, *per_y_upper_line_lowz ,
+                                           *outlet_line_lowz, *per_y_lower_line_lowz], mesh=my_mesh)
+
+
+    inlet_line_highz= curves_gen(my_mesh,[per_y_lower_highz.points[-1], per_y_upper_highz.points[-1]])
+    per_y_upper_line_highz =  curves_gen(my_mesh,[*per_y_upper_highz.points[::-1]])
+    outlet_line_highz = curves_gen(my_mesh,[per_y_upper_highz.points[0], per_y_lower_highz.points[0]])
+    per_y_lower_line_highz = curves_gen(my_mesh,[*per_y_lower_highz.points[::-1]])
+    upper_domain_curve = Entity.CurveLoop([*inlet_line_highz, *per_y_upper_line_highz ,
+                                           *outlet_line_highz, *per_y_lower_line_highz], mesh=my_mesh)
+
+    # todo from hereon it is fishy
+    # work on ylower_curveloop and try tofigure out how the curves have to be sorted. if necessary adapt curves_gen - calls
+
+    inlet_lowtohigh_lower= curves_gen(my_mesh,[per_y_lower_lowz.points[-1],per_y_lower_highz.points[-1]])
+    inlet_lowtohigh_upper = curves_gen(my_mesh,[per_y_upper_highz.points[-1],per_y_lower_highz.points[-1]])
+    outlet_hightolow_lower= curves_gen(my_mesh,[per_y_lower_highz.points[0],per_y_lower_lowz.points[0]])
+    outlet_lowtohigh_upper = curves_gen(my_mesh,[per_y_upper_highz.points[0],per_y_lower_highz.points[0]])
+
+    ylower_curveloop =Entity.CurveLoop([*inlet_lowtohigh_lower,*per_y_lower_line_highz,*outlet_hightolow_lower,*per_y_lower_line_lowz],mesh=my_mesh)
+
+    outlet_curve=curveloop_gen([per_y_lower_lowz.points[-1],per_y_lower_highz.points[-1], per_y_upper_highz.points[-1], per_y_upper_lowz.points[-1]], my_mesh=my_mesh)
+    inlet_curve=curveloop_gen([per_y_lower_lowz.points[0],per_y_lower_highz.points[0], per_y_upper_highz.points[0], per_y_upper_lowz.points[0]], my_mesh=my_mesh)
+    inletface = Entity.PlaneSurface([inlet_curve], mesh=my_mesh)
+    outletface = Entity.PlaneSurface([outlet_curve], mesh=my_mesh)
+    zspan_low_face = Entity.PlaneSurface([lower_domain_curve,lower_blade_curve], mesh=my_mesh)
+    zspan_high_face = Entity.PlaneSurface([upper_domain_curve,upper_blade_curve], mesh=my_mesh)
 
     # create fields
     f1 = Field.MathEval(mesh=my_mesh)
@@ -63,7 +102,7 @@ def pyvista2gmsh_3d(sortedPoly_lowz,sortedPoly_high,per_y_upper_lowz,per_y_upper
     my_mesh.Coherence = True
     my_mesh.writeGeo(filename)
 
-# todo: use py
+
 
 def pyvista2gmsh_2d(sspoly, pspoly, yupperpoly, ylowerpoly,filename):
     my_mesh = Mesh()
