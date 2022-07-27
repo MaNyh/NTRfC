@@ -107,6 +107,15 @@ def pyvista2gmsh_3d(sortedPoly_lowz,sortedPoly_high,per_y_upper_lowz,per_y_upper
     inlet_face = Entity.PlaneSurface([inlet_curveloop],mesh=my_mesh)
 
 
+    outlet_curves = [Entity.Curve([lower_outlet_points[0],upper_outlet_points[0]],mesh=my_mesh),
+                    *upper_outlet_curves,
+                    Entity.Curve([upper_outlet_points[-1], lower_outlet_points[-1]], mesh=my_mesh),
+                    *lower_outlet_curves
+                    ]
+
+    outlet_curveloop = Entity.CurveLoop(outlet_curves,mesh=my_mesh)
+
+    outlet_face = Entity.PlaneSurface([outlet_curveloop],mesh=my_mesh)
 
     # inlet_lowtohigh_lower= curves_gen(my_mesh,[per_y_lower_lowz.points[-1],per_y_lower_highz.points[-1]])
     # inlet_lowtohigh_upper = curves_gen(my_mesh,[per_y_upper_highz.points[-1],per_y_lower_highz.points[-1]])
