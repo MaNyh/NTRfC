@@ -96,19 +96,18 @@ def pyvista2gmsh_3d(sortedPoly_lowz,sortedPoly_high,per_y_upper_lowz,per_y_upper
 
     upper_domain_face = Entity.PlaneSurface([upper_domain_curveloop,upper_blade_curveloop], mesh=my_mesh)
 
+    inlet_curves = [Entity.Curve([lower_inlet_points[0],upper_inlet_points[0]],mesh=my_mesh),
+                    *upper_inlet_curves,
+                    Entity.Curve([upper_inlet_points[-1], lower_inlet_points[-1]], mesh=my_mesh),
+                    *lower_inlet_curves
+                    ]
+
+    inlet_curveloop = Entity.CurveLoop(inlet_curves,mesh=my_mesh)
+
+    inlet_face = Entity.PlaneSurface([inlet_curveloop],mesh=my_mesh)
 
 
-    #, *per_y_lower_line_lowz
-    # inlet_line_highz= curves_gen(my_mesh,[per_y_lower_highz.points[-1], per_y_upper_highz.points[-1]])
-    # per_y_upper_line_highz =  curves_gen(my_mesh,[*per_y_upper_highz.points[::-1]])
-    # outlet_line_highz = curves_gen(my_mesh,[per_y_upper_highz.points[0], per_y_lower_highz.points[0]])
-    # per_y_lower_line_highz = curves_gen(my_mesh,[*per_y_lower_highz.points[::-1]])
-    # upper_domain_curve = Entity.CurveLoop([*inlet_line_highz, *per_y_upper_line_highz ,
-    #                                        *outlet_line_highz, *per_y_lower_line_highz], mesh=my_mesh)
-    #
-    # # todo from hereon it is fishy
-    # # work on ylower_curveloop and try tofigure out how the curves have to be sorted. if necessary adapt curves_gen - calls
-    #
+
     # inlet_lowtohigh_lower= curves_gen(my_mesh,[per_y_lower_lowz.points[-1],per_y_lower_highz.points[-1]])
     # inlet_lowtohigh_upper = curves_gen(my_mesh,[per_y_upper_highz.points[-1],per_y_lower_highz.points[-1]])
     # outlet_hightolow_lower= curves_gen(my_mesh,[per_y_lower_highz.points[0],per_y_lower_lowz.points[0]])
