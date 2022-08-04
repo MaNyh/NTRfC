@@ -14,6 +14,13 @@ cache:
   paths:
     - .cache/pip
     - venv/
+    
+before_script:
+  - python -m pip install --upgrade pip
+  - python --version  # For debugging
+  - pip install virtualenv
+  - virtualenv venv
+  - source venv/bin/activate
 
 stages:          # List of stages for jobs, and their order of execution
   - build
