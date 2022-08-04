@@ -52,8 +52,8 @@ lint-test-job:   # This job also runs in the test stage.
   script:
     - pip install flake8 pytest
     - ls
-    - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude='.git', '__pycache__', '.tox', '.eggs', '*.egg' , 'venv'
-    - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics   --exclude='.git', '__pycache__', '.tox', '.eggs', '*.egg' , 'venv'
+    - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude='venv'
+    - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics   --exclude='venv'
 
 deploy-job:      # This job runs in the deploy stage.
   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
