@@ -12,7 +12,7 @@ image: continuumio/miniconda3:latest
 
 
 before_script:
-  - conda env create -n ntrfc python=3.9
+  - conda create -n ntrfc python=3.9
   - conda activate ntrfc
   - python -m pip install --upgrade pip
   
