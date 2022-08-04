@@ -36,6 +36,7 @@ build-job:       # This job runs in the build stage, which runs first.
 test:       # This job runs in the build stage, which runs first.
   stage: test
   script:
+    - apt-get update && apt-get install libgl1
     - pip install pytest
     - pytest tests/.
  
