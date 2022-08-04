@@ -51,6 +51,7 @@ lint-test-job:   # This job also runs in the test stage.
   stage: test    # It can run at the same time as unit-test-job (in parallel).
   script:
     - pip install flake8 pytest
+    - ls
     - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
     - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
