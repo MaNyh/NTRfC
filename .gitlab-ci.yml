@@ -28,6 +28,7 @@ before_script:
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
+  - apt install libgl1-mesa-glx
 
 
 stages:          # List of stages for jobs, and their order of execution
