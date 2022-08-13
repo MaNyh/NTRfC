@@ -23,20 +23,15 @@ before_script:
   - source venv/bin/activate
 
 stages:          # List of stages for jobs, and their order of execution
-  - build
   - test
 #  - deploy
-
-build-job:       # This job runs in the build stage, which runs first.
-  stage: build
-  script: 
-    - pip install .
 
 
 test:       # This job runs in the build stage, which runs first.
   stage: test
   script:
     - apt-get update -y && apt-get install libgl1 -y
+    - pip install .
     - pip install pytest
     - pytest tests/.
  
