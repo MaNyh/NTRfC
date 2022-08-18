@@ -19,9 +19,12 @@ def test_stationarity_uncertainties():
 
     timesteps, values = signalgen_sine(amplitude=1, frequency=1, mean =1, time=2)
 
-    ans = stationarity_uncertainties(timesteps,values)
+    stationary_timestep , uncertainty = stationarity_uncertainties(timesteps,values)
 
-    return 0
+    assert stationary_timestep == 0.0 , "computation failed"
+    #todo: define uncertainty limit properly
+    assert 1 > uncertainty , "computation failed"
+
 
 
 

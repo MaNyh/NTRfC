@@ -84,7 +84,7 @@ def stationarity_uncertainties(timesteps, values, verbose=False):
         axs[1].plot(autocorrelated)
         plt.show()
 
-    return timesteps(id_stationary), (confidence_mean_high-second_half_mean)
+    return timesteps[id_stationary], (confidence_mean_high-second_half_mean)
 
 
 
