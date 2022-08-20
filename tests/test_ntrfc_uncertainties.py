@@ -30,12 +30,10 @@ def test_stationarity_uncertainties_stationarysine():
             minperiods = int(equals_periods)
         timesteps, values = signalgen_sine(amplitude=amplitude, frequency=frequency, mean=mean, time=time)
         stationary_timestep, uncertainty = stationarity_uncertainties(timesteps, values)
-        # todo: implement analytical or value-defined limits for stationarity-approximations.
-        well_computed_stationarity_limit = 0.0
-        well_computed_uncertainty_limit = amplitude
-        assert stationary_timestep == well_computed_stationarity_limit, "computation failed"
-        # todo: define uncertainty limit properly
-        assert well_computed_uncertainty_limit > uncertainty, "computation failed"
+        analytic_stationary_limit = 0.0
+        analytic_uncertainty = 0.0
+        assert stationary_timestep == analytic_stationary_limit, "computation failed"
+        assert np.isclose(analytic_uncertainty, uncertainty,atol=0.002), "computation failed"
     assert 10 >= minperiods, f"critical value {minperiods} not tested"
 
 
@@ -73,10 +71,8 @@ def test_stationarity_uncertainties_abatingsine():
                                                   abate=abate)
         stationary_timestep, uncertainty = stationarity_uncertainties(timesteps, values)
 
-        # todo: implement analytical or value-defined limits for stationarity-approximations.
-        well_computed_stationarity_limit = 0.0
-        well_computed_uncertainty_limit = amplitude
-        assert stationary_timestep == well_computed_stationarity_limit, "computation failed"
-        # todo: define uncertainty limit properly
-        assert well_computed_uncertainty_limit > uncertainty, "computation failed"
+        well_computed_stationarity_limit = -np.log(0.05)/abate
+        uncertainty_limit = 0.05
+        assert stationary_timestep > well_computed_stationarity_limit, "computation failed"
+        assert  uncertainty_limit > uncertainty , "computation failed"
     assert 10 >= minperiods, f"critical value {minperiods} not tested"
