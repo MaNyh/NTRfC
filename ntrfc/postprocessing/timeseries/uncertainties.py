@@ -38,7 +38,7 @@ def minimal_statistical_timewindow(somesignal, time, error):
 
     return -1, -1, -1
 
-def stationarity_uncertainties(timesteps, values, verbose=True):
+def stationarity_uncertainties(timesteps, values, verbose=False):
     '''
     :param timesteps: 1D np.array()
     :param values: 1D np.array()

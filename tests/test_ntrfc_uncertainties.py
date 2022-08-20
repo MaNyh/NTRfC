@@ -36,7 +36,7 @@ def test_stationarity_uncertainties_stationarysine():
         assert stationary_timestep == well_computed_stationarity_limit, "computation failed"
         # todo: define uncertainty limit properly
         assert well_computed_uncertainty_limit > uncertainty, "computation failed"
-    assert 10 > minperiods, f"critical value {minperiods} not tested"
+    assert 10 >= minperiods, f"critical value {minperiods} not tested"
 
 
 def test_stationarity_uncertainties_abatingsine():
@@ -79,4 +79,4 @@ def test_stationarity_uncertainties_abatingsine():
         assert stationary_timestep == well_computed_stationarity_limit, "computation failed"
         # todo: define uncertainty limit properly
         assert well_computed_uncertainty_limit > uncertainty, "computation failed"
-    assert 10 > minperiods, f"critical value {minperiods} not tested"
+    assert 10 >= minperiods, f"critical value {minperiods} not tested"
