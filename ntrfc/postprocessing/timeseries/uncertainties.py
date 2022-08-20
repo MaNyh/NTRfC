@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
-
+from ntrfc.postprocessing.timeseries.integral_scales import integralscales
 
 def minimal_statistical_timewindow(somesignal, time, error):
     """
     computes the minimal statistical time window for a given error in the energy-spectrum of a signal
-    if the energy-stectrum is converged, a necessary condition for stationarity is satisfied
+    if the energy-spectrum is converged, a necessary condition for stationary is satisfied
 
     """
     numtimesteps = len(time)
@@ -23,7 +23,7 @@ def minimal_statistical_timewindow(somesignal, time, error):
         signal_window = somesignal[check_id:]
         time_window = time[check_id:]
 
-        # compute powerspectrum
+        # compute power spectrum
         fs = dt ** -1
         f, Pxx_spec = signal.welch(signal_window, fs, 'flattop', scaling='spectrum')
         pspecs.append(Pxx_spec)
@@ -39,7 +39,7 @@ def minimal_statistical_timewindow(somesignal, time, error):
     return -1, -1, -1
 
 
-def stationarity_uncertainties(timesteps, values, verbose=False):
+def stationarity_uncertainties(timesteps, values, verbose=True):
     '''
     :param timesteps: 1D np.array()
     :param values: 1D np.array()
@@ -58,14 +58,16 @@ def stationarity_uncertainties(timesteps, values, verbose=False):
     # compute minimal time window for the approximation of a stationary signal
     minimal_stationarity_timestep, pspecs, times = minimal_statistical_timewindow(somesignal, time, error)
 
-    #
-    sample_length = n - minimal_stationarity_timestep
 
     error_sec_test = 0
     checks = 0
     sample_start = minimal_stationarity_timestep
     new_sample_idxbegin = n
     means = []
+    spectralerrors = []
+    vars = []
+    integralscale= []
+    statpairids = []
     while (error_sec > error_sec_test and sample_start > 0):
         stationary = [sample_start, n - checks]
 
@@ -79,7 +81,12 @@ def stationarity_uncertainties(timesteps, values, verbose=False):
         pspec_diff_sqr = np.abs(Pxx_spec - pspecs[-1]) / pspecs[-1]
         pspecs_diff_sqrint = np.trapz(pspec_diff_sqr, f) / np.trapz(pspecs[-1], f)
         error_sec_test = pspecs_diff_sqrint
+        spectralerrors.append(error_sec_test)
         means.append(np.mean(newsamplesignal))
+        vars.append(np.var(newsamplesignal))
+        tau, lenghtscale = integralscales(newsamplesignal,sampletime)
+        integralscale.append(tau)
+        statpairids.append(stationary)
         checks += 1
         sample_start -= 1
 

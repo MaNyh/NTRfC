@@ -1,7 +1,8 @@
-def test_stationarity_uncertainties_stationarysine():
+def test_stationarity_uncertainties_stationarysine(verbose=True):
     from ntrfc.postprocessing.timeseries.uncertainties import stationarity_uncertainties
     import numpy as np
     from itertools import product
+    import matplotlib.pyplot as plt
 
     def signalgen_sine(amplitude, frequency, mean, time):
         frequency_resolution = 200
@@ -33,11 +34,16 @@ def test_stationarity_uncertainties_stationarysine():
         analytic_stationary_limit = 0.0
         analytic_uncertainty = 0.0
         assert stationary_timestep == analytic_stationary_limit, "computation failed"
-        assert np.isclose(analytic_uncertainty, uncertainty,atol=0.002), "computation failed"
+        assert np.isclose(analytic_uncertainty, uncertainty, atol=0.002), "computation failed"
+
+        if verbose:
+            plt.figure()
+            plt.plot(timesteps,values)
+            plt.axvline(stationary_timestep)
     assert 10 >= minperiods, f"critical value {minperiods} not tested"
 
 
-def test_stationarity_uncertainties_abatingsine():
+def test_stationarity_uncertainties_abatingsine(verbose=True):
     from ntrfc.postprocessing.timeseries.uncertainties import stationarity_uncertainties
     import numpy as np
     from itertools import product
@@ -71,8 +77,12 @@ def test_stationarity_uncertainties_abatingsine():
                                                   abate=abate)
         stationary_timestep, uncertainty = stationarity_uncertainties(timesteps, values)
 
-        well_computed_stationarity_limit = -np.log(0.05)/abate
+        well_computed_stationarity_limit = -np.log(0.05) / abate
         uncertainty_limit = 0.05
         assert stationary_timestep > well_computed_stationarity_limit, "computation failed"
-        assert  uncertainty_limit > uncertainty , "computation failed"
+        assert uncertainty_limit > uncertainty, "computation failed"
+        if verbose:
+            plt.figure()
+            plt.plot(timesteps,values)
+            plt.axvline(stationary_timestep)
     assert 10 >= minperiods, f"critical value {minperiods} not tested"
