@@ -23,7 +23,7 @@ def minimal_statistical_timewindow(somesignal, time, error):
         signal_window = somesignal[check_id:]
         time_window = time[check_id:]
 
-        #compute powerspectrum
+        # compute powerspectrum
         fs = dt ** -1
         f, Pxx_spec = signal.welch(signal_window, fs, 'flattop', scaling='spectrum')
         pspecs.append(Pxx_spec)
@@ -38,6 +38,7 @@ def minimal_statistical_timewindow(somesignal, time, error):
 
     return -1, -1, -1
 
+
 def stationarity_uncertainties(timesteps, values, verbose=False):
     '''
     :param timesteps: 1D np.array()
@@ -45,7 +46,6 @@ def stationarity_uncertainties(timesteps, values, verbose=False):
     :param verbose: bool
     :return: stationary_timestep ,mean_value , uncertainty
     '''
-
 
     time = timesteps
     somesignal = values
@@ -61,13 +61,13 @@ def stationarity_uncertainties(timesteps, values, verbose=False):
     #
     sample_length = n - minimal_stationarity_timestep
 
-
     error_sec_test = 0
     checks = 0
     sample_start = minimal_stationarity_timestep
     new_sample_idxbegin = n
-    while(error_sec >error_sec_test and sample_start > 0):
-        stationary = [sample_start, n-checks]
+    means = []
+    while (error_sec > error_sec_test and sample_start > 0):
+        stationary = [sample_start, n - checks]
 
         sampletime = time[stationary[0]:stationary[-1]]
 
@@ -78,13 +78,13 @@ def stationarity_uncertainties(timesteps, values, verbose=False):
 
         pspec_diff_sqr = np.abs(Pxx_spec - pspecs[-1]) / pspecs[-1]
         pspecs_diff_sqrint = np.trapz(pspec_diff_sqr, f) / np.trapz(pspecs[-1], f)
-        error_sec_test = pspecs_diff_sqrint#(error + error) / (1 - 2 * error) ** 2
+        error_sec_test = pspecs_diff_sqrint
+        means.append(np.mean(newsamplesignal))
+        checks += 1
+        sample_start -= 1
 
-        checks+=1
-        sample_start-=1
-
-    id_stationary=new_sample_idxbegin-new_sample_idxbegin
-
+    id_stationary = new_sample_idxbegin - new_sample_idxbegin
+    uncertainty = np.std(means)
     if verbose:
         plt.figure()
         plt.hist(somesignal[minimal_stationarity_timestep:], bins=100)
@@ -116,6 +116,4 @@ def stationarity_uncertainties(timesteps, values, verbose=False):
         plt.ylim(min(somesignal), max(somesignal))
         plt.show()
 
-
-
-    return timesteps[id_stationary], np.std(somesignal[id_stationary:])
+    return timesteps[id_stationary], uncertainty
