@@ -47,6 +47,7 @@ def test_stationarity_uncertainties_abatingsine(verbose=True):
     from ntrfc.postprocessing.timeseries.uncertainties import stationarity_uncertainties
     import numpy as np
     from itertools import product
+    import matplotlib.pyplot as plt
 
     def signalgen_abatingsine(amplitude, frequency, mean, abate, time):
         resolution = 200

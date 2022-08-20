@@ -62,7 +62,6 @@ def stationarity_uncertainties(timesteps, values, verbose=True):
     error_sec_test = 0
     checks = 0
     sample_start = minimal_stationarity_timestep
-    new_sample_idxbegin = n
     means = []
     spectralerrors = []
     vars = []
@@ -81,6 +80,7 @@ def stationarity_uncertainties(timesteps, values, verbose=True):
         pspec_diff_sqr = np.abs(Pxx_spec - pspecs[-1]) / pspecs[-1]
         pspecs_diff_sqrint = np.trapz(pspec_diff_sqr, f) / np.trapz(pspecs[-1], f)
         error_sec_test = pspecs_diff_sqrint
+
         spectralerrors.append(error_sec_test)
         means.append(np.mean(newsamplesignal))
         vars.append(np.var(newsamplesignal))
@@ -90,8 +90,25 @@ def stationarity_uncertainties(timesteps, values, verbose=True):
         checks += 1
         sample_start -= 1
 
-    id_stationary = new_sample_idxbegin - new_sample_idxbegin
-    uncertainty = np.std(means)
+    mean_0 = means[0]
+    vars_0 = vars[0]
+    integralscale_0 = integralscale[0]
+    spectralerrors_0 = 0.05
+
+    check_spectralerrors = [True if spectralerrors_0  > i else False for i in spectralerrors]
+    check_vars = [True  if np.isclose(vars_0, i, rtol=0.05) else False  for i in vars]
+    check_scales = [True  if np.isclose(integralscale_0, i,rtol=0.05) else False for i in integralscale]
+    check_means =  [True if np.isclose(mean_0, i,rtol=0.05) else False for i in means ]
+
+    statwindowcount = 0
+    for sp,va,sc,me,window in zip(check_spectralerrors,check_vars,check_scales,check_means,statpairids):
+        if all([sp,va,sc,me]):
+            id_stationary = window[0]
+
+            statwindowcount +=1
+        else:
+            break;
+    uncertainty = np.std(means[:statwindowcount])
     if verbose:
         plt.figure()
         plt.hist(somesignal[minimal_stationarity_timestep:], bins=100)
