@@ -176,6 +176,14 @@ def constructWallMesh(surfaces):
 #################################################################################
 
 def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield, mu_0):
+    """
+    :param volmesh: pyvista-vtk object
+    :param surfaces: pyvista-vtk object
+    :param use_velfield: string, name of the velocity field array
+    :param use_rhofield:  string, name of the density field array
+    :param mu_0: float. kinematic viscosity
+    :return: volmesh: pyvista-vtk object with the nondimensionals
+    """
 
     print("constructing surfacemesh from wall meshes ...")
     surfaceMesh = constructWallMesh(surfaces)
