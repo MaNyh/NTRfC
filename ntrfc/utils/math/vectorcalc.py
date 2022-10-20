@@ -138,7 +138,7 @@ def posVec(vec):
 
 def findNearest(array, point):
     array = np.asarray(array)
-    idx = np.array([vecAbs(i) for i in (np.abs(array - point))]).argmin()
+    idx = np.array([vecAbs(i) for i in (array - point)]).argmin()
     return idx
 
 
