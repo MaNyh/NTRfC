@@ -1,0 +1,65 @@
+Bootstrap: docker
+From: ubuntu:20.04
+
+%labels
+    Version v0.0.2
+
+%help
+    With the python system-installatioon of this container can access all the ntrfc functionality
+    The container can render images.
+
+    Example cases will follow
+
+%environment
+    export LIBGL_ALWAYS_INDIRECT=0
+
+
+%post
+
+  CURDIR=$(pwd)
+
+    # Set timezone to Etc/UTC for tzdata. See issue #4365 for more details.
+    TZ=Etc/UTC && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
+
+    apt-get update -y
+    apt-get install -y tmux nano git
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        gfortran \
+        libssl-dev \
+        zlib1g-dev \
+        libbz2-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        wget \
+        curl \
+        llvm \
+        libncurses5-dev \
+        xz-utils \
+        tk-dev \
+        libxml2-dev \
+        libxmlsec1-dev \
+        libffi-dev \
+        liblzma-dev \
+        liblapack-dev \
+        libopenblas-dev \
+        libhdf5-dev \
+        libgl1-mesa-glx xvfb \
+        gcc \
+
+
+    export PYENV_ROOT=/opt/pyenv
+    export PATH="/opt/pyenv/bin:$PATH"
+    curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
+    pyenv install 3.9.10
+    echo 'export PATH=/opt/pyenv/versions/3.9.10/bin/:$PATH' >> $SINGULARITY_ENVIRONMENT
+    export PATH=/opt/pyenv/versions/3.9.10/bin/:$PATH
+
+    apt install python3-wheel -y
+    pip install git+https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC.git#egg=NTRfC
+    pip install pandas tqdm
+
+    # clean the build
+    apt-get clean
