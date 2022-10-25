@@ -5,7 +5,7 @@ from scipy.spatial import Delaunay
 from scipy import interpolate
 
 from ntrfc.utils.geometry.alphashape import calc_concavehull
-from ntrfc.utils.math.vectorcalc import findNearest, vecDir
+from ntrfc.utils.math.vectorcalc import findNearest, vecDir, calc_largedistant_idx, vecAngle, gradToRad
 from ntrfc.utils.pyvista_utils.line import lines_from_points, polyline_from_points,refine_spline
 
 
@@ -259,13 +259,19 @@ def filter_camb(tri_y,camb,para_filt):
 
 def extract_vk_hk(sortedPoly, verbose=False):
 
+    # todo: check if the next 5 lines are really necessary. its supposed to be a quickfix for high stagger angles
+    poly = sortedPoly.copy()
+    vk_est,hk_est = calc_largedistant_idx(poly.points[::,0],poly.points[::,1])
+    camber_est = (poly.points[vk_est]-poly.points[hk_est])
+    stagger_est = vecAngle(np.array([1,0,0]),camber_est)*180/np.pi
+    poly.rotate_z(-stagger_est,inplace=True)
 
     para_int_points = np.array([3000, 3000])
     para_filt = np.array([[1 * 10 ** -5, 3 * 10 ** -5, 8 * 10 ** -5, 1.1, 1]])
 
 
     # read data from cuts
-    X, Y, Z= sortedPoly.points[::,0],sortedPoly.points[::,1],sortedPoly.points[::,2]
+    X, Y, Z= poly.points[::,0],poly.points[::,1],poly.points[::,2]
 
 
     # setting coordinates in right order and a single matrix
@@ -331,10 +337,12 @@ def extract_vk_hk(sortedPoly, verbose=False):
     if verbose:
         p = pv.Plotter()
         p.add_mesh(camberpoints)
+        p.add_mesh(poly,color="blue")
         p.add_mesh(profilepoly)
         p.add_mesh(camberline_computed)
         p.add_mesh(profilepoly.points[le_ind],color="red",point_size=20)
         p.add_mesh(profilepoly.points[te_ind],color="green",point_size=20)
+        p.add_axes()
         p.show()
 
     return le_ind, te_ind
