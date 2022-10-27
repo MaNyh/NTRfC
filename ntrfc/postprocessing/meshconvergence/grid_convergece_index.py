@@ -1,4 +1,3 @@
-
 import numpy as np
 from scipy.optimize import least_squares
 
@@ -69,17 +68,17 @@ def getGCI(N1,N2,N3,fc1,fc2,fc3,D, Fs=1.25):
     #        [EERE_1_p1, EERE_2_p1, EERE_3_p1]
 
 
-fc3 = 25.263
-fc2 = 23.565
-fc1 = 23.151
-
-N3 = 1
-N2 = 8
-N1 = 27
-Fs=1.25
-D = 3
+# fc3 = 25.263
+# fc2 = 23.565
+# fc1 = 23.151
+#
+# N3 = 1
+# N2 = 8
+# N1 = 27
+# Fs=1.25
+# D = 3
 
 
 
 #print('p(min) = ',p_min,'\np(max) = ',p_max,'\np(act) = ',P,'\np(rel) = ',prel(p_opt,P))
-a = getGCI(N1, N2, N3, fc1, fc2, fc3, D, Fs=1.25)
+# GCI_1, GCI_2, GCI_3 = getGCI(N1, N2, N3, fc1, fc2, fc3, D, Fs=1.25)
