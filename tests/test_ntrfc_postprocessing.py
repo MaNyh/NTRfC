@@ -1,10 +1,10 @@
-from ntrfc.postprocessing.turbo.probegeneration import create_profileprobes, create_midpassageprobes
-from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
-from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
 import pyvista as pv
 import numpy as np
 
 def test_createprofileprobes():
+    from ntrfc.postprocessing.turbo.probegeneration import create_profileprobes
+    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
     naca_code = "6009"
     angle = 10  # deg
     res = 240
@@ -19,6 +19,9 @@ def test_createprofileprobes():
     assert probes_ss.number_of_points == n_ssprobes,  "number of suction side probes not correct"
 
 def test_create_midpassageprobes():
+    from ntrfc.postprocessing.turbo.probegeneration import create_midpassageprobes
+    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
     naca_code = "6009"
     angle = 10  # deg
     res = 240
