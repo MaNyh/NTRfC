@@ -67,18 +67,3 @@ def getGCI(N1,N2,N3,fc1,fc2,fc3,D, Fs=1.25):
     # return [GCI_1, GCI_2, GCI_3], [EERE_1, EERE_2, EERE_3], [GCI_1_p1, GCI_2_p1, GCI_3_p1], \
     #        [EERE_1_p1, EERE_2_p1, EERE_3_p1]
 
-
-# fc3 = 25.263
-# fc2 = 23.565
-# fc1 = 23.151
-#
-# N3 = 1
-# N2 = 8
-# N1 = 27
-# Fs=1.25
-# D = 3
-
-
-
-#print('p(min) = ',p_min,'\np(max) = ',p_max,'\np(act) = ',P,'\np(rel) = ',prel(p_opt,P))
-# GCI_1, GCI_2, GCI_3 = getGCI(N1, N2, N3, fc1, fc2, fc3, D, Fs=1.25)

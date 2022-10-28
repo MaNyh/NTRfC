@@ -1,3 +1,6 @@
+from ntrfc.utils.geometry.cascade_geometry import calcmidpassagestreamline
+
+
 def test_calc_concavehull():
     """
     in these simple geometries, each point must be found by calcConcaveHull
@@ -93,7 +96,7 @@ def test_extract_vk_hk(verbose=False):
     # manifold problems with other profiles with veronoi-mid and other unoptimized code. therefor tests only 0009
     # todo: currently we cant test half_cosine_spacing profiles, as the resolution is too good for extract_vk_hk
     naca_code = "6509"
-    angle = 60# deg
+    angle = 30# deg
     res = 420
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
@@ -102,7 +105,7 @@ def test_extract_vk_hk(verbose=False):
     ind_1 = res
     ind_2 = 0
 
-    points = np.stack((X[:-1], Y[:-1], np.zeros(len(X) - 1))).T
+    points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
     profile_points = pv.PolyData(points)
     sorted_poly = pv.PolyData(profile_points)
     ind_hk, ind_vk = extract_vk_hk(sorted_poly, verbose=verbose)
@@ -205,12 +208,12 @@ def test_extract_geo_paras(verbose=False):
     import numpy as np
     import pyvista as pv
 
-    naca_code = "0009"
-    angle = 20  # deg
+    naca_code = "6009"
+    angle = 10  # deg
     alpha = 1
     res = 240
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
-    sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
+    sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle)
 
     poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
@@ -230,3 +233,8 @@ def test_extract_geo_paras(verbose=False):
     assert np.isclose(beta_trailing, angle, rtol=0.03), "wrong leading edge angle"
     assert np.isclose(mids_poly.length, 1, rtol=0.03)
     assert np.isclose(camber_angle, angle, rtol=0.03)
+
+
+def test_calcmidpassagestreamline():
+    # todo FILL
+    calcmidpassagestreamline
