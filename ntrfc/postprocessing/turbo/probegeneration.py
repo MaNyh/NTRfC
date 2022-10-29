@@ -1,6 +1,6 @@
 from ntrfc.utils.geometry.cascade_geometry import calcmidpassagestreamline
 from ntrfc.utils.pyvista_utils.line import polyline_from_points, refine_spline
-from ntrfc.utils.geometry.pointcloud_methods import midline_from_sides
+from ntrfc.utils.math.vectorcalc import vecAngle
 import pyvista as pv
 import numpy as np
 
@@ -66,3 +66,16 @@ def create_midpassageprobes(midspan_z,x_inlet, x_outlet,pitch,beta1, beta2,midsp
     x_probes[-1] = x_probes[-1] - 0.00001 * dist
 
     return pv.PolyData(np.stack([x_probes,y_probes,np.ones(len(x_probes)*midspan_z)]).T)
+
+
+def create_stagnationpointprobes(length,nop,sortedpoly,ind_vk,u_inlet,midspan_z):
+    vk_point = sortedpoly.points[ind_vk]
+    angle = vecAngle(u_inlet,np.array([1,0,0]) * 180 / np.pi)
+    stagnationLine = pv.Line((0, 0, 0), (-length, 0, 0), nop - 1)
+    stagnationLine.rotate_z(angle)
+    stagnationLine.translate(vk_point)
+    x_probes = stagnationLine.points[::, 0]
+    y_probes = stagnationLine.points[::, 1]
+    z_probes = stagnationLine.points[::, 2] + midspan_z
+    return pv.PolyData(np.stack([x_probes,y_probes,z_probes]).T)
+

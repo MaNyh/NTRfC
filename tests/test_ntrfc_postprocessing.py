@@ -49,3 +49,17 @@ def test_getgci():
     D = 2
 
     GCI_1, GCI_2, GCI_3 = getGCI(N1, N2, N3, fc1, fc2, fc3, D, Fs=1.25)
+
+
+def test_stagnationpointprobes():
+    from ntrfc.postprocessing.turbo.probegeneration import create_stagnationpointprobes
+    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+
+
+    naca_code = "6509"
+    angle = 30# deg
+    res = 420
+    xs, ys = naca(naca_code, res, half_cosine_spacing=False)
+    sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
+    sorted_poly.rotate_z(angle)
+    probes = create_stagnationpointprobes(1,20,sorted_poly,0,np.array([1,0,0]),1)
