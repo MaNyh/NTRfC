@@ -1,4 +1,4 @@
-image: python:3.9
+image: python:3.10
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
@@ -27,18 +27,8 @@ stages:          # List of stages for jobs, and their order of execution
 #  - deploy
 
 
-test_py39:       # This job runs in the build stage, which runs first.
+test:       # This job runs in the build stage, which runs first.
   stage: test
-  image: python:3.9
-  script:
-    - apt-get update -y && apt-get install libgl1 -y
-    - pip install .
-    - pip install pytest
-    - pytest tests/.
-
-test_py310:       # This job runs in the build stage, which runs first.
-  stage: test
-  image: python:3.10
   script:
     - apt-get update -y && apt-get install libgl1 -y
     - pip install .
