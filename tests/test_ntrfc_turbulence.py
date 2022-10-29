@@ -59,15 +59,13 @@ def test_calc_dimensionless_gridspacing():
         upperwall["rho"] = np.ones(upperwall.number_of_cells) * rho
         dimless_gridspacings = calc_dimensionless_gridspacing(grid, [lowerwall, upperwall], "U", "rho", mu_0)
         assert all(np.isclose(deltaxplus, dimless_gridspacings[
-            "DeltaXPlus"],rtol=0.05)), "calc_dimensionelss_gridspcing in x direction not accurate"
+            "DeltaXPlus"], rtol=0.05)), "calc_dimensionelss_gridspcing in x direction not accurate"
         assert all(np.isclose(deltayplus, dimless_gridspacings[
-            "DeltaYPlus"],rtol=0.05)), "calc_dimensionelss_gridspcing in y direction not accurate"
+            "DeltaYPlus"], rtol=0.05)), "calc_dimensionelss_gridspcing in y direction not accurate"
         assert all(np.isclose(deltazplus, dimless_gridspacings[
-            "DeltaZPlus"],rtol=0.05)), "calc_dimensionelss_gridspcing in z direction not accurate"
-
+            "DeltaZPlus"], rtol=0.05)), "calc_dimensionelss_gridspcing in z direction not accurate"
 
     runtest(height=1, length=1, width=1)
     runtest(height=2, length=1, width=1)
     runtest(height=1, length=2, width=1)
     runtest(height=1, length=1, width=2)
-

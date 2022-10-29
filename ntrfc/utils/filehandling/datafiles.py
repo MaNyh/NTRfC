@@ -1,10 +1,10 @@
+import csv
 import os
+import pickle
 from functools import reduce
 from pathlib import Path
 
 import yaml
-import pickle
-import csv
 
 
 def yaml_dict_read(yml_file):
@@ -80,7 +80,6 @@ def get_directory_structure(rootdir):
         parent = reduce(dict.get, folders[:-1], dir)
         parent[folders[-1]] = subdir
     return dir
-
 
 
 def get_filelist_fromdir(path):

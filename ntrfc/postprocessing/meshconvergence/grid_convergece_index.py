@@ -2,30 +2,30 @@ import numpy as np
 from scipy.optimize import least_squares
 
 
-def func_p(x0,a,b,c,A):
+def func_p(x0, a, b, c, A):
     x = x0
-    F = A*((a**x)-1)/((b**x)-1)*(b**x)-c                #least squares von F ist p
+    F = A * ((a ** x) - 1) / ((b ** x) - 1) * (b ** x) - c  # least squares von F ist p
     return F
 
-def calcp(x0,A,N1,N2,N3,fc1,fc2,fc3,D):
 
-    a = (N2/N3)**(1/D)
-    b = (N1/N2)**(1/D)
-    c = (fc3-fc2)/(fc2-fc1)
+def calcp(x0, A, N1, N2, N3, fc1, fc2, fc3, D):
+    a = (N2 / N3) ** (1 / D)
+    b = (N1 / N2) ** (1 / D)
+    c = (fc3 - fc2) / (fc2 - fc1)
 
-    p = least_squares(func_p,x0,args=(a,b,c,A))
+    p = least_squares(func_p, x0, args=(a, b, c, A))
 
     return p.x[0]
 
-def prel(p_opt,P):
-    p_rel = abs((p_opt-P)/p_opt)
+
+def prel(p_opt, P):
+    p_rel = abs((p_opt - P) / p_opt)
     return p_rel
 
 
-def getGCI(N1,N2,N3,fc1,fc2,fc3,D, Fs=1.25):
-
-    assert not (((fc2 > fc3) & (fc2 > fc1))|((fc2 < fc3) & (fc2 < fc1))) , "values are not monotone"
-    assert not ((N1 <= N2) or (N2 <= N3)) , "Number of cells must be N1 > N2 > N3"
+def getGCI(N1, N2, N3, fc1, fc2, fc3, D, Fs=1.25):
+    assert not (((fc2 > fc3) & (fc2 > fc1)) | ((fc2 < fc3) & (fc2 < fc1))), "values are not monotone"
+    assert not ((N1 <= N2) or (N2 <= N3)), "Number of cells must be N1 > N2 > N3"
 
     r21 = (N1 / N2) ** (1 / D)
     r32 = (N2 / N3) ** (1 / D)
@@ -33,9 +33,8 @@ def getGCI(N1,N2,N3,fc1,fc2,fc3,D, Fs=1.25):
     epsilon32 = (fc3 - fc2)
     epsilon21 = (fc2 - fc1)
 
-
     x0 = np.log(epsilon32 / epsilon21) / np.log(r21)
-    p = calcp(x0, Fs,N1,N2,N3,fc1,fc2,fc3,D)
+    p = calcp(x0, Fs, N1, N2, N3, fc1, fc2, fc3, D)
 
     GCI_1 = Fs * abs((epsilon21 / fc1)) * 1 / ((r21 ** p) - 1)
     GCI_2 = Fs * abs((epsilon32 / fc2)) * 1 / ((r32 ** p) - 1)
@@ -66,4 +65,3 @@ def getGCI(N1,N2,N3,fc1,fc2,fc3,D, Fs=1.25):
     return GCI_1, GCI_2, GCI_3
     # return [GCI_1, GCI_2, GCI_3], [EERE_1, EERE_2, EERE_3], [GCI_1_p1, GCI_2_p1, GCI_3_p1], \
     #        [EERE_1_p1, EERE_2_p1, EERE_3_p1]
-

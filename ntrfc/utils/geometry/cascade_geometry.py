@@ -34,4 +34,3 @@ def calcmidpassagestreamline(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t):
         y_mpsl[i] = y_mpsl[i] + 0.5 * t
 
     return refine_spline(x_mpsl, y_mpsl, 1000)
-

@@ -1,14 +1,15 @@
 import os
-import vtk
+
 import pyvista as pv
+import vtk
 
 
 def load_mesh(path_to_mesh):
     assert os.path.isfile(path_to_mesh), path_to_mesh + " is not a valid file"
     extension = os.path.splitext(path_to_mesh)[1]
-    if extension == ".vtk" or extension == ".vtp" or extension == ".vtu" :
+    if extension == ".vtk" or extension == ".vtp" or extension == ".vtu":
         mesh = pv.read(path_to_mesh)
-    elif  extension == ".vtm":
+    elif extension == ".vtm":
         multiBlockMesh = pv.read(path_to_mesh)
         mesh = multiBlockMesh.combine()
     elif extension == ".cgns":

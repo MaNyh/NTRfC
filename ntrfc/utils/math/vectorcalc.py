@@ -5,13 +5,13 @@ Created on Sun Oct  4 19:01:50 2020
 @author: malte
 """
 
+import math as m
+import sys
+
 import numpy as np
-from scipy.stats import special_ortho_group
 from scipy.spatial import distance
 from scipy.spatial.distance import squareform, pdist
-
-import sys
-import math as m
+from scipy.stats import special_ortho_group
 
 
 def closest_node_index(node, nodes):

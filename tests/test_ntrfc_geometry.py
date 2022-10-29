@@ -96,7 +96,7 @@ def test_extract_vk_hk(verbose=False):
     # manifold problems with other profiles with veronoi-mid and other unoptimized code. therefor tests only 0009
     # todo: currently we cant test half_cosine_spacing profiles, as the resolution is too good for extract_vk_hk
     naca_code = "6509"
-    angle = 30# deg
+    angle = 30  # deg
     res = 420
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)

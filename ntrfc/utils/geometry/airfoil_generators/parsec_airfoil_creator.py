@@ -10,6 +10,7 @@
 from __future__ import division
 
 from math import sqrt, tan, pi
+
 import numpy as np
 
 
@@ -57,8 +58,6 @@ def pcoef(xte, yte, rle, x_cre, y_cre, d2ydx2_cre, th_cre, surface):
 
     # Return coefficients
     return coef
-
-
 
 
 def parsec_airfoil_gen(pparray, halfsinespacing=True, resolution=2000):

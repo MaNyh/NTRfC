@@ -2,9 +2,9 @@ import numpy as np
 import pyvista as pv
 
 from ntrfc.utils.geometry.alphashape import calc_concavehull
-from ntrfc.utils.math.vectorcalc import  vecAngle, vecAbs, findNearest
-from ntrfc.utils.pyvista_utils.line import polyline_from_points, refine_spline
 from ntrfc.utils.geometry.profile_tele_extraction import extract_vk_hk
+from ntrfc.utils.math.vectorcalc import vecAngle
+from ntrfc.utils.pyvista_utils.line import polyline_from_points, refine_spline
 
 
 def mid_length(ind_1, ind_2, sorted_poly):
@@ -37,24 +37,20 @@ def midline_from_sides(ps_poly, ss_poly):
         bx, by = refine_spline(x_ss, y_ss, midsres)
     xmids, ymids = ((ax + bx) / 2, (ay + by) / 2)
 
-    midsPoly = polyline_from_points(np.stack((xmids, ymids, z*np.ones(len(ymids)))).T)
+    midsPoly = polyline_from_points(np.stack((xmids, ymids, z * np.ones(len(ymids)))).T)
     return midsPoly
 
 
-
-
-
-def extractSidePolys(ind_1, ind_2, sortedPoly,verbose=False):
+def extractSidePolys(ind_1, ind_2, sortedPoly, verbose=False):
     # xs, ys = list(sortedPoly.points[::, 0]), list(sortedPoly.points[::, 1])
     indices = np.arange(0, sortedPoly.number_of_points)
 
     if ind_2 > ind_1:
-        side_one_idx = indices[ind_1:ind_2+1]
-        side_two_idx = np.concatenate((indices[:ind_1+1][::-1], indices[ind_2:][::-1]))
+        side_one_idx = indices[ind_1:ind_2 + 1]
+        side_two_idx = np.concatenate((indices[:ind_1 + 1][::-1], indices[ind_2:][::-1]))
     elif ind_1 > ind_2:
-        side_one_idx = indices[ind_2:ind_1+1]
-        side_two_idx = np.concatenate((indices[:ind_2+1][::-1], indices[ind_1:][::-1]))
-
+        side_one_idx = indices[ind_2:ind_1 + 1]
+        side_two_idx = np.concatenate((indices[:ind_2 + 1][::-1], indices[ind_1:][::-1]))
 
     side_one = extract_points_fromsortedpoly(side_one_idx, sortedPoly)
     side_two = extract_points_fromsortedpoly(side_two_idx, sortedPoly)
@@ -71,10 +67,10 @@ def extractSidePolys(ind_1, ind_2, sortedPoly,verbose=False):
 
     if verbose:
         p = pv.Plotter()
-        p.add_mesh(ssPoly,color="g",label="ssPoly")
-        p.add_mesh(psPoly,color="b",label="psPoly")
-        p.add_mesh(sortedPoly.points[ind_1], color="w",label="ind_1")
-        p.add_mesh(sortedPoly.points[ind_2], color="k",label="ind_2")
+        p.add_mesh(ssPoly, color="g", label="ssPoly")
+        p.add_mesh(psPoly, color="b", label="psPoly")
+        p.add_mesh(sortedPoly.points[ind_1], color="w", label="ind_1")
+        p.add_mesh(sortedPoly.points[ind_2], color="k", label="ind_2")
         p.add_legend()
         p.show()
 
@@ -108,8 +104,8 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
 
     sortedPoly = pv.PolyData(polyblade.points[index_sort])  # polyblade.extract_cells(index_sort)
     for arr in polyblade.array_names:
-        if sortedPoly.number_of_points==len(polyblade[arr]):
-            sortedPoly[arr]=polyblade.point_data[arr][index_sort]
+        if sortedPoly.number_of_points == len(polyblade[arr]):
+            sortedPoly[arr] = polyblade.point_data[arr][index_sort]
 
     ind_hk, ind_vk = extract_vk_hk(sortedPoly)
     psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly)
@@ -119,7 +115,7 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
     xmids, ymids = midsPoly.points[::, 0], midsPoly.points[::, 1]
     vk_tangent = np.stack((xmids[0] - xmids[1], ymids[0] - ymids[1], 0)).T
     hk_tangent = np.stack((xmids[-2] - xmids[-1], ymids[-2] - ymids[-1], 0)).T
-    chord = psPoly.points[0]-psPoly.points[-1]
+    chord = psPoly.points[0] - psPoly.points[-1]
     beta_leading = vecAngle(vk_tangent, -np.array([1, 0, 0])) / np.pi * 180
     beta_trailing = vecAngle(hk_tangent, -np.array([1, 0, 0])) / np.pi * 180
     camber_angle = vecAngle(chord, -np.array([1, 0, 0])) / np.pi * 180
@@ -131,8 +127,8 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
         p.add_mesh(ssPoly, color="black", label="ssPoly")
         p.add_mesh(midsPoly, color="black", label="midsPoly")
         p.add_mesh(pv.Line((0, 0, 0), (midsPoly.length, 0, 0)))
-        p.add_mesh(sortedPoly.points[ind_hk],color="red",point_size=5)
-        p.add_mesh(sortedPoly.points[ind_vk],color="orange",point_size=5)
+        p.add_mesh(sortedPoly.points[ind_hk], color="red", point_size=5)
+        p.add_mesh(sortedPoly.points[ind_vk], color="orange", point_size=5)
         p.add_legend()
         p.show()
 
@@ -171,5 +167,3 @@ def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t):
         y_mpsl[i] = y_mpsl[i] + 0.5 * t
 
     return refine_spline(x_mpsl, y_mpsl, 1000)
-
-

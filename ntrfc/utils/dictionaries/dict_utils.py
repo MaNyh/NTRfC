@@ -1,5 +1,5 @@
-from functools import reduce
 import operator
+from functools import reduce
 
 
 def delete_keys_from_dict(dictionary, key_list):

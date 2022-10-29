@@ -55,5 +55,3 @@ def calc_dist_from_surface(surface_primary, surface_secondary, verbose=False):
         p.show()
 
     return h0n
-
-

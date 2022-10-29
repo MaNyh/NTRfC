@@ -3,10 +3,9 @@
 """Tests for `ntrfc` package."""
 import os
 
+import numpy as np
 import pytest
 import pyvista as pv
-import numpy as np
-
 
 
 @pytest.fixture
@@ -146,5 +145,3 @@ def test_create_dirstructure(tmpdir):
     create_dirstructure(dirstructure, tmpdir)
     checks = [os.path.isdir(path) for path in [os.path.join(tmpdir, relpath) for relpath in dirstructure]]
     assert all(checks), "not all directories have been created"
-
-
