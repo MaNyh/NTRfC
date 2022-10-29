@@ -27,14 +27,24 @@ stages:          # List of stages for jobs, and their order of execution
 #  - deploy
 
 
-test:       # This job runs in the build stage, which runs first.
+test_py39:       # This job runs in the build stage, which runs first.
   stage: test
+  image: python:3.9
   script:
     - apt-get update -y && apt-get install libgl1 -y
     - pip install .
     - pip install pytest
     - pytest tests/.
- 
+
+test_py310:       # This job runs in the build stage, which runs first.
+  stage: test
+  image: python:3.10
+  script:
+    - apt-get update -y && apt-get install libgl1 -y
+    - pip install .
+    - pip install pytest
+    - pytest tests/.
+
 lint-test-job:   # This job also runs in the test stage.
   stage: test    # It can run at the same time as unit-test-job (in parallel).
   script:
