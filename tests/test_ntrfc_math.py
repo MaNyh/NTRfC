@@ -1,4 +1,7 @@
+import numpy as np
 import pyvista as pv
+
+from ntrfc.utils.math.methods import calcAnisoMatrix, calcAnisoEigs, C_barycentric, autocorr, zero_crossings
 
 
 def test_absVec():
@@ -188,3 +191,37 @@ def test_largedistance_indices():
     id1, id2 = calc_largedistant_idx(xx, yy)
     assert id1 == 0
     assert id2 == 100
+
+
+def test_calcanisomatrix():
+    from ntrfc.utils.math.vectorcalc import symToMatrix
+    r = np.array([1,1,1,1,1,1])
+    rm=symToMatrix(r)
+    calcAnisoMatrix(rm)
+    # todo implement real test
+
+
+def test_calcanisoeigs():
+    from ntrfc.utils.math.vectorcalc import symToMatrix
+    r = np.array([1,1,1,1,1,1])
+    rm=symToMatrix(r)
+    aniso = calcAnisoMatrix(rm)
+    calcAnisoEigs(aniso)
+    # todo implement real test
+
+
+def test_calcbarycentric():
+    from ntrfc.utils.math.vectorcalc import symToMatrix
+    r = np.array([1,1,1,1,1,1])
+    rm=symToMatrix(r)
+    C_barycentric(rm)
+    # todo implement real test
+
+
+def test_autocorr():
+    time=np.linspace(0,200,10000)
+    signal= np.sin(time)
+    corr =autocorr(signal)
+    zeroc = zero_crossings(corr)
+
+    assert np.isclose(time[zeroc[0]],np.pi/2,rtol=0.05)

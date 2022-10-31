@@ -257,12 +257,7 @@ def filter_camb(tri_y, camb, para_filt):
 
 
 def extract_vk_hk(sortedPoly, verbose=False):
-    # todo: check if the next 5 lines are really necessary. its supposed to be a quickfix for high stagger angles
     poly = sortedPoly.copy()
-    # vk_est,hk_est = calc_largedistant_idx(poly.points[::,0],poly.points[::,1])
-    # camber_est = (poly.points[vk_est]-poly.points[hk_est])
-    # stagger_est = vecAngle(np.array([1,0,0]),camber_est)*180/np.pi+1
-    # poly.rotate_z(-stagger_est,inplace=True)
 
     para_int_points = np.array([3000, 3000])
     para_filt = np.array([[1 * 10 ** -5, 3 * 10 ** -5, 8 * 10 ** -5, 1.1, 1]])

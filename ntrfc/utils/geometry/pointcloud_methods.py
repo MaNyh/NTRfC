@@ -135,7 +135,7 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
     return sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle
 
 
-def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t):
+def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t,verbose=False):
     """
 
     Returns two lists of Points representing a curve through the passage
@@ -149,13 +149,13 @@ def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t):
     """
 
     delta_x_vk = x_mcl[0] - x_inlet
-    delta_y_vk = np.tan(np.deg2rad(beta1 - 90)) * delta_x_vk
+    delta_y_vk = np.tan(np.deg2rad(beta1 )) * delta_x_vk
 
     p_inlet_x = x_mcl[0] - delta_x_vk
     p_inlet_y = y_mcl[0] - delta_y_vk
 
     delta_x_hk = x_outlet - x_mcl[-1]
-    delta_y_hk = delta_x_hk * np.tan(np.deg2rad(beta2 - 90))
+    delta_y_hk = delta_x_hk * np.tan(np.deg2rad(beta2))
 
     p_outlet_x = x_mcl[-1] + delta_x_hk
     p_outlet_y = y_mcl[-1] + delta_y_hk
@@ -166,4 +166,12 @@ def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t):
     for i in range(len(x_mpsl)):
         y_mpsl[i] = y_mpsl[i] + 0.5 * t
 
-    return refine_spline(x_mpsl, y_mpsl, 1000)
+    x_mpsl_ref,y_mpsl_ref =refine_spline(x_mpsl, y_mpsl, 1000)
+
+    midspoly = pv.PolyData(np.stack([x_mpsl_ref, y_mpsl_ref, np.zeros(len(x_mpsl_ref))]).T)
+    if verbose:
+
+        p = pv.Plotter()
+        p.add_mesh(midspoly, color="orange", point_size=5)
+        p.show()
+    return x_mpsl_ref,y_mpsl_ref

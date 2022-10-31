@@ -91,19 +91,6 @@ def test_cgnsReader():
     return 0
 
 
-def test_vtkUnstructuredGridReader():
-    from ntrfc.utils.filehandling.mesh import vtkUnstructuredGridReader
-    # todo fill
-    a = vtkUnstructuredGridReader
-    return 0
-
-
-def test_vtkFLUENTReader():
-    from ntrfc.utils.filehandling.mesh import vtkFLUENTReader
-    # todo fill
-    a = vtkFLUENTReader
-    return 0
-
 
 def test_pickle_operations(tmpdir):
     """

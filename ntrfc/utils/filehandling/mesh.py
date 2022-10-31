@@ -35,19 +35,4 @@ def cgnsReader(file):
     return dataset
 
 
-def vtkUnstructuredGridReader(file):
-    reader = vtk.vtkUnstructuredGridReader()
-    reader.SetFileName(file)
-    reader.UpdateInformation()
-    reader.Update()
-    dataset = reader.GetOutput()
-    return dataset
 
-
-def vtkFLUENTReader(file):
-    reader = vtk.vtkFLUENTReader
-    reader.SetFileName(file)
-    reader.UpdateInformation()
-    reader.Update()
-    dataset = reader.GetOutput()
-    return dataset

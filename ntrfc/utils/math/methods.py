@@ -2,7 +2,6 @@ import numpy as np
 
 
 def calcAnisoMatrix(reynoldsstress_tensor):
-    # todo: implement test
     rpg = np.linalg.eigh(reynoldsstress_tensor)[1]
     r_ii = sum([rpg[0][0], rpg[1][1], rpg[2][2]])
     anisotropy_matrix = reynoldsstress_tensor / r_ii - np.identity(3) / 3
@@ -10,7 +9,6 @@ def calcAnisoMatrix(reynoldsstress_tensor):
 
 
 def calcAnisoEigs(anisotropy_matrix):
-    # todo: implement test
 
     # eigenwerte für anisotropie muss hiermit berechnet werden!
     # wieso nochmal? es tauchen negative eigenwerte auf, bei berechnung mit numpy
@@ -36,7 +34,6 @@ def calcAnisoEigs(anisotropy_matrix):
 
 
 def C_barycentric(R):
-    # todo: implement test
     aniso = calcAnisoMatrix(R)
     anisoEigs = calcAnisoEigs(aniso)[0]
     if list(anisoEigs) == [0, 0, 0]:
@@ -58,13 +55,11 @@ def autocorr(signal):
     """
     :param: signal - numpy-array.
     """
-    # todo: implement test
     norm = np.sum(np.array(signal) ** 2)
     result = np.correlate(np.array(signal), np.array(signal), 'full') / norm
     return result[int(len(result) / 2):]
 
 
 def zero_crossings(data_series):
-    # todo: implement test
     zcs = np.where(np.diff(np.sign(data_series)))[0]
     return zcs
