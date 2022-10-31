@@ -1,9 +1,9 @@
-matplotlib==3.3.4
-numpy==1.22.3
+matplotlib==3.6.1
+numpy==1.23.4
 pip==22.1.2
-pytest==6.2.4
-pyvista==0.33.0
+pytest==7.2.0
+pyvista==0.36.1
 PyYAML==6.0
-scipy==1.8.0
+scipy==1.9.3
 setuptools==61.2.0
-vtk==9.1.0
+vtk==9.2.2
