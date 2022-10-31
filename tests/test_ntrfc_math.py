@@ -195,16 +195,16 @@ def test_largedistance_indices():
 
 def test_calcanisomatrix():
     from ntrfc.utils.math.vectorcalc import symToMatrix
-    r = np.array([1,1,1,1,1,1])
-    rm=symToMatrix(r)
+    r = np.array([1, 1, 1, 1, 1, 1])
+    rm = symToMatrix(r)
     calcAnisoMatrix(rm)
     # todo implement real test
 
 
 def test_calcanisoeigs():
     from ntrfc.utils.math.vectorcalc import symToMatrix
-    r = np.array([1,1,1,1,1,1])
-    rm=symToMatrix(r)
+    r = np.array([1, 1, 1, 1, 1, 1])
+    rm = symToMatrix(r)
     aniso = calcAnisoMatrix(rm)
     calcAnisoEigs(aniso)
     # todo implement real test
@@ -212,16 +212,16 @@ def test_calcanisoeigs():
 
 def test_calcbarycentric():
     from ntrfc.utils.math.vectorcalc import symToMatrix
-    r = np.array([1,1,1,1,1,1])
-    rm=symToMatrix(r)
+    r = np.array([1, 1, 1, 1, 1, 1])
+    rm = symToMatrix(r)
     C_barycentric(rm)
     # todo implement real test
 
 
 def test_autocorr():
-    time=np.linspace(0,200,10000)
-    signal= np.sin(time)
-    corr =autocorr(signal)
+    time = np.linspace(0, 200, 10000)
+    signal = np.sin(time)
+    corr = autocorr(signal)
     zeroc = zero_crossings(corr)
 
-    assert np.isclose(time[zeroc[0]],np.pi/2,rtol=0.05)
+    assert np.isclose(time[zeroc[0]], np.pi / 2, rtol=0.05)

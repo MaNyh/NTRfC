@@ -3,7 +3,7 @@ image: python:3.10
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/topics/caching/
@@ -11,36 +11,36 @@ variables:
 # If you want to also cache the installed packages, you have to install
 # them in a virtualenv and cache it as well.
 cache:
-  paths:
-    - .cache/pip
-    - venv/
-    
-before_script:
-  - python -m pip install --upgrade pip
-  - python --version  # For debugging
-  - pip install virtualenv
-  - virtualenv venv
-  - source venv/bin/activate
+    paths:
+        - .cache/pip
+        - venv/
 
-stages:          # List of stages for jobs, and their order of execution
-  - test
+before_script:
+    - python -m pip install --upgrade pip
+    - python --version  # For debugging
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+
+stages: # List of stages for jobs, and their order of execution
+    - test
 #  - deploy
 
 
-test:       # This job runs in the build stage, which runs first.
-  stage: test
-  script:
-    - apt-get update -y && apt-get install libgl1 -y
-    - pip install .
-    - pip install pytest
-    - pytest tests/.
+test: # This job runs in the build stage, which runs first.
+    stage: test
+    script:
+        - apt-get update -y && apt-get install libgl1 -y
+        - pip install .
+        - pip install pytest
+        - pytest tests/.
 
-lint-test-job:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
-  script:
-    - pip install flake8  
-    - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude='venv/'
-    - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics   --exclude='venv/'
+lint-test-job: # This job also runs in the test stage.
+    stage: test    # It can run at the same time as unit-test-job (in parallel).
+    script:
+        - pip install flake8
+        - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude='venv/'
+        - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics   --exclude='venv/'
 
 
 #deploy-job:      # This job runs in the deploy stage.

@@ -91,7 +91,6 @@ def test_cgnsReader():
     return 0
 
 
-
 def test_pickle_operations(tmpdir):
     """
     checks if the pickle-operators are working

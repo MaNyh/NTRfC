@@ -256,7 +256,7 @@ def test_calcmidpassagestreamline():
     poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
         sorted_poly, alpha)
 
-    calcmidpassagestreamline(mids_poly.points[::,0], mids_poly.points[::,1], beta_leading, beta_trailing, -1, 2, 1)
+    calcmidpassagestreamline(mids_poly.points[::, 0], mids_poly.points[::, 1], beta_leading, beta_trailing, -1, 2, 1)
 
 
 def test_cascad_3d_domain():
@@ -270,6 +270,9 @@ def test_cascad_3d_domain():
     sorted_poly.rotate_z(angle)
     X, Y = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
     points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
-    sortedPoly, psPoly, ssPoly,  per_y_upper, per_y_lower, inletPoly, outletPoly= cascade_2d_domain(points,-1,2,1,"m",0.1,1,verbose=False)
+    sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cascade_2d_domain(points, -1, 2, 1,
+                                                                                                    "m", 0.1, 1,
+                                                                                                    verbose=False)
 
-    cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan=0.2, avdr=1, verbose=False)
+    cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan=0.2, avdr=1,
+                      verbose=False)

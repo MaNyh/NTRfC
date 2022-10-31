@@ -33,6 +33,3 @@ def cgnsReader(file):
     reader.Update()
     dataset = reader.GetOutput()
     return dataset
-
-
-

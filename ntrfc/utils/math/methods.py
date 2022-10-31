@@ -9,7 +9,6 @@ def calcAnisoMatrix(reynoldsstress_tensor):
 
 
 def calcAnisoEigs(anisotropy_matrix):
-
     # eigenwerte für anisotropie muss hiermit berechnet werden!
     # wieso nochmal? es tauchen negative eigenwerte auf, bei berechnung mit numpy
     # nicht-symmetrische matrix (anisotrop)

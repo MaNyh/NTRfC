@@ -13,7 +13,8 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
     # =============================================================================
     # Daten Einlesen
     # =============================================================================
-    points = pv.PolyData(np.stack([profilepoints2d[::,0], profilepoints2d[::,1], np.zeros(len(profilepoints2d[::,0]))]).T)
+    points = pv.PolyData(
+        np.stack([profilepoints2d[::, 0], profilepoints2d[::, 1], np.zeros(len(profilepoints2d[::, 0]))]).T)
     unitcoeff = 0
     if unit == "m":
         unitcoeff = 1
@@ -59,14 +60,14 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
 
     if verbose:
         p = pv.Plotter()
-        p.add_mesh(outletPoly,color="r")
-        p.add_mesh(inletPoly,color="r")
-        p.add_mesh(per_y_lower,color="r")
-        p.add_mesh(per_y_upper,color="r")
-        p.add_mesh(profilepoints2d,color="k")
+        p.add_mesh(outletPoly, color="r")
+        p.add_mesh(inletPoly, color="r")
+        p.add_mesh(per_y_lower, color="r")
+        p.add_mesh(per_y_upper, color="r")
+        p.add_mesh(profilepoints2d, color="k")
         p.show()
 
-    return sortedPoly, psPoly, ssPoly,  per_y_upper, per_y_lower, inletPoly, outletPoly
+    return sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly
 
 
 def test_cascad_2d_domain():
@@ -80,19 +81,21 @@ def test_cascad_2d_domain():
     sorted_poly.rotate_z(angle)
     X, Y = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
     points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
-    sortedPoly, psPoly, ssPoly,  per_y_upper, per_y_lower, inletPoly, outletPoly= cascade_2d_domain(points,-1,2,1,"m",0.1,1,False)
+    sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cascade_2d_domain(points, -1, 2, 1,
+                                                                                                    "m", 0.1, 1, False)
 
-def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan, avdr=1, verbose=False):
 
-    x_lower =inletPoly.bounds[0]
-    x_upper =outletPoly.bounds[0]
+def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan, avdr=1,
+                      verbose=False):
+    x_lower = inletPoly.bounds[0]
+    x_upper = outletPoly.bounds[0]
 
-    def compute_transform(point,span,avdr,x_lower,x_upper,sign=1):
-        l = abs(x_lower-x_upper)
-        x = abs(point[0]-x_upper) / l
-        return np.array([0,0,sign*span*(1+avdr*x)])+point
+    def compute_transform(point, span, avdr, x_lower, x_upper, sign=1):
+        l = abs(x_lower - x_upper)
+        x = abs(point[0] - x_upper) / l
+        return np.array([0, 0, sign * span * (1 + avdr * x)]) + point
 
-    def transform(avdr, poly, x_lower, x_upper, zspan,sign):
+    def transform(avdr, poly, x_lower, x_upper, zspan, sign):
         poly_copy = poly.copy()
         for idx, pt in enumerate(poly_copy.points):
             poly_copy.points[idx] = compute_transform(pt, zspan, avdr, x_lower, x_upper, sign)
@@ -121,23 +124,21 @@ def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inle
 
     if verbose:
         p = pv.Plotter()
-        p.add_mesh(psPoly_lowz,color="r")
-        p.add_mesh(psPoly_highz,opacity=0.9)
-        p.add_mesh(ssPoly_lowz,opacity=0.9)
-        p.add_mesh(ssPoly_highz,opacity=0.9,color="white")
-        p.add_mesh(per_y_upper_lowz,opacity=0.9,color="white")
-        p.add_mesh(per_y_upper_highz,opacity=0.9,color="white")
-        p.add_mesh(per_y_lower_lowz,opacity=0.9,color="white")
-        p.add_mesh(per_y_lower_highz,opacity=0.9,color="white")
-        p.add_mesh(inletPoly_lowz,opacity=0.9,color="white")
-        p.add_mesh(inletPoly_highz,opacity=0.9,color="white")
-        p.add_mesh(outletPoly_lowz,opacity=0.9,color="white")
-        p.add_mesh(outletPoly_highz,opacity=0.9,color="white")
+        p.add_mesh(psPoly_lowz, color="r")
+        p.add_mesh(psPoly_highz, opacity=0.9)
+        p.add_mesh(ssPoly_lowz, opacity=0.9)
+        p.add_mesh(ssPoly_highz, opacity=0.9, color="white")
+        p.add_mesh(per_y_upper_lowz, opacity=0.9, color="white")
+        p.add_mesh(per_y_upper_highz, opacity=0.9, color="white")
+        p.add_mesh(per_y_lower_lowz, opacity=0.9, color="white")
+        p.add_mesh(per_y_lower_highz, opacity=0.9, color="white")
+        p.add_mesh(inletPoly_lowz, opacity=0.9, color="white")
+        p.add_mesh(inletPoly_highz, opacity=0.9, color="white")
+        p.add_mesh(outletPoly_lowz, opacity=0.9, color="white")
+        p.add_mesh(outletPoly_highz, opacity=0.9, color="white")
         p.show()
 
-    return sortedPoly_lowz,sortedPoly_high,per_y_upper_lowz,per_y_upper_highz,\
-           per_y_lower_lowz,per_y_lower_highz,\
-           inletPoly_lowz,inletPoly_highz,\
-           outletPoly_lowz,outletPoly_highz
-
-
+    return sortedPoly_lowz, sortedPoly_high, per_y_upper_lowz, per_y_upper_highz, \
+           per_y_lower_lowz, per_y_lower_highz, \
+           inletPoly_lowz, inletPoly_highz, \
+           outletPoly_lowz, outletPoly_highz
