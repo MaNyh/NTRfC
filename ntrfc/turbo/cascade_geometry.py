@@ -1,6 +1,6 @@
 import numpy as np
 
-from ntrfc.utils.pyvista_utils.line import refine_spline
+from ntrfc.geometry.line import refine_spline
 
 
 def calcmidpassagestreamline(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t):

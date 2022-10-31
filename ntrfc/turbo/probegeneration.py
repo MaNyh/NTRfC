@@ -1,9 +1,9 @@
 import numpy as np
 import pyvista as pv
 
-from ntrfc.utils.geometry.cascade_geometry import calcmidpassagestreamline
-from ntrfc.utils.math.vectorcalc import vecAngle
-from ntrfc.utils.pyvista_utils.line import polyline_from_points, refine_spline
+from ntrfc.turbo.cascade_geometry import calcmidpassagestreamline
+from ntrfc.math.vectorcalc import vecAngle
+from ntrfc.geometry.line import polyline_from_points, refine_spline
 
 
 def create_profileprobes(ssPoly, psPoly, midspan_z, pden_ps, pden_ss, tolerance=1e-10):

@@ -8,7 +8,7 @@ Created on Fri Apr 24 23:33:53 2020
 import numpy as np
 import pyvista as pv
 
-from ntrfc.utils.math.vectorcalc import vecAbs, vecProjection, vecAngle
+from ntrfc.math.vectorcalc import vecAbs, vecProjection, vecAngle
 
 
 def unitvec(vec):

@@ -3,9 +3,9 @@ import pyvista as pv
 
 
 def test_createprofileprobes():
-    from ntrfc.postprocessing.turbo.probegeneration import create_profileprobes
-    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
-    from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
+    from ntrfc.turbo.probegeneration import create_profileprobes
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.turbo.pointcloud_methods import extract_geo_paras
     naca_code = "6009"
     angle = 10  # deg
     res = 240
@@ -22,9 +22,9 @@ def test_createprofileprobes():
 
 
 def test_create_midpassageprobes():
-    from ntrfc.postprocessing.turbo.probegeneration import create_midpassageprobes
-    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
-    from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
+    from ntrfc.turbo.probegeneration import create_midpassageprobes
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.turbo.pointcloud_methods import extract_geo_paras
     naca_code = "6009"
     angle = 10  # deg
     res = 240
@@ -38,26 +38,9 @@ def test_create_midpassageprobes():
     assert midspan_probes.number_of_points == nop, "number of probes on midpassage line not correct"
 
 
-def test_getgci():
-    # todo FILL
-    from ntrfc.postprocessing.meshconvergence.grid_convergece_index import getGCI
-
-    fc3 = 23.263
-    fc2 = 23.165
-    fc1 = 23.151
-
-    N3 = 18576
-    N2 = 74304
-    N1 = 297216
-    Fs = 1.25
-    D = 2
-
-    GCI_1, GCI_2, GCI_3 = getGCI(N1, N2, N3, fc1, fc2, fc3, D, Fs=1.25)
-
-
 def test_stagnationpointprobes():
-    from ntrfc.postprocessing.turbo.probegeneration import create_stagnationpointprobes
-    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.turbo.probegeneration import create_stagnationpointprobes
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
 
     naca_code = "6509"
     angle = 30  # deg

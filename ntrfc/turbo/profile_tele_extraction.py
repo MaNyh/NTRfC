@@ -4,9 +4,9 @@ from matplotlib import path
 from scipy import interpolate
 from scipy.spatial import Delaunay
 
-from ntrfc.utils.geometry.alphashape import calc_concavehull
-from ntrfc.utils.math.vectorcalc import findNearest, vecDir
-from ntrfc.utils.pyvista_utils.line import lines_from_points, polyline_from_points, refine_spline
+from ntrfc.geometry.alphashape import calc_concavehull
+from ntrfc.math.vectorcalc import findNearest, vecDir
+from ntrfc.geometry.line import lines_from_points, polyline_from_points, refine_spline
 
 
 # read the base-data

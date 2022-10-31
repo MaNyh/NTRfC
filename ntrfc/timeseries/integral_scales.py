@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import simps
 
-from ntrfc.utils.math.methods import autocorr, zero_crossings
+from ntrfc.math.methods import autocorr, zero_crossings
 
 
 def integralscales(signal, timesteparray):

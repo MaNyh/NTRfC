@@ -1,7 +1,22 @@
+import numpy as np
+import pyvista as pv
+
+
+def test_surface_distance():
+    from ntrfc.geometry.surface import calc_dist_from_surface
+
+    surf_one = pv.Plane()
+    surf_two = pv.Plane()
+    z_shift = 1.0
+    surf_two.points += np.array([0, 0, z_shift])
+    dist = calc_dist_from_surface(surf_one, surf_two)
+    assert any(dist["distances"] == z_shift)
+
+
 def test_massflow_plane():
     import numpy as np
     import pyvista as pv
-    from ntrfc.utils.pyvista_utils.plane import massflow_plane
+    from ntrfc.geometry.plane import massflow_plane
 
     plane = pv.Plane()
     numcells = plane.number_of_cells
@@ -16,7 +31,7 @@ def test_massflow_plane():
 def test_areaave_plane():
     import numpy as np
     import pyvista as pv
-    from ntrfc.utils.pyvista_utils.plane import areaave_plane
+    from ntrfc.geometry.plane import areaave_plane
 
     plane = pv.Plane()
     plane["U"] = np.ones(plane.number_of_cells)
@@ -29,7 +44,7 @@ def test_areaave_plane():
 def test_massflowave_plane():
     import pyvista as pv
     import numpy as np
-    from ntrfc.utils.pyvista_utils.plane import massflowave_plane
+    from ntrfc.geometry.plane import massflowave_plane
 
     plane = pv.Plane()
     numcells = plane.number_of_cells

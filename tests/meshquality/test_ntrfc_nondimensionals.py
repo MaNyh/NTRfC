@@ -7,7 +7,7 @@ def test_calc_dimensionless_gridspacing():
     calc_dimensionless_gridspacing needs to compute accurately the Delta+-Values
 
     """
-    from ntrfc.postprocessing.turbulence.nondimensionals import calc_dimensionless_gridspacing
+    from ntrfc.meshquality.nondimensionals import calc_dimensionless_gridspacing
     import pyvista as pv
     import numpy as np
 

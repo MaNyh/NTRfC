@@ -1,7 +1,7 @@
 import numpy as np
 import pyvista as pv
 
-from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras, calcMidPassageStreamLine
+from ntrfc.turbo.pointcloud_methods import extract_geo_paras, calcMidPassageStreamLine
 
 
 def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shift, alpha, verbose=False):
@@ -71,7 +71,7 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
 
 
 def test_cascad_2d_domain():
-    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
 
     naca_code = "6509"
     angle = 30  # deg

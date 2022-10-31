@@ -1,6 +1,6 @@
 import numpy as np
 
-from ntrfc.utils.math.vectorcalc import vecAbs, vecProjection
+from ntrfc.math.vectorcalc import vecAbs, vecProjection
 
 
 def massflow_plane(mesh, rhoname="rho", velocityname="U"):

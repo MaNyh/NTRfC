@@ -1,50 +1,12 @@
 import numpy as np
 import pyvista as pv
 
-from ntrfc.utils.geometry.cascade_geometry import calcmidpassagestreamline
-from ntrfc.utils.geometry.domaingen_cascade import cascade_2d_domain, cascade_3d_domain
-
-
-def test_calc_concavehull():
-    """
-    in these simple geometries, each point must be found by calcConcaveHull
-    """
-    from ntrfc.utils.geometry.alphashape import calc_concavehull
-    import numpy as np
-    import pyvista as pv
-
-    square = pv.Plane()
-    boxedges = square.extract_feature_edges()
-
-    boxedges.rotate_z(np.random.randint(0, 360))
-    boxpoints = boxedges.points
-
-    np.random.shuffle(boxpoints)
-
-    xs_raw = boxpoints[:, 0]
-    ys_raw = boxpoints[:, 1]
-
-    xs, ys = calc_concavehull(xs_raw, ys_raw, 10)
-
-    assert len(xs) == len(xs_raw)
-    assert any([yi in ys_raw for yi in ys])
-
-    polygon = pv.Polygon()
-    polygon.rotate_z(np.random.randint(0, 360))
-    polyedges = polygon.extract_feature_edges()
-    polypoints = polyedges.points
-    np.random.shuffle(polypoints)
-    xs_raw = polypoints[:, 0]
-    ys_raw = polypoints[:, 1]
-
-    xs, ys = calc_concavehull(xs_raw, ys_raw, 10)
-
-    assert len(xs) == len(xs_raw)
-    assert any([yi in ys_raw for yi in ys])
+from ntrfc.turbo.cascade_geometry import calcmidpassagestreamline
+from ntrfc.turbo.domaingen_cascade import cascade_2d_domain, cascade_3d_domain
 
 
 def test_parsec():
-    from ntrfc.utils.geometry.airfoil_generators.parsec_airfoil_creator import parsec_airfoil_gen
+    from ntrfc.turbo.airfoil_generators.parsec_airfoil_creator import parsec_airfoil_gen
 
     R_LE = 0.01
     x_PRE = 0.450
@@ -63,7 +25,7 @@ def test_parsec():
 
 
 def test_naca():
-    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
     import numpy as np
 
     def rand_naca_code():
@@ -90,8 +52,8 @@ def test_extract_vk_hk(verbose=False):
     tests a NACA  profile in a random angle as a minimal example.
     :return:
     """
-    from ntrfc.utils.geometry.profile_tele_extraction import extract_vk_hk
-    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
     import numpy as np
     import pyvista as pv
 
@@ -126,10 +88,10 @@ def test_extract_vk_hk(verbose=False):
 
 
 def test_midline_from_sides(verbose=False):
-    from ntrfc.utils.geometry.pointcloud_methods import midline_from_sides
-    from ntrfc.utils.math.vectorcalc import vecAbs
-    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
-    from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
+    from ntrfc.turbo.pointcloud_methods import midline_from_sides
+    from ntrfc.math.vectorcalc import vecAbs
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.turbo.pointcloud_methods import extractSidePolys
     import numpy as np
     import pyvista as pv
 
@@ -163,7 +125,7 @@ def test_midLength():
     """
     checks weather
     """
-    from ntrfc.utils.geometry.pointcloud_methods import mid_length
+    from ntrfc.turbo.pointcloud_methods import mid_length
     import numpy as np
     import pyvista as pv
 
@@ -183,8 +145,8 @@ def test_midLength():
 
 
 def test_extractSidePolys():
-    from ntrfc.utils.geometry.pointcloud_methods import extractSidePolys
-    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.turbo.pointcloud_methods import extractSidePolys
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
     import numpy as np
     import pyvista as pv
 
@@ -207,8 +169,8 @@ def test_extractSidePolys():
 
 
 def test_extract_geo_paras(verbose=False):
-    from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
-    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.turbo.pointcloud_methods import extract_geo_paras
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
     import numpy as np
     import pyvista as pv
 
@@ -240,8 +202,8 @@ def test_extract_geo_paras(verbose=False):
 
 
 def test_calcmidpassagestreamline():
-    from ntrfc.utils.geometry.pointcloud_methods import extract_geo_paras
-    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.turbo.pointcloud_methods import extract_geo_paras
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
     import numpy as np
     import pyvista as pv
 
@@ -260,7 +222,7 @@ def test_calcmidpassagestreamline():
 
 
 def test_cascad_3d_domain():
-    from ntrfc.utils.geometry.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
 
     naca_code = "6509"
     angle = 30  # deg
