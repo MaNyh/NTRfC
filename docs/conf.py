@@ -19,11 +19,10 @@
 #
 import os
 import sys
+
 import ntrfc
 
-
 sys.path.insert(0, os.path.abspath('..'))
-
 
 # -- General configuration ---------------------------------------------
 
@@ -79,7 +78,6 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-
 # -- Options for HTML output -------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -98,12 +96,10 @@ html_theme = 'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-
 # -- Options for HTMLHelp output ---------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'ntrfcdoc'
-
 
 # -- Options for LaTeX output ------------------------------------------
 
@@ -134,7 +130,6 @@ latex_documents = [
      'Malte Nyhuis', 'manual'),
 ]
 
-
 # -- Options for manual page output ------------------------------------
 
 # One entry per manual page. List of tuples
@@ -144,7 +139,6 @@ man_pages = [
      'NTRfC Documentation',
      [author], 1)
 ]
-
 
 # -- Options for Texinfo output ----------------------------------------
 
@@ -159,6 +153,3 @@ texinfo_documents = [
      'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-

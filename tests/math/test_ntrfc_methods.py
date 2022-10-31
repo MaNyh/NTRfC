@@ -1,0 +1,154 @@
+import numpy as np
+import pyvista as pv
+
+from ntrfc.math.methods import calcAnisoMatrix, calcAnisoEigs, C_barycentric, autocorr, zero_crossings
+
+
+def test_ellipsoidVol():
+    import numpy as np
+    import pyvista as pv
+    from ntrfc.math.vectorcalc import ellipsoidVol
+    sigma = np.array([1, 1, 1])
+    ellipsoid = pv.ParametricEllipsoid(*sigma)
+    calcVol = ellipsoidVol(sigma)
+    assert np.isclose(calcVol, ellipsoid.volume, rtol=1e-03, atol=1e-03)
+
+
+def test_gradToRad():
+    import numpy as np
+    from ntrfc.math.vectorcalc import gradToRad
+    angle_grad = 180
+    angle_rad = gradToRad(angle_grad)
+    assert np.pi == angle_rad
+
+
+def test_symToMatrix():
+    import numpy as np
+    from ntrfc.math.vectorcalc import symToMatrix
+    A = np.array([1, 1, 1, 1, 1, 1])
+    R = symToMatrix(A)
+    assert all(np.equal(np.ones((3, 3)), R).flatten())
+
+
+def test_Rx():
+    import numpy as np
+    from ntrfc.math.vectorcalc import gradToRad, Rx
+    angle = 90
+    R = Rx(gradToRad(angle))
+    test_vec = np.array([0, 0, 1])
+    new_vec = np.dot(R, test_vec)
+    assert all(np.isclose(new_vec, np.array([0, 1, 0])))
+
+
+def test_Ry():
+    import numpy as np
+    from ntrfc.math.vectorcalc import gradToRad, Ry
+    angle = 90
+    R = Ry(gradToRad(angle))
+    test_vec = np.array([1, 0, 0])
+    new_vec = np.dot(R, test_vec)
+    assert all(np.isclose(new_vec, np.array([0, 0, 1])))
+
+
+def test_Rz():
+    import numpy as np
+    from ntrfc.math.vectorcalc import gradToRad, Rz
+    angle = 90
+    R = Rz(gradToRad(angle))
+    test_vec = np.array([0, 1, 0])
+    new_vec = np.dot(R, test_vec)
+    assert all(np.isclose(new_vec, np.array([1, 0, 0])))
+
+
+def test_lineseg():
+    import pyvista as pv
+    import numpy as np
+    from ntrfc.math.vectorcalc import lineseg_dist
+    line = pv.Line()
+    testpt = np.array([0, 1, 0])
+    pt_a, pt_b = line.points[0], line.points[-1]
+    assert line.length == lineseg_dist(testpt, pt_a, pt_b)
+
+
+def test_findNearest():
+    from ntrfc.math.vectorcalc import findNearest
+    import pyvista as pv
+    import numpy as np
+    res = 100
+    line = pv.Line(resolution=res)
+    point = np.array([0, 0, 0])
+    near = findNearest(line.points, point)
+    assert near == int(res / 2)
+
+
+def test_eulersFromRPG():
+    from ntrfc.math.vectorcalc import eulersFromRPG, RotFromTwoVecs, vecAngle
+    import numpy as np
+    a = np.array([1, 0, 0])
+    b = np.array([0, 1, 0])
+    cangle = vecAngle(a, b)
+    R = RotFromTwoVecs(a, b)
+
+    angle = eulersFromRPG(R)
+    assert angle[0] == cangle
+
+
+def test_randomOrthMat():
+    from ntrfc.math.vectorcalc import randomOrthMat
+    import numpy as np
+    o = randomOrthMat()
+    dot_o = np.dot(o, o.T)
+    assert all(np.isclose(dot_o, np.identity(3)).flatten())
+
+
+def test_line_intersection():
+    import numpy as np
+    from ntrfc.math.vectorcalc import line_intersection
+
+    intersect = line_intersection((-1, 0), (1, 0),
+                                  (0, -1), (0, 1))
+    assert all(intersect == np.array([0, 0]))
+
+
+def test_largedistance_indices():
+    from ntrfc.math.vectorcalc import calc_largedistant_idx
+
+    line = pv.Line(resolution=100)
+    xx, yy = line.points[::, 0], line.points[::, 1]
+    id1, id2 = calc_largedistant_idx(xx, yy)
+    assert id1 == 0
+    assert id2 == 100
+
+
+def test_calcanisomatrix():
+    from ntrfc.math.vectorcalc import symToMatrix
+    r = np.array([1, 1, 1, 1, 1, 1])
+    rm = symToMatrix(r)
+    calcAnisoMatrix(rm)
+    # todo implement real test
+
+
+def test_calcanisoeigs():
+    from ntrfc.math.vectorcalc import symToMatrix
+    r = np.array([1, 1, 1, 1, 1, 1])
+    rm = symToMatrix(r)
+    aniso = calcAnisoMatrix(rm)
+    calcAnisoEigs(aniso)
+    # todo implement real test
+
+
+def test_calcbarycentric():
+    from ntrfc.math.vectorcalc import symToMatrix
+    r = np.array([1, 1, 1, 1, 1, 1])
+    rm = symToMatrix(r)
+    C_barycentric(rm)
+    # todo implement real test
+
+
+def test_autocorr():
+    time = np.linspace(0, 200, 10000)
+    signal = np.sin(time)
+    corr = autocorr(signal)
+    zeroc = zero_crossings(corr)
+
+    assert np.isclose(time[zeroc[0]], np.pi / 2, rtol=0.05)
