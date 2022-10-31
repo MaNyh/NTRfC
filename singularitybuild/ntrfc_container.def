@@ -53,9 +53,9 @@ From: ubuntu:20.04
     export PYENV_ROOT=/opt/pyenv
     export PATH="/opt/pyenv/bin:$PATH"
     curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
-    pyenv install 3.9.10
-    echo 'export PATH=/opt/pyenv/versions/3.9.10/bin/:$PATH' >> $SINGULARITY_ENVIRONMENT
-    export PATH=/opt/pyenv/versions/3.9.10/bin/:$PATH
+    pyenv install 3.10.8
+    echo 'export PATH=/opt/pyenv/versions/3.10.8/bin/:$PATH' >> $SINGULARITY_ENVIRONMENT
+    export PATH=/opt/pyenv/versions/3.10.8/bin/:$PATH
 
     apt install python3-wheel -y
     pip install git+https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC.git#egg=NTRfC
