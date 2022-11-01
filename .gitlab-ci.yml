@@ -16,6 +16,7 @@ cache:
         - venv/
 
 before_script:
+    - apt-get update -y && apt-get install libgl1 -y
     - python -m pip install --upgrade pip
     - python --version  # For debugging
     - pip install virtualenv
@@ -30,7 +31,6 @@ stages: # List of stages for jobs, and their order of execution
 test: # This job runs in the build stage, which runs first.
     stage: test
     script:
-        - apt-get update -y && apt-get install libgl1 -y
         - pip install .
         - pip install pytest
         - pytest tests/.
