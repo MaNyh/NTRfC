@@ -32,7 +32,7 @@ test: # This job runs in the build stage, which runs first.
     stage: test
     script:
         - pip install .
-        - pip install pytest
+        - pip install -r requirements_dev.txt
         - pytest tests/.
 
 lint-test-job: # This job also runs in the test stage.
@@ -42,9 +42,23 @@ lint-test-job: # This job also runs in the test stage.
         - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude='venv/'
         - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics   --exclude='venv/'
 
+coverage:
+  stage: test
+  script:
+        - pip install .
+        - pip install -r requirements_dev.txt
+        - python -m  pytest --cov=ntrfc tests
+        - coverage xml
+  coverage: '/TOTAL.*\s+(\d+\%)/'
+  artifacts:
+    paths:
+      - coverage.xml
+    when: always
+
 
 #deploy-job:      # This job runs in the deploy stage.
 #  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
 #  script:
 #    - echo "Deploying application..."
 #    - echo "Application successfully deployed."
+

@@ -3,17 +3,6 @@ NTRfC
 =====
 
 
-.. image:: https://img.shields.io/pypi/v/ntrfc.svg
-        :target: https://pypi.python.org/pypi/ntrfc
-
-.. image:: https://img.shields.io/travis/MaNyh/ntrfc.svg
-        :target: https://travis-ci.com/MaNyh/ntrfc
-
-.. image:: https://readthedocs.org/projects/ntrfc/badge/?version=latest
-        :target: https://ntrfc.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
-
-
 Numerical Test Rig for Cascades.
 
 
