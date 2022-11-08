@@ -34,7 +34,7 @@ def getGCI(N1, N2, N3, fc1, fc2, fc3, D, Fs=1.25):
     epsilon21 = (fc2 - fc1)
 
     x0 = np.log(epsilon32 / epsilon21) / np.log(r21)
-    p = calcp(x0, Fs, N1, N2, N3, fc1, fc2, fc3, D)
+    p = calcp(x0, 1, N1, N2, N3, fc1, fc2, fc3, D)
 
     GCI_1 = Fs * abs((epsilon21 / fc1)) * 1 / ((r21 ** p) - 1)
     GCI_2 = Fs * abs((epsilon32 / fc2)) * 1 / ((r32 ** p) - 1)
@@ -62,6 +62,20 @@ def getGCI(N1, N2, N3, fc1, fc2, fc3, D, Fs=1.25):
     EERE_2_p1 = abs((f_extra_p1 - fc2) / f_extra_p1)
     EERE_3_p1 = abs((f_extra_p1 - fc3) / f_extra_p1)
 
+    text = ""
+    text += f'{"GCI_1": <16} {GCI_1}\n'
+    text += f'{"GCI_2": <16} {GCI_2}\n'
+    text += f'{"GCI_3": <16} {GCI_3}\n'
+    text += f'{"EERE_1": <16} {EERE_1}\n'
+    text += f'{"EERE_2": <16} {EERE_2}\n'
+    text += f'{"EERE_3": <16} {EERE_3}\n'
+    text += f'{"GCI_1_p1": <16} {GCI_1_p1}\n'
+    text += f'{"GCI_2_p1": <16} {GCI_2_p1}\n'
+    text += f'{"GCI_3_p1": <16} {GCI_3_p1}\n'
+    text += f'{"EERE_1_p1": <16} {EERE_1_p1}\n'
+    text += f'{"EERE_2_p1": <16} {EERE_2_p1}\n'
+    text += f'{"EERE_3_p1": <16} {EERE_3_p1}\n'
+    print(text)
     return GCI_1, GCI_2, GCI_3
     # return [GCI_1, GCI_2, GCI_3], [EERE_1, EERE_2, EERE_3], [GCI_1_p1, GCI_2_p1, GCI_3_p1], \
     #        [EERE_1_p1, EERE_2_p1, EERE_3_p1]
