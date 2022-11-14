@@ -29,7 +29,14 @@ Installation
 --------
 
 NTRfC is utilizing powerful and complex dependencies like pyvista and gmsh.
-It is strongly recommanded to use virtual environments [virtualenv](https://pypi.org/project/virtualenv/), conda-environments (see [miniconda](https://docs.conda.io/en/latest/miniconda.html), [anaconda](https://docs.anaconda.com/anaconda/install/index.html), [mamba](https://mamba.readthedocs.io/en/latest/installation.html) ) or to use a singularity container from (ntrfc singularity releases)[https://cloud.sylabs.io/library/nyhuma/ntrflows/ntr.sif].
+It is strongly recommanded to use virtual environments or conda-environments
+
+For more information, see:
+
+- virtualenv: https://pypi.org/project/virtualenv/
+- miniconda: https://docs.conda.io/en/latest/miniconda.html
+- anaconda: https://docs.anaconda.com/anaconda/install/index.html
+- mamba: https://mamba.readthedocs.io/en/latest/installation.html
 
 **Installation from gitlab with pip**
 
@@ -62,6 +69,10 @@ This way you have NTRfC installed but the code is not installed, but linked to t
 You don't have to reinstall the package after your edits.
 This speeds up testing and will lead to less debugging time.
 
+**Singularity releases**
+
+use a singularity container from ntrfc singularity releases:  https://cloud.sylabs.io/library/nyhuma/ntrflows/ntr.sif].
+The containers will come with a virtual graphics card and a xvfb display-server, enabling you to render on hpc-systems and any other unprepared system with limited graphics capability.
 
 Credits
 -------
