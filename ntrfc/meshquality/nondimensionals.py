@@ -8,11 +8,7 @@ Created on Fri Apr 24 23:33:53 2020
 import numpy as np
 import pyvista as pv
 
-from ntrfc.math.vectorcalc import vecAbs, vecProjection, vecAngle
-
-
-def unitvec(vec):
-    return vec / vecAbs(vec)
+from ntrfc.math.vectorcalc import vecAbs,vecAbs_list, vecProjection, vecAngle, unitvec, unitvec_list
 
 
 def readDataSet(grid, dataName):
@@ -120,32 +116,20 @@ def cellSpans( solutionMesh, calcFrom):
 def getWalluTaus(labelChunk, solutionMesh, surfaceMesh, mu_0, rhofieldname, velfieldname):
     uTaus = []
     surfaceNormals = surfaceMesh.extract_surface().compute_normals()
-    for cellIdx in labelChunk:
-        cellCenter = solutionMesh["cellCenters"][cellIdx]
+    cell_centers = solutionMesh["cellCenters"]
 
-        pointOnWallId = surfaceNormals.find_closest_point(cellCenter)
-        pointOnWall = surfaceNormals.points[pointOnWallId]
-        # surfaceNormal = surfaceNormals.point_arrays["Normals"][pointOnWallId]#        pointOnWall = cellNormal+cellCenter
+    relatedpointonwallids = [surfaceNormals.find_closest_point(i) for i in cell_centers]
+    relatedpointonwall = [surfaceNormals.points[i] for i in relatedpointonwallids]
+    relatedpointonwall_samples = pv.PolyData(relatedpointonwall).sample(surfaceMesh)
+    graduwall = relatedpointonwall_samples["gradient"].reshape(relatedpointonwall_samples.number_of_points,3,3)
+    flowdirections = unitvec_list(solutionMesh[velfieldname])
+    gradUyWs = vecAbs_list([np.dot(flowdirections[i], graduwall[i]) for i in range(relatedpointonwall_samples.number_of_points)])
+    rhoWs = relatedpointonwall_samples[rhofieldname]
 
-        PT = pv.PolyData(pointOnWall)
-        PT = PT.sample(surfaceMesh)
-        PT.set_active_scalars("gradient")
+    tauWs = gradUyWs * mu_0 * rhoWs
+    u_taus = (tauWs / rhoWs) ** 0.5
 
-        gradUWall = PT.active_scalars[0]
-
-        gradUWall = np.array([[gradUWall[0], gradUWall[1], gradUWall[2]],
-                              [gradUWall[3], gradUWall[4], gradUWall[5]],
-                              [gradUWall[6], gradUWall[7], gradUWall[8]]])
-
-        flowdirection = unitvec(solutionMesh[velfieldname][cellIdx])
-        gradUyW = vecAbs(np.dot(flowdirection, gradUWall))
-        PT.set_active_scalars(rhofieldname)
-        rhoW = PT.active_scalars[0]
-        tauW = gradUyW * mu_0 * rhoW
-        u_tau = (tauW / rhoW) ** 0.5
-        uTaus.append(u_tau)
-
-    return uTaus
+    return u_taus
 
 
 def gridSpacing(mu_0, volmesh):

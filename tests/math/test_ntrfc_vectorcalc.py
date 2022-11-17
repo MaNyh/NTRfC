@@ -1,3 +1,8 @@
+import numpy as np
+
+from ntrfc.math.vectorcalc import unitvec_list
+
+
 def test_absVec():
     import numpy as np
     from ntrfc.math.vectorcalc import vecAbs
@@ -82,3 +87,18 @@ def test_vecAbs_list():
     c_mags = vecAbs_list(c)
     assert c_mags[0] == 1, "inaccuracy in magnitudes!"
     assert c_mags[1] == 9, "inaccuracy in magnitudes!"
+
+
+def test_unitvec_list():
+    a = np.array([1,0,0])
+    b = np.array([0,0,9])
+    c = np.stack([a,b])
+    directions = unitvec_list(c)
+    assert directions[0] == np.array([1,0,0])
+    assert directions[1] == np.array([0,0,1])
+
+
+def test_unitvec():
+    a = np.array([9,0,0])
+    am = unitvec(a)
+    b = np.array([0,0,-9])

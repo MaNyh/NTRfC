@@ -267,3 +267,11 @@ def line_intersection(point_a1, point_a2,
     x = det_2d(d, xdiff) / div
     y = det_2d(d, ydiff) / div
     return x, y
+
+
+def unitvec(vec):
+    return vec / vecAbs(vec)
+
+
+def unitvec_list(vecs):
+    return vecs / vecAbs_list(vecs)[:,None]
