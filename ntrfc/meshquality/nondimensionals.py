@@ -46,19 +46,20 @@ def cellDirections(cellUMean, wallNorm):
 #################################################################################
 
 
-def closestWallNormalPoint(point, surfaceMesh):
-    surfacenormals = surfaceMesh.extract_surface().compute_normals()
+def closestWallNormalPoint(point, surfacenormals):
     surfacepoint_id = surfacenormals.find_closest_point(point)
     wallpoint = surfacenormals.points[surfacepoint_id]
     return surfacenormals.point_arrays["Normals"][surfacepoint_id], wallpoint - point
 
 
-def calcWallNormalVectors(cellIds, surfaceMesh, volmesh):
+def calcWallNormalVectors(surfaceMesh, volmesh):
     surfacenormals = []
     surfacevectors = []
+    surfacenormals_surface = surfaceMesh.extract_surface().compute_normals()
+    cellIds = np.arange(0,volmesh.number_of_cells)
     for cellIdx in cellIds:
         center = volmesh["cellCenters"][cellIdx]
-        surfacenormal, surfacevector = closestWallNormalPoint(center, surfaceMesh)
+        surfacenormal, surfacevector = closestWallNormalPoint(center, surfacenormals_surface)
         surfacenormals.append(surfacenormal)
         surfacevectors.append(surfacevector)
 
@@ -67,10 +68,10 @@ def calcWallNormalVectors(cellIds, surfaceMesh, volmesh):
     return surfacenormals, surfacevectors
 
 
-def cellSpans(labelChunk, solutionMesh, calcFrom):
+def cellSpans( solutionMesh, calcFrom):
     spans = []
-
-    for cellIdx in labelChunk:
+    cellIds = np.arange(0,solutionMesh.number_of_cells)
+    for cellIdx in cellIds:
 
         x_span = 0
         x_weight = 0
@@ -202,11 +203,11 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     cellIds = [i for i in range(volmesh.GetNumberOfCells())]
 
     print("calculating wall-normal vectors...")
-    surfaceNormals, surfaceVectors = calcWallNormalVectors(cellIds, surfaceMesh, volmesh)
+    surfaceNormals, surfaceVectors = calcWallNormalVectors(surfaceMesh, volmesh)
     volmesh["wallNormal"] = surfaceNormals
 
     print("calculating cell spans from WallNormals and CellEdges...")
-    spanS = cellSpans(cellIds, volmesh, use_velfield)
+    spanS = cellSpans( volmesh, use_velfield)
     volmesh["xSpan"] = np.array([i[0] for i in spanS])  # calculate cell span in flow direction
     volmesh["ySpan"] = np.array([i[1] for i in spanS])  # calculate cell span in wall normal direction
     volmesh["zSpan"] = np.array([i[2] for i in spanS])  # calculate cell span in span direction
