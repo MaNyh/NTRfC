@@ -69,3 +69,16 @@ def test_vecAngle():
     b = np.array([0, 1, 0])
     angle = vecAngle(a, b)
     assert angle == np.pi / 2
+
+
+def test_vecAbs_list():
+    import numpy as np
+    from ntrfc.math.vectorcalc import vecAbs_list
+
+    a = np.array([1, 0, 0])
+    b = np.array([9, 0, 0])
+    c = np.stack([a, b])
+
+    c_mags = vecAbs_list(c)
+    assert c_mags[0] == 1, "inaccuracy in magnitudes!"
+    assert c_mags[1] == 9, "inaccuracy in magnitudes!"

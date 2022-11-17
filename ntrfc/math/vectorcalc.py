@@ -116,11 +116,20 @@ def RotFromTwoVecs(vec1, vec2):
 
 def vecAbs(vec):
     """
-    tested method to calculate the absolute value of a vector
+    method to calculate the absolute value of a vector
     :param vec:
     :return:
     """
-    return np.sqrt(sum(vec ** 2))
+    return np.linalg.norm(vec)
+
+
+def vecAbs_list(vecs):
+    """
+    method to calculate the absolute value of a vector
+    :param np.array vec with shape (n,3):
+    :return: array of magnitudes in shape (n)
+    """
+    return np.linalg.norm(vecs, axis=1)
 
 
 def vecDir(vec):
