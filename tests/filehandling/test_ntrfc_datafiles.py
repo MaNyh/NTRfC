@@ -1,5 +1,7 @@
 import os
 
+from ntrfc.filehandling.datafiles import inplace_change, get_filelist_fromdir
+
 
 def test_yamlDictRead(tmpdir):
     """
@@ -51,3 +53,33 @@ def test_create_dirstructure(tmpdir):
     create_dirstructure(dirstructure, tmpdir)
     checks = [os.path.isdir(path) for path in [os.path.join(tmpdir, relpath) for relpath in dirstructure]]
     assert all(checks), "not all directories have been created"
+
+
+def test_inplace_change(tmpdir):
+
+    test_oldstring = "old"
+    test_newstring = "new"
+    test_file = tmpdir / "file.txt"
+    with open(test_file, "w") as fobj:
+        fobj.write(test_oldstring)
+
+    inplace_change(test_file, test_oldstring, test_newstring)
+
+    with open(test_file,"r") as fobj:
+        ans = fobj.read()
+
+    assert ans==test_newstring, "inplace change not working"
+
+
+def test_get_filelist_fromdir(tmpdir):
+    os.mkdir(f"{tmpdir}/somedir")
+
+    file_one = "somedir/somefile"
+    file_two = "somefile"
+    open(f"{tmpdir}/{file_one}","w")
+    open(f"{tmpdir}/{file_two}","w")
+    filelist = get_filelist_fromdir(tmpdir)
+    assert len(filelist) == 2
+    filebase = [os.path.relpath(i,tmpdir) for i in filelist]
+    assert file_one in filebase
+    assert file_two in filebase
