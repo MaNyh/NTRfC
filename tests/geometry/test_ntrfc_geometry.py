@@ -5,48 +5,6 @@ from ntrfc.turbo.cascade_geometry import calcmidpassagestreamline
 from ntrfc.turbo.domaingen_cascade import cascade_2d_domain, cascade_3d_domain
 
 
-def test_parsec():
-    from ntrfc.turbo.airfoil_generators.parsec_airfoil_creator import parsec_airfoil_gen
-
-    R_LE = 0.01
-    x_PRE = 0.450
-    y_PRE = -0.006
-    d2y_dx2_PRE = -0.4
-    th_PRE = 0.05
-    x_SUC = 0.450
-    y_SUC = 0.055
-    d2y_dx2_SUC = -0.350
-    th_SUC = -6
-
-    pparray = [R_LE, x_PRE, y_PRE, d2y_dx2_PRE, th_PRE, x_SUC, y_SUC, d2y_dx2_SUC, th_SUC]
-    profile_points = parsec_airfoil_gen(pparray)
-    x, y = profile_points[::, 0], profile_points[::, 1]
-    assert len(x) == len(y)
-
-
-def test_naca():
-    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
-    import numpy as np
-
-    def rand_naca_code():
-        digits = np.random.choice([4, 5])
-        if digits == 4:
-            d1, d2, d3, d4 = np.random.randint(0, 6), np.random.randint(0, 8), np.random.randint(0,
-                                                                                                 6), np.random.randint(
-                0, 9)
-            digitstring = str(d1) + str(d2) + str(d3) + str(d4)
-        if digits == 5:
-            d1, d2, d3, d4, d5 = np.random.randint(0, 5), np.random.randint(0, 5), np.random.randint(0,
-                                                                                                     6), np.random.randint(
-                0, 9), np.random.randint(0, 9)
-            digitstring = str(d1) + str(d2) + str(d3) + str(d4) + str(d5)
-        return digitstring
-
-    prof_naca = [rand_naca_code() for i in range(6)]
-    for i, p in enumerate(prof_naca):
-        X, Y = naca(p, 240, half_cosine_spacing=np.random.choice([True, False]))
-
-
 def test_extract_vk_hk(verbose=False):
     """
     tests a NACA  profile in a random angle as a minimal example.
