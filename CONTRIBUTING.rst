@@ -1,5 +1,3 @@
-.. highlight:: shell
-
 ============
 Contributing
 ============
@@ -15,7 +13,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/MaNyh/ntrfc/issues.
+Report bugs at  https://github.com/MaNyh/ntrfc/issues
 
 If you are reporting a bug, please include:
 
@@ -32,15 +30,15 @@ wanted" is open to whoever wants to implement it.
 Implement Features
 ~~~~~~~~~~~~~~~~~~
 
-Look through the GitHub issues for features. Anything tagged with "enhancement"
-and "help wanted" is open to whoever wants to implement it.
+Start your own feature development or look through the gitlab issues for feature-developments.
+Feel free to create feature branches and merge requests.
+Before a merge request, run the whole test-library.
+If you can't figure out why tests are not running through, write an issue.
 
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-NTRfC could always use more documentation, whether as part of the
-official NTRfC docs, in docstrings, or even on the web in blog posts,
-articles, and such.
+NTRfC could always use more documentation, whether as part of the official NTRfC docs, in docstrings, or even on the web in blog posts, articles, and such.
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
@@ -59,10 +57,10 @@ Get Started!
 
 Ready to contribute? Here's how to set up `ntrfc` for local development.
 
-1. Fork the `ntrfc` repo on GitHub.
+1. Fork the `ntrfc` repo on a gitlab instance.
 2. Clone your fork locally::
 
-    $ git clone git@github.com:your_name_here/ntrfc.git
+    $ git clone https://gitlab.uni-hannover.de/your_name_here/ntrfc.git
 
 3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
@@ -102,7 +100,7 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 3.5, 3.6, 3.7 and 3.8, and for PyPy. Check
+3. The pull request should work for Python 3.10, and for PyPy. Check
    https://travis-ci.com/MaNyh/ntrfc/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
