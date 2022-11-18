@@ -275,7 +275,7 @@ def naca(number, n, finite_te=False, half_cosine_spacing=True):
         pointa = np.array([X[0], Y[0], 0])
         pointb = np.array([X[-1], Y[-1], 0])
         center = (pointb - pointa) / 2 + pointa
-        arcres = int(n / 5)
+        arcres = int(n / 5)+1
         arc = pv.CircularArc(pointa, pointb, center, resolution=arcres, negative=True)
         arcpts = arc.points[1:-2]
         points = np.vstack([points, arcpts[::-1]])
