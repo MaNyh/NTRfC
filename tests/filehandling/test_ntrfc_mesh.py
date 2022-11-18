@@ -20,4 +20,4 @@ def test_cgnsReader():
     from ntrfc.filehandling.mesh import cgnsReader
     # todo fill
     a = cgnsReader
-    return 0
+
