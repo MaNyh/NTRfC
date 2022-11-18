@@ -45,7 +45,7 @@ def cellDirections(cellUMean, wallNorm):
 def closestWallNormalPoint(point, surfacenormals):
     surfacepoint_id = surfacenormals.find_closest_point(point)
     wallpoint = surfacenormals.points[surfacepoint_id]
-    return surfacenormals.point_arrays["Normals"][surfacepoint_id], wallpoint - point
+    return surfacenormals.point_data["Normals"][surfacepoint_id], wallpoint - point
 
 
 def calcWallNormalVectors(surfaceMesh, volmesh):

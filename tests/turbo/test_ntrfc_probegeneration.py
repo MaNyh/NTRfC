@@ -30,7 +30,7 @@ def test_create_midpassageprobes():
     res = 240
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
-    sorted_poly.rotate_z(angle)
+    sorted_poly.rotate_z(angle,inplace=False)
     sorted_extracted_poly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
         sorted_poly, 1)
     nop = 40
