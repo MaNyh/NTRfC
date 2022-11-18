@@ -151,7 +151,7 @@ def delaunay_calc(SS_y, DS_y, x_interp, para_filt):
     tri = Delaunay(points.T)
 
     # center of circle around triangle
-    tri1 = tri.points[tri.vertices]
+    tri1 = tri.points[tri.simplices]
     tri_mid = np.zeros([len(tri1), 2])
     for i in range(len(tri1)):
         tri_mid1 = circumcenter(tri1[i, :, 0], tri1[i, :, 1])
