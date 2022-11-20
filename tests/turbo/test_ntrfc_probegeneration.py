@@ -1,11 +1,14 @@
 import numpy as np
 import pyvista as pv
 
+pv.OFF_SCREEN = True
+
 
 def test_createprofileprobes():
     from ntrfc.turbo.probegeneration import create_profileprobes
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
     from ntrfc.turbo.pointcloud_methods import extract_geo_paras
+
     naca_code = "6009"
     angle = 10  # deg
     res = 240
@@ -13,7 +16,7 @@ def test_createprofileprobes():
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle)
     sorted_extracted_poly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
-        sorted_poly, 1)
+        sorted_poly, 1,verbose=True)
     n_psprobes = 24
     n_ssprobes = 36
     probes_ss, probes_ps = create_profileprobes(ssPoly, psPoly, 1, n_ssprobes, n_psprobes, tolerance=1e-6)
@@ -32,7 +35,7 @@ def test_create_midpassageprobes():
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle,inplace=True)
     sorted_extracted_poly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
-        sorted_poly, 1)
+        sorted_poly, 1,verbose=True)
     nop = 40
     midspan_probes = create_midpassageprobes(1, -0.3, 0.3, 0.1, beta_leading, beta_trailing, midsPoly, nop)
     assert midspan_probes.number_of_points == nop, "number of probes on midpassage line not correct"

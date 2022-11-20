@@ -4,6 +4,8 @@ def test_extractSidePolys():
     import numpy as np
     import pyvista as pv
 
+    pv.OFF_SCREEN=True
+
     d1, d2, d3, d4 = np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9)
     digit_string = str(d1) + str(d2) + str(d3) + str(d4)
 
@@ -15,7 +17,7 @@ def test_extractSidePolys():
 
     poly = pv.PolyData(points)
     poly["A"] = np.ones(poly.number_of_points)
-    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk, poly)
+    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk, poly,verbose=True)
     # the assertion is consistent with all tests but it is confusing
     # we generate profiles with a naca-generator. probably there is a minor bug in the algorithm
     # ssPoly needs to have one point more then psPoly
