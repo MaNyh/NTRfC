@@ -15,9 +15,13 @@ def test_loadmesh_vtk(tmpdir):
     mesh_load = load_mesh(test_file)
     assert "Density" in mesh_load.array_names
 
+def test_loadmesh_cgns(tmpdir):
+    from ntrfc.filehandling.mesh import load_mesh
+    from pyvista.examples.downloads import download_cgns_multi
+    import shutil
+    download = download_cgns_multi(load=False)
 
-def test_cgnsReader():
-    from ntrfc.filehandling.mesh import cgnsReader
-    # todo fill
-    a = cgnsReader
-
+    test_file = tmpdir / "tmp.cgns"
+    shutil.move(download,test_file)
+    mesh_load = load_mesh(test_file)
+    assert "Density" in mesh_load.array_names

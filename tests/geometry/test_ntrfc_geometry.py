@@ -1,10 +1,3 @@
-import numpy as np
-import pyvista as pv
-
-from ntrfc.turbo.cascade_geometry import calcmidpassagestreamline
-from ntrfc.turbo.domaingen_cascade import cascade_2d_domain, cascade_3d_domain
-
-
 def test_extract_vk_hk(verbose=False):
     """
     tests a NACA  profile in a random angle as a minimal example.
@@ -102,30 +95,6 @@ def test_midLength():
     assert np.isclose(2 * radius, length, rtol=1e-4), "length should be two times the size of the defined test-circle"
 
 
-def test_extractSidePolys():
-    from ntrfc.turbo.pointcloud_methods import extractSidePolys
-    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
-    import numpy as np
-    import pyvista as pv
-
-    d1, d2, d3, d4 = np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9)
-    digit_string = str(d1) + str(d2) + str(d3) + str(d4)
-
-    res = 240
-    X, Y = naca(digit_string, res, half_cosine_spacing=True)
-    ind_hk = 0
-    ind_vk = res
-    points = np.stack((X[:], Y[:], np.zeros(res * 2 + 1))).T
-
-    poly = pv.PolyData(points)
-    poly["A"] = np.ones(poly.number_of_points)
-    ssPoly, psPoly = extractSidePolys(ind_hk, ind_vk, poly)
-    # the assertion is consistent with all tests but it is confusing
-    # we generate profiles with a naca-generator. probably there is a minor bug in the algorithm
-    # ssPoly needs to have one point more then psPoly
-    assert ssPoly.number_of_points + 1 == psPoly.number_of_points, "number of sidepoints are not equal "
-
-
 def test_extract_geo_paras(verbose=False):
     from ntrfc.turbo.pointcloud_methods import extract_geo_paras
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
@@ -159,40 +128,3 @@ def test_extract_geo_paras(verbose=False):
     assert np.isclose(camber_angle, angle, rtol=0.03)
 
 
-def test_calcmidpassagestreamline():
-    from ntrfc.turbo.pointcloud_methods import extract_geo_paras
-    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
-    import numpy as np
-    import pyvista as pv
-
-    naca_code = "6009"
-    angle = 10  # deg
-    alpha = 1
-    res = 240
-    xs, ys = naca(naca_code, res, half_cosine_spacing=False)
-    sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
-    sorted_poly.rotate_z(angle)
-
-    poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
-        sorted_poly, alpha)
-
-    calcmidpassagestreamline(mids_poly.points[::, 0], mids_poly.points[::, 1], beta_leading, beta_trailing, -1, 2, 1)
-
-
-def test_cascad_3d_domain():
-    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
-
-    naca_code = "6509"
-    angle = 30  # deg
-    res = 420
-    xs, ys = naca(naca_code, res, half_cosine_spacing=False)
-    sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
-    sorted_poly.rotate_z(angle)
-    X, Y = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
-    points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
-    sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cascade_2d_domain(points, -1, 2, 1,
-                                                                                                    "m", 0.1, 1,
-                                                                                                    verbose=False)
-
-    cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan=0.2, avdr=1,
-                      verbose=False)

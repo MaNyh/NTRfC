@@ -8,25 +8,22 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
     """
     profilepoints2d = 2d numpy array
     """
-    # todo: implement testmethod!
 
     # =============================================================================
     # Daten Einlesen
     # =============================================================================
-    points = pv.PolyData(
-        np.stack([profilepoints2d[::, 0], profilepoints2d[::, 1], np.zeros(len(profilepoints2d[::, 0]))]).T)
     unitcoeff = 0
     if unit == "m":
         unitcoeff = 1
     elif unit == "mm":
         unitcoeff = 1 / 1000
-    points.points *= unitcoeff
+    profilepoints2d.points *= unitcoeff
 
     # =============================================================================
     # Bestimmung Profilparameter
     # =============================================================================
     sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
-        points,
+        profilepoints2d,
         alpha,
         verbose)
     ##############################################################
@@ -68,21 +65,6 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
         p.show()
 
     return sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly
-
-
-def test_cascad_2d_domain():
-    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
-
-    naca_code = "6509"
-    angle = 30  # deg
-    res = 420
-    xs, ys = naca(naca_code, res, half_cosine_spacing=False)
-    sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
-    sorted_poly.rotate_z(angle)
-    X, Y = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
-    points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
-    sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cascade_2d_domain(points, -1, 2, 1,
-                                                                                                    "m", 0.1, 1, False)
 
 
 def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan, avdr=1,
