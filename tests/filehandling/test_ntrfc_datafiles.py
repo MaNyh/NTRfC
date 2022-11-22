@@ -56,7 +56,6 @@ def test_create_dirstructure(tmpdir):
 
 
 def test_inplace_change(tmpdir):
-
     test_oldstring = "old"
     test_newstring = "new"
     test_file = tmpdir / "file.txt"
@@ -65,10 +64,10 @@ def test_inplace_change(tmpdir):
 
     inplace_change(test_file, test_oldstring, test_newstring)
 
-    with open(test_file,"r") as fobj:
+    with open(test_file, "r") as fobj:
         ans = fobj.read()
 
-    assert ans==test_newstring, "inplace change not working"
+    assert ans == test_newstring, "inplace change not working"
 
 
 def test_get_filelist_fromdir(tmpdir):
@@ -76,10 +75,10 @@ def test_get_filelist_fromdir(tmpdir):
 
     file_one = "somedir/somefile"
     file_two = "somefile"
-    open(f"{tmpdir}/{file_one}","w")
-    open(f"{tmpdir}/{file_two}","w")
+    open(f"{tmpdir}/{file_one}", "w")
+    open(f"{tmpdir}/{file_two}", "w")
     filelist = get_filelist_fromdir(tmpdir)
     assert len(filelist) == 2
-    filebase = [os.path.relpath(i,tmpdir) for i in filelist]
+    filebase = [os.path.relpath(i, tmpdir) for i in filelist]
     assert file_one in filebase
     assert file_two in filebase

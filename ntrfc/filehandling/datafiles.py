@@ -1,9 +1,9 @@
 import os
 import pickle
-import yaml
 from functools import reduce
 from pathlib import Path
 
+import yaml
 
 
 def yaml_dict_read(yml_file):
@@ -40,7 +40,6 @@ def write_yaml_dict(fpath, data):
     """
     with open(fpath, 'w') as outfile:
         yaml.dump(data, outfile, default_flow_style=False)
-
 
 
 def inplace_change(filename, old_string, new_string):

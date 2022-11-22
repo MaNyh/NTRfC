@@ -5,8 +5,8 @@ from scipy import interpolate
 from scipy.spatial import Delaunay
 
 from ntrfc.geometry.alphashape import calc_concavehull
-from ntrfc.math.vectorcalc import findNearest, vecDir
 from ntrfc.geometry.line import lines_from_points, polyline_from_points, refine_spline
+from ntrfc.math.vectorcalc import findNearest, vecDir
 
 
 # read the base-data

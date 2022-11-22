@@ -274,4 +274,4 @@ def unitvec(vec):
 
 
 def unitvec_list(vecs):
-    return vecs / vecAbs_list(vecs)[:,None]
+    return vecs / vecAbs_list(vecs)[:, None]

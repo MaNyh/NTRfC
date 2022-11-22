@@ -126,5 +126,3 @@ def test_extract_geo_paras(verbose=False):
     assert np.isclose(beta_trailing, angle, rtol=0.03), "wrong leading edge angle"
     assert np.isclose(mids_poly.length, 1, rtol=0.03)
     assert np.isclose(camber_angle, angle, rtol=0.03)
-
-

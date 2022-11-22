@@ -1,5 +1,4 @@
 def test_getgci():
-
     from ntrfc.meshquality.grid_convergece_index import getGCI
     import numpy as np
     #
@@ -16,6 +15,6 @@ def test_getgci():
 
     GCI_1, GCI_2, GCI_3 = getGCI(N1, N2, N3, fc1, fc2, fc3, D, Fs=1.25)
 
-    assert np.isclose(GCI_1,0.0001259844787122061), "GCI_1 computation does not seem to be correct"
-    assert np.isclose(GCI_2,0.0008813583711057829), "GCI_3 computation does not seem to be correct"
-    assert np.isclose(GCI_3,0.0061695085977409286), "GCI_3 computation does not seem to be correct"
+    assert np.isclose(GCI_1, 0.0001259844787122061), "GCI_1 computation does not seem to be correct"
+    assert np.isclose(GCI_2, 0.0008813583711057829), "GCI_3 computation does not seem to be correct"
+    assert np.isclose(GCI_3, 0.0061695085977409286), "GCI_3 computation does not seem to be correct"

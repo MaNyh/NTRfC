@@ -1,32 +1,31 @@
-
 def test_solution(tmpdir):
     from ntrfc.cascade_case.case import solution
     import numpy as np
     import pyvista as pv
 
     fake_inlet = pv.Plane()
-    fake_inlet["U"]=np.array([1]*fake_inlet.number_of_cells)
+    fake_inlet["U"] = np.array([1] * fake_inlet.number_of_cells)
     fake_inlet["u"] = np.array([1] * fake_inlet.number_of_cells)
     fake_inlet["v"] = np.array([0] * fake_inlet.number_of_cells)
     fake_inlet["w"] = np.array([0] * fake_inlet.number_of_cells)
-    fake_inlet["rho"]=np.array([1]*fake_inlet.number_of_cells)
+    fake_inlet["rho"] = np.array([1] * fake_inlet.number_of_cells)
 
     fake_outlet = pv.Plane()
-    fake_outlet["U"]=np.array([1]*fake_outlet.number_of_cells)
+    fake_outlet["U"] = np.array([1] * fake_outlet.number_of_cells)
     fake_outlet["u"] = np.array([1] * fake_outlet.number_of_cells)
     fake_outlet["v"] = np.array([0] * fake_outlet.number_of_cells)
     fake_outlet["w"] = np.array([0] * fake_outlet.number_of_cells)
-    fake_outlet["rho"]=np.array([1]*fake_outlet.number_of_cells)
+    fake_outlet["rho"] = np.array([1] * fake_outlet.number_of_cells)
 
     case = solution()
     case.inlet = fake_inlet
     case.outlet = fake_outlet
     case.compute_avdr()
-    assert case.avdr == 1 , "should be avdr==1"
+    assert case.avdr == 1, "should be avdr==1"
 
 
 def test_read_ansys_csv(tmpdir):
-    from ntrfc.cascade_case.solvers.ansys import read_ansys_csv
+    from ntrfc.cascade_case.solverspecific.ansys import read_ansys_csv
 
     data = """
 [Name]
@@ -40,7 +39,7 @@ X [ m ], Y [ m ], Z [ m ], Absolute Pressure [ Pa ], Approximated Mass Flow [ kg
 """
 
     fname = tmpdir / "data.csv"
-    with open(fname,"w") as fobj:
+    with open(fname, "w") as fobj:
         fobj.writelines(data)
     surface = read_ansys_csv(fname)
     testarrays = ['rho', 'p', 'T', 'U', 'u', 'v', 'w']

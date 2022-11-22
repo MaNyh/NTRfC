@@ -15,7 +15,8 @@ def test_cascade_3d_domain():
     sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
     sorted_poly.rotate_z(angle)
 
-    sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cascade_2d_domain(sorted_poly, -1, 2, 1,
+    sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cascade_2d_domain(sorted_poly, -1, 2,
+                                                                                                    1,
                                                                                                     "m", 0.1, 1,
                                                                                                     verbose=False)
 
@@ -35,5 +36,6 @@ def test_cascade_2d_domain():
     X, Y = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
     points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
     pointspoly = pv.PolyData(points)
-    sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cascade_2d_domain(pointspoly, -1, 2, 1,
+    sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cascade_2d_domain(pointspoly, -1, 2,
+                                                                                                    1,
                                                                                                     "m", 0.1, 1, False)
