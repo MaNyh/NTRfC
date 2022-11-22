@@ -58,6 +58,3 @@ def read_ansys_csv(path):
     surface = poly.delaunay_2d()
     surface = surface.point_data_to_cell_data()
     return surface
-
-
-

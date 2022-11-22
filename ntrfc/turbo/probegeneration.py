@@ -1,9 +1,9 @@
 import numpy as np
 import pyvista as pv
 
-from ntrfc.turbo.cascade_geometry import calcmidpassagestreamline
-from ntrfc.math.vectorcalc import vecAngle
 from ntrfc.geometry.line import polyline_from_points, refine_spline
+from ntrfc.math.vectorcalc import vecAngle
+from ntrfc.turbo.cascade_geometry import calcmidpassagestreamline
 
 
 def create_profileprobes(ssPoly, psPoly, midspan_z, pden_ps, pden_ss, tolerance=1e-10):
@@ -70,7 +70,7 @@ def create_stagnationpointprobes(length, nop, sortedpoly, ind_vk, u_inlet, midsp
     vk_point = sortedpoly.points[ind_vk]
     angle = vecAngle(u_inlet, np.array([1, 0, 0]) * 180 / np.pi)
     stagnationLine = pv.Line((0, 0, 0), (-length, 0, 0), nop - 1)
-    stagnationLine.rotate_z(angle,inplace=False)
+    stagnationLine.rotate_z(angle, inplace=False)
     stagnationLine.translate(vk_point)
     x_probes = stagnationLine.points[::, 0]
     y_probes = stagnationLine.points[::, 1]

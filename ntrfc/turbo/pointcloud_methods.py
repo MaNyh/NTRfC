@@ -2,9 +2,9 @@ import numpy as np
 import pyvista as pv
 
 from ntrfc.geometry.alphashape import calc_concavehull
-from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
-from ntrfc.math.vectorcalc import vecAngle
 from ntrfc.geometry.line import polyline_from_points, refine_spline
+from ntrfc.math.vectorcalc import vecAngle
+from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
 
 
 def mid_length(ind_1, ind_2, sorted_poly):

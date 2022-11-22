@@ -291,4 +291,3 @@ def naca(number, n, finite_te=False, half_cosine_spacing=True):
         y = radius * np.sin(theta)
         """
     return X, Y
-

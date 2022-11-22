@@ -8,7 +8,7 @@ Created on Fri Apr 24 23:33:53 2020
 import numpy as np
 import pyvista as pv
 
-from ntrfc.math.vectorcalc import vecAbs,vecAbs_list, vecProjection, vecAngle, unitvec, unitvec_list
+from ntrfc.math.vectorcalc import vecAbs, vecAbs_list, vecProjection, vecAngle, unitvec, unitvec_list
 
 
 def readDataSet(grid, dataName):
@@ -42,31 +42,9 @@ def cellDirections(cellUMean, wallNorm):
 #################################################################################
 
 
-def closestWallNormalPoint(point, surfacenormals):
-    surfacepoint_id = surfacenormals.find_closest_point(point)
-    wallpoint = surfacenormals.points[surfacepoint_id]
-    return surfacenormals.point_data["Normals"][surfacepoint_id], wallpoint - point
-
-
-def calcWallNormalVectors(surfaceMesh, volmesh):
-    surfacenormals = []
-    surfacevectors = []
-    surfacenormals_surface = surfaceMesh.extract_surface().compute_normals()
-    cellIds = np.arange(0,volmesh.number_of_cells)
-    for cellIdx in cellIds:
-        center = volmesh["cellCenters"][cellIdx]
-        surfacenormal, surfacevector = closestWallNormalPoint(center, surfacenormals_surface)
-        surfacenormals.append(surfacenormal)
-        surfacevectors.append(surfacevector)
-
-    surfacenormals = np.array(surfacenormals)
-    surfacevectors = np.array(surfacevectors)
-    return surfacenormals, surfacevectors
-
-
-def cellSpans( solutionMesh, calcFrom):
+def cellSpans(solutionMesh, calcFrom):
     spans = []
-    cellIds = np.arange(0,solutionMesh.number_of_cells)
+    cellIds = np.arange(0, solutionMesh.number_of_cells)
     for cellIdx in cellIds:
 
         x_span = 0
@@ -113,17 +91,17 @@ def cellSpans( solutionMesh, calcFrom):
     return spans
 
 
-def getWalluTaus(labelChunk, solutionMesh, surfaceMesh, mu_0, rhofieldname, velfieldname):
-    uTaus = []
+def getWalluTaus(solutionMesh, surfaceMesh, mu_0, rhofieldname, velfieldname):
     surfaceNormals = surfaceMesh.extract_surface().compute_normals()
     cell_centers = solutionMesh["cellCenters"]
 
     relatedpointonwallids = [surfaceNormals.find_closest_point(i) for i in cell_centers]
     relatedpointonwall = [surfaceNormals.points[i] for i in relatedpointonwallids]
     relatedpointonwall_samples = pv.PolyData(relatedpointonwall).sample(surfaceMesh)
-    graduwall = relatedpointonwall_samples["gradient"].reshape(relatedpointonwall_samples.number_of_points,3,3)
+    graduwall = relatedpointonwall_samples["gradient"].reshape(relatedpointonwall_samples.number_of_points, 3, 3)
     flowdirections = unitvec_list(solutionMesh[velfieldname])
-    gradUyWs = vecAbs_list([np.dot(flowdirections[i], graduwall[i]) for i in range(relatedpointonwall_samples.number_of_points)])
+    gradUyWs = vecAbs_list(
+        [np.dot(flowdirections[i], graduwall[i]) for i in range(relatedpointonwall_samples.number_of_points)])
     rhoWs = relatedpointonwall_samples[rhofieldname]
 
     tauWs = gradUyWs * mu_0 * rhoWs
@@ -184,21 +162,19 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     volmesh[use_velfield] = readDataSet(volmesh, use_velfield)
     volmesh["cellCenters"] = volmesh.cell_centers().points
 
-    cellIds = [i for i in range(volmesh.GetNumberOfCells())]
-
     print("calculating wall-normal vectors...")
-    surfaceNormals, surfaceVectors = calcWallNormalVectors(surfaceMesh, volmesh)
-    volmesh["wallNormal"] = surfaceNormals
+    surfacenormals_surface = surfaceMesh.extract_surface().compute_normals()
 
+    volmesh["wallNormal"] = [surfacenormals_surface.point_data["Normals"][surfacenormals_surface.find_closest_point(i)]
+                             for i in volmesh.points]
     print("calculating cell spans from WallNormals and CellEdges...")
-    spanS = cellSpans( volmesh, use_velfield)
+    spanS = cellSpans(volmesh, use_velfield)
     volmesh["xSpan"] = np.array([i[0] for i in spanS])  # calculate cell span in flow direction
     volmesh["ySpan"] = np.array([i[1] for i in spanS])  # calculate cell span in wall normal direction
     volmesh["zSpan"] = np.array([i[2] for i in spanS])  # calculate cell span in span direction
 
     print("calculating wall-shear and friction-velocity")
-    uTaus = getWalluTaus(cellIds, volmesh, surfaceMesh, mu_0, use_rhofield, use_velfield)
-    volmesh["uTaus"] = uTaus
+    volmesh["uTaus"] = getWalluTaus(volmesh, surfaceMesh, mu_0, use_rhofield, use_velfield)
 
     print("calculating grid spacing")
     gridSpacings = gridSpacing(mu_0, volmesh)

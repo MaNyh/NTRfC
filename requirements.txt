@@ -1,9 +1,10 @@
 matplotlib==3.6.1
-numpy==1.23.4
-pip==22.1.2
+pip>=22
 pytest==7.2.0
 pyvista==0.36.1
 PyYAML==6.0
-scipy==1.9.3
+scipy
 pandas==1.5.1
 setuptools==61.2.0
+fluidfoam==0.2.3
+tqdm==4.64.1

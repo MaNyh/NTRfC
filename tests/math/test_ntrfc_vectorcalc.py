@@ -89,19 +89,19 @@ def test_vecAbs_list():
 
 def test_unitvec_list():
     from ntrfc.math.vectorcalc import unitvec_list
-    a = np.array([1,0,0])
-    b = np.array([0,0,9])
-    c = np.stack([a,b])
+    a = np.array([1, 0, 0])
+    b = np.array([0, 0, 9])
+    c = np.stack([a, b])
     directions = unitvec_list(c)
-    assert all(np.equal(directions[0],np.array([1,0,0])))
-    assert all(np.equal(directions[1],np.array([0,0,1])))
+    assert all(np.equal(directions[0], np.array([1, 0, 0])))
+    assert all(np.equal(directions[1], np.array([0, 0, 1])))
 
 
 def test_unitvec():
     from ntrfc.math.vectorcalc import unitvec
-    a = np.array([9,0,0])
+    a = np.array([9, 0, 0])
     am = unitvec(a)
-    assert all(np.equal(am,np.array([1,0,0])))
-    b = np.array([0,0,-9])
+    assert all(np.equal(am, np.array([1, 0, 0])))
+    b = np.array([0, 0, -9])
     bm = unitvec(b)
-    assert all(np.equal(bm,np.array([0,0,-1])))
+    assert all(np.equal(bm, np.array([0, 0, -1])))

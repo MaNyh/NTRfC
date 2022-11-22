@@ -26,7 +26,7 @@ def load_mesh(path_to_mesh):
                 nblocks = domain.n_blocks
                 blocks = [domain[b] for b in range(nblocks)]
                 for block in blocks:
-                    if type(block)==pv.UnstructuredGrid:
+                    if type(block) == pv.UnstructuredGrid:
                         mesh = mesh.merge(block)
                     if type(block) == pv.StructuredGrid:
                         mesh = mesh.merge(block)
