@@ -4,6 +4,7 @@ image: python:3.10
 # only cache local items.
 variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    LIBGL_ALWAYS_INDIRECT : 0
 
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/topics/caching/
@@ -16,7 +17,7 @@ cache:
         - venv/
 
 before_script:
-    - apt-get update -y && apt-get install libgl1 -y
+    - apt-get update -y && apt-get install libgl1-mesa-glx xvfb -y
     - python -m pip install --upgrade pip
     - python --version  # For debugging
     - pip install virtualenv
