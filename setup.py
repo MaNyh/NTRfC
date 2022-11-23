@@ -42,7 +42,7 @@ setup(
     packages=find_packages(include=['ntrfc', 'ntrfc.*']),
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/MaNyh/ntrfc',
+    url='https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC',
     version='0.1.1',
     zip_safe=False,
 )
