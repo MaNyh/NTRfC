@@ -22,7 +22,7 @@ setup(
     author_email='nyhuis@tfd.uni-hannover.de',
     python_requires='>=3.10',
     classifiers=[
-        'Development Status :: 0.1.0',
+        'Development Status :: 0.1.1',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
@@ -43,6 +43,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/MaNyh/ntrfc',
-    version='0.1.0',
+    version='0.1.1',
     zip_safe=False,
 )

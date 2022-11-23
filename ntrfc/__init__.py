@@ -2,4 +2,4 @@
 
 __author__ = """Malte Nyhuis"""
 __email__ = 'nyhuis@tfd.uni-hannover.de'
-__version__ = '0.1.0'
+__version__ = '0.1.1'
