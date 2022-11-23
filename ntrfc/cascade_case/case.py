@@ -20,7 +20,7 @@ class proberegistry:
         new_probeset = probeset(variablename,groupname, time, values, timestamps)
         self.probesets.append(new_probeset)
 
-    def plot_all(self,id = "all"):
+    def plot_all(self,id = "all",save=None,dpi=300):
         """
         :param id: str (all), int (id)
         """
@@ -55,9 +55,11 @@ class proberegistry:
             plt.grid()
             plt.legend()
             plt.show()
+            if save:
+                plt.savefig(save,dpi=dpi)
             plt.close()
 
-    def plot_val(self,val):
+    def plot_val(self,val,save=None,dpi=300):
         plt.figure(figsize=(32, 24),dpi=200)
         for probeset in [i for i in self.probesets if i.variablename==val]:
             nprobes = probeset.arrays.shape[1]
@@ -79,6 +81,8 @@ class proberegistry:
             plt.grid()
             plt.legend()
             plt.show()
+            if save:
+                plt.savefig(save,dpi=dpi)
             plt.close()
 
 @dataclass
