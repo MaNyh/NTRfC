@@ -3,10 +3,10 @@ from pathlib import Path
 
 import numpy as np
 from fluidfoam.readpostpro import readprobes
-from ntrfc.cascade_case.case import solution
+from ntrfc.cascade_case.generic import case
 
 
-class openfoam_solution(solution):
+class openfoam_case(case):
     def __init__(self):
         super().__init__()
         self.solver = "openfoam"

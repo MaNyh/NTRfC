@@ -2,11 +2,11 @@ import numpy as np
 import pandas as pd
 import pyvista as pv
 
-from ntrfc.cascade_case.case import solution
+from ntrfc.cascade_case.generic import case
 from ntrfc.filehandling.mesh import load_mesh
 
 
-class ansys_solution(solution):
+class ansys_case(case):
     def __init__(self):
         super().__init__()
         self.solver = "ansys"

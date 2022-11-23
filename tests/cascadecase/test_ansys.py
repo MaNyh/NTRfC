@@ -1,5 +1,5 @@
 def test_solution(tmpdir):
-    from ntrfc.cascade_case.case import solution
+    from ntrfc.cascade_case.generic import case
     import numpy as np
     import pyvista as pv
 
@@ -17,7 +17,7 @@ def test_solution(tmpdir):
     fake_outlet["w"] = np.array([0] * fake_outlet.number_of_cells)
     fake_outlet["rho"] = np.array([1] * fake_outlet.number_of_cells)
 
-    case = solution()
+    case = case()
     case.inlet = fake_inlet
     case.outlet = fake_outlet
     case.compute_avdr()
@@ -25,7 +25,7 @@ def test_solution(tmpdir):
 
 
 def test_read_ansys_csv(tmpdir):
-    from ntrfc.cascade_case.solverspecific.ansys import read_ansys_csv
+    from ntrfc.cascade_case.ansys import read_ansys_csv
 
     data = """
 [Name]

@@ -1,5 +1,5 @@
 def test_solution():
-    from ntrfc.cascade_case.solverspecific.openfoam import openfoam_solution
+    from ntrfc.cascade_case.openfoam import openfoam_case
     import numpy as np
     import pyvista as pv
 
@@ -17,7 +17,7 @@ def test_solution():
     fake_outlet["w"] = np.array([0] * fake_outlet.number_of_cells)
     fake_outlet["rho"] = np.array([1] * fake_outlet.number_of_cells)
 
-    case = openfoam_solution()
+    case = openfoam_case()
     case.inlet = fake_inlet
     case.outlet = fake_outlet
     case.compute_avdr()
@@ -26,7 +26,7 @@ def test_solution():
 
 def test_openfoam_probereading(tmpdir):
     from ntrfc.filehandling.datafiles import create_dirstructure
-    from ntrfc.cascade_case.solverspecific.openfoam import openfoam_solution
+    from ntrfc.cascade_case.openfoam import openfoam_case
 
     probefilestring="""# Probe 0 (-0.1599997156611697 -0.1430012427480623 0.02)  # Not Found
 # Probe 1 (-0.1411821182118212 -0.1216852152363719 0.02)  # Not Found
@@ -59,12 +59,12 @@ def test_openfoam_probereading(tmpdir):
     with open(tmpfname,"w") as fobj:
         fobj.writelines(probefilestring)
 
-    case = openfoam_solution()
+    case = openfoam_case()
     case.read_openfoam_probes(f"{tmpdir}/{dirstructure[0]}")
 
 
 def test_read_openfoam_sliceseries(tmpdir):
-    from ntrfc.cascade_case.solverspecific.openfoam import openfoam_solution
+    from ntrfc.cascade_case.openfoam import openfoam_case
     import pyvista as pv
     import os
     import numpy as np
@@ -86,5 +86,5 @@ def test_read_openfoam_sliceseries(tmpdir):
         slice.save(fpath)
         ts.append(idx)
 
-    test_solution = openfoam_solution()
+    test_solution = openfoam_case()
     test_solution.read_openfoam_sliceseries(f"{tmpdir}/postProcessing/some","someface.vtk")

@@ -7,7 +7,7 @@ ON_CI = 'CI' in os.environ
 
 
 def test_solution(tmpdir):
-    from ntrfc.cascade_case.case import solution
+    from ntrfc.cascade_case.generic import case
 
     inletname = tmpdir / "fake_inlet.vtk"
     outletname = tmpdir / "fake_outlet.vtk"
@@ -25,7 +25,7 @@ def test_solution(tmpdir):
     fake_outlet["w"] = np.array([0] * fake_outlet.number_of_cells)
     fake_outlet["rho"] = np.array([1] * fake_outlet.number_of_cells)
     fake_outlet.save(outletname)
-    case = solution()
+    case = case()
     case.read_inlet(inletname)
     case.read_outlet(outletname)
     case.compute_avdr()
@@ -33,7 +33,7 @@ def test_solution(tmpdir):
 
 @pytest.mark.skipif(ON_CI, reason="currently cant render on ci-systems")
 def test_animations(tmpdir):
-    from ntrfc.cascade_case.case import solution
+    from ntrfc.cascade_case.generic import case
     import pyvista as pv
     import os
     noslices = 3
@@ -49,6 +49,6 @@ def test_animations(tmpdir):
         slice.save(fpath)
         ts.append(idx)
 
-    test_solution = solution()
+    test_solution = case()
     test_solution.sliceseries.add_sliceset(slices,"some",ts)
     test_solution.sliceseries.create_animation("some","U",tmpdir,"U.gif")
