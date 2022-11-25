@@ -146,7 +146,7 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     :param use_velfield: string, name of the velocity field array
     :param use_rhofield:  string, name of the density field array
     :param mu_0: float. kinematic viscosity
-    :return: volmesh: pyvista-vtk object with the nondimensionals
+    :return: volmesh_walladjacent: pyvista-vtk object with the nondimensionals
     """
 
     print("constructing surfacemesh from wall meshes ...")
@@ -157,30 +157,31 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     print("preparing processData from meshes")
 
     volmesh = volmesh.compute_derivative(scalars=use_velfield)
-    surfaceMeshcopy = surfaceMeshcopy.sample(volmesh)
+    volmesh_walladjacent = volmesh.extract_cells(volmesh.find_containing_cell(volmesh.extract_surface().points))
+    surfaceMeshcopy = surfaceMeshcopy.sample(volmesh_walladjacent)
     surfaceMesh["gradient"] = surfaceMeshcopy["gradient"]
-    volmesh[use_velfield] = readDataSet(volmesh, use_velfield)
-    volmesh["cellCenters"] = volmesh.cell_centers().points
+    volmesh_walladjacent[use_velfield] = readDataSet(volmesh_walladjacent, use_velfield)
+    volmesh_walladjacent["cellCenters"] = volmesh_walladjacent.cell_centers().points
 
     print("calculating wall-normal vectors...")
     surfacenormals_surface = surfaceMesh.extract_surface().compute_normals()
 
-    volmesh["wallNormal"] = [surfacenormals_surface.point_data["Normals"][surfacenormals_surface.find_closest_point(i)]
-                             for i in volmesh.points]
+    volmesh_walladjacent["wallNormal"] = [surfacenormals_surface.point_data["Normals"][surfacenormals_surface.find_closest_point(i)]
+                                          for i in volmesh_walladjacent.points]
     print("calculating cell spans from WallNormals and CellEdges...")
-    spanS = cellSpans(volmesh, use_velfield)
-    volmesh["xSpan"] = np.array([i[0] for i in spanS])  # calculate cell span in flow direction
-    volmesh["ySpan"] = np.array([i[1] for i in spanS])  # calculate cell span in wall normal direction
-    volmesh["zSpan"] = np.array([i[2] for i in spanS])  # calculate cell span in span direction
+    spanS = cellSpans(volmesh_walladjacent, use_velfield)
+    volmesh_walladjacent["xSpan"] = np.array([i[0] for i in spanS])  # calculate cell span in flow direction
+    volmesh_walladjacent["ySpan"] = np.array([i[1] for i in spanS])  # calculate cell span in wall normal direction
+    volmesh_walladjacent["zSpan"] = np.array([i[2] for i in spanS])  # calculate cell span in span direction
 
     print("calculating wall-shear and friction-velocity")
-    volmesh["uTaus"] = getWalluTaus(volmesh, surfaceMesh, mu_0, use_rhofield, use_velfield)
+    volmesh_walladjacent["uTaus"] = getWalluTaus(volmesh_walladjacent, surfaceMesh, mu_0, use_rhofield, use_velfield)
 
     print("calculating grid spacing")
-    gridSpacings = gridSpacing(mu_0, volmesh)
+    gridSpacings = gridSpacing(mu_0, volmesh_walladjacent)
 
-    volmesh["DeltaXPlus"] = gridSpacings[0]
-    volmesh["DeltaYPlus"] = gridSpacings[1]
-    volmesh["DeltaZPlus"] = gridSpacings[2]
+    volmesh_walladjacent["DeltaXPlus"] = gridSpacings[0]
+    volmesh_walladjacent["DeltaYPlus"] = gridSpacings[1]
+    volmesh_walladjacent["DeltaZPlus"] = gridSpacings[2]
 
-    return volmesh
+    return volmesh_walladjacent
