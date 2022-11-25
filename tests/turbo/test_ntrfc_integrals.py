@@ -26,10 +26,11 @@ def test_avdr():
 
     rho_1 = 1
     mag_u_1 = 10
-    beta_1 = np.pi
+    beta_1 = np.pi/4
     rho_2 = 1
-    mag_u_2 = 5
-    beta_2 = np.pi
+    mag_u_2 = 4.082485
+    beta_2 = np.pi/3
 
     ans = avdr(rho_1, mag_u_1, beta_1, rho_2, mag_u_2, beta_2)
-    assert ans == 0.5, "error"
+    assert ans == 0.5000002566283092, "error"
+
