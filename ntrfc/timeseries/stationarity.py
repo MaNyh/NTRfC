@@ -32,12 +32,12 @@ def stationarity(timesteps, values, verbose=False):
         autocorr_ref = autocorr(ref_valsplit)
         hist_ref = np.histogram(ref_valsplit, bins=histogram_bins, density=True)
 
-        investigate = investigation(mean_all, var_ref, autocorr_ref, hist_ref, splitindex, timesteps, values)
+        investigate = stationarity_investigation(mean_all, var_ref, autocorr_ref, hist_ref, splitindex, timesteps, values)
 
         doinvestigate.append(investigate)
 
     for invest in doinvestigate:
-        invest.compare()
+        analize_stationarity_investigation(invest)
     stationary_guesses = [i for i in doinvestigate if i.stationary==True]
     if len(stationary_guesses)>0:
         best_guess = np.argmin([i.stationary_time for i in stationary_guesses])
@@ -47,7 +47,7 @@ def stationarity(timesteps, values, verbose=False):
 
 
 @dataclass
-class investigation:
+class stationarity_investigation:
     mean_ref: float
     var_ref: float
     autocorr_ref: float
@@ -58,58 +58,58 @@ class investigation:
     timesteps: np.array
     values: np.array
 
-    def compare(self):
-        means = []
-        varis = []
-        acrrs = []
-        hists = []
+def analize_stationarity_investigation(investigate: stationarity_investigation):
+    means = []
+    varis = []
+    acrrs = []
+    hists = []
 
-        self.stationary = False
-        self.stationary_time = np.inf
-        self.score = 1
+    investigate.stationary = False
+    investigate.stationary_time = np.inf
+    investigate.score = 1
 
-        mean_reldiffs = []
-        var_reldiffs = []
-        accr_reldiffs = []
-        hist_reldiffs = []
+    mean_reldiffs = []
+    var_reldiffs = []
+    accr_reldiffs = []
+    hist_reldiffs = []
 
-        lower = np.arange(self.checkssplit - (len(self.timesteps) - self.checkssplit), -1, -1)
-        higher = np.arange(len(self.timesteps) - (len(self.timesteps) - self.checkssplit), len(self.timesteps) - self.checkssplit - 1, -1)
+    lower_íds = np.arange(investigate.checkssplit - (len(investigate.timesteps) - investigate.checkssplit), -1, -1)
+    higher_ids = np.arange(len(investigate.timesteps) - (len(investigate.timesteps) - investigate.checkssplit), len(investigate.timesteps) - investigate.checkssplit - 1, -1)
 
-        limit = 0.05
+    accuracy_limit = 0.05
 
-        for l,h in zip(lower,higher):
+    for l,h in zip(lower_íds, higher_ids):
 
-            compare_vs = self.values[l:h]
+        compare_vs = investigate.values[l:h]
 
 
-            mean_all = np.mean(compare_vs)
-            var_all = np.var(compare_vs)
-            autocorr_all = autocorr(compare_vs)
-            hist_all = np.histogram(compare_vs, bins=self.hist_ref[1], density=True)
+        mean_all = np.mean(compare_vs)
+        var_all = np.var(compare_vs)
+        autocorr_all = autocorr(compare_vs)
+        hist_all = np.histogram(compare_vs, bins=investigate.hist_ref[1], density=True)
 
-            means.append(mean_all)
-            varis.append(var_all)
-            acrrs.append(autocorr_all)
-            hists.append(hist_all)
+        means.append(mean_all)
+        varis.append(var_all)
+        acrrs.append(autocorr_all)
+        hists.append(hist_all)
 
-            mean_reldiffs.append(reldiff(self.mean_ref, mean_all))
-            var_reldiffs.append(reldiff(self.var_ref, var_all))
-            accr_reldiffs.append(1-return_intersection(autocorr_all,self.autocorr_ref))
+        mean_reldiffs.append(reldiff(investigate.mean_ref, mean_all))
+        var_reldiffs.append(reldiff(investigate.var_ref, var_all))
+        accr_reldiffs.append(1-return_intersection(autocorr_all,investigate.autocorr_ref))
 
-            #https://mpatacchiola.github.io/blog/2016/11/12/the-simplest-classifier-histogram-intersection.html
-            histdiff =[1 - return_intersection( _a, _b) for _a, _b in zip(self.hist_ref[0], hist_all[0])]
+        #https://mpatacchiola.github.io/blog/2016/11/12/the-simplest-classifier-histogram-intersection.html
+        histdiff =[1 - return_intersection( _a, _b) for _a, _b in zip(investigate.hist_ref[0], hist_all[0])]
 
-            meanhistdiff = np.nanmean(histdiff)
-            hist_reldiffs.append(meanhistdiff)
+        meanhistdiff = np.nanmean(histdiff)
+        hist_reldiffs.append(meanhistdiff)
 
-            accuracylimit_reached = limit>np.max(mean_reldiffs) and limit>np.max(var_reldiffs) and limit>np.max(accr_reldiffs) and limit>np.max(hist_reldiffs)
-            if accuracylimit_reached and self.timesteps[l]<self.stationary_time:
-                self.stationary = True
-                self.stationary_time = self.timesteps[l]
-                self.score = np.nanmean([mean_reldiffs,var_reldiffs,accr_reldiffs,hist_reldiffs])
-            elif not accuracylimit_reached:
-                break
+        accuracylimit_reached = accuracy_limit > np.max(mean_reldiffs) and accuracy_limit > np.max(var_reldiffs) and accuracy_limit > np.max(accr_reldiffs) and accuracy_limit > np.max(hist_reldiffs)
+        if accuracylimit_reached and investigate.timesteps[l]<investigate.stationary_time:
+            investigate.stationary = True
+            investigate.stationary_time = investigate.timesteps[l]
+            investigate.score = np.nanmean([mean_reldiffs,var_reldiffs,accr_reldiffs,hist_reldiffs])
+        elif not accuracylimit_reached:
+            break
 
 
 
