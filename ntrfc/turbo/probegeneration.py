@@ -1,5 +1,5 @@
 import numpy as np
-
+import pyvista as pv
 
 from ntrfc.geometry.line import polyline_from_points, refine_spline
 from ntrfc.math.vectorcalc import vecAngle
