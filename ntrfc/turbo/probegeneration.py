@@ -1,42 +1,70 @@
 import numpy as np
-import pyvista as pv
+
 
 from ntrfc.geometry.line import polyline_from_points, refine_spline
 from ntrfc.math.vectorcalc import vecAngle
 from ntrfc.turbo.cascade_geometry import calcmidpassagestreamline
 
-
 def create_profileprobes(ssPoly, psPoly, midspan_z, pden_ps, pden_ss, tolerance=1e-10):
+    """
+    Create profile probes from two PolyData objects.
+
+    Parameters:
+    - ssPoly: PyVista PolyData object representing the suction side profile.
+    - psPoly: PyVista PolyData object representing the pressure side profile.
+    - midspan_z: Height of the midspan plane along the z-axis.
+    - pden_ps: Density of the pressure side profile points.
+    - pden_ss: Density of the suction side profile points.
+    - tolerance: Small tolerance value to shift the 3D faces along their normals.
+
+    Returns:
+    - probes_ss: PyVista PolyData object representing the profile probes on the suction side.
+    - probes_ps: PyVista PolyData object representing the profile probes on the pressure side.
+    """
+
+    # Refine the splines defined by the input PolyData objects
     ref_ss_x, ref_ss_y = refine_spline(ssPoly.points[::, 0], ssPoly.points[::, 1], 4000)
+    ref_ps_x, ref_ps_y = refine_spline(psPoly.points[::, 0], psPoly.points[::, 1], 4000)
+
+    # Create PolyData objects from the refined splines
     ref_ss_points = np.stack((ref_ss_x, ref_ss_y, np.zeros(len(ref_ss_y)))).T
+    ref_ps_points = np.stack((ref_ps_x, ref_ps_y, np.zeros(len(ref_ps_y)))).T
     ref_ssPoly = pv.PolyData(ref_ss_points)
+    ref_psPoly = pv.PolyData(ref_ps_points)
+
+    # Convert the PolyData objects to polylines
     ref_ss_poly = polyline_from_points(ref_ssPoly.points)
+    ref_ps_poly = polyline_from_points(ref_psPoly.points)
+
+    # Extrude the polylines along the z-axis to create 3D face models
     ref_ss_face = ref_ss_poly.extrude((0, 0, midspan_z * 2)).compute_normals()
+    ref_ps_face = ref_ps_poly.extrude((0, 0, midspan_z * 2)).compute_normals()
+
+    # Shift the 3D faces slightly along their normals
     ref_ss_face_shift = ref_ss_face.copy()
     ref_ss_face_shift.points += tolerance * ref_ss_face_shift.point_data["Normals"]
-    ref_ss_cut = ref_ss_face_shift.slice(normal="z", origin=(0, 0, midspan_z))
-
-    ref_ps_x, ref_ps_y = refine_spline(psPoly.points[::, 0], psPoly.points[::, 1], 4000)
-    ref_ps_points = np.stack((ref_ps_x, ref_ps_y, np.zeros(len(ref_ps_y)))).T
-    ref_psPoly = pv.PolyData(ref_ps_points)
-    ref_ps_poly = polyline_from_points(ref_psPoly.points)
-    ref_ps_face = ref_ps_poly.extrude((0, 0, midspan_z * 2)).compute_normals()
     ref_ps_face_shift = ref_ps_face.copy()
     ref_ps_face_shift.points += tolerance * ref_ps_face_shift.point_data["Normals"]
+
+    # Create a cut through each 3D face at the midspan plane
+    ref_ss_cut = ref_ss_face_shift.slice(normal="z", origin=(0, 0, midspan_z))
     ref_ps_cut = ref_ps_face_shift.slice(normal="z", origin=(0, 0, midspan_z))
 
+    # Extract the x and y coordinates of the points on the cut faces
     x_ss_shift = ref_ss_cut.points[::, 0]
     y_ss_shift = ref_ss_cut.points[::, 1]
-
     x_ps_shift = ref_ps_cut.points[::, 0]
     y_ps_shift = ref_ps_cut.points[::, 1]
 
+    # Refine the splines defined by the cut faces using the specified densities
     x_bl_ss, y_bl_ss = refine_spline(x_ss_shift, y_ss_shift, pden_ss)
     x_bl_ps, y_bl_ps = refine_spline(x_ps_shift, y_ps_shift, pden_ps)
 
+    # Create PolyData objects from the refined splines
     probes_ps = pv.PolyData(np.stack((x_bl_ss, y_bl_ss, midspan_z * np.ones(len(x_bl_ss)))).T)
     probes_ss = pv.PolyData(np.stack((x_bl_ps, y_bl_ps, midspan_z * np.ones(len(x_bl_ps)))).T)
 
+    # Return the profile probes
     return probes_ss, probes_ps
 
 
