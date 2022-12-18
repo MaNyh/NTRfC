@@ -17,7 +17,7 @@ def test_calc_concavehull():
     xs_raw = boxpoints[:, 0]
     ys_raw = boxpoints[:, 1]
 
-    xs, ys = calc_concavehull(xs_raw, ys_raw, 10)
+    xs, ys = calc_concavehull(xs_raw, ys_raw, 1)
 
     assert len(xs) == len(xs_raw)
     assert any([yi in ys_raw for yi in ys])
