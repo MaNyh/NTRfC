@@ -1,13 +1,12 @@
 import pyvista as pv
-from ntrfc.cascade_case.case_modules.postprocessing import postprocessing
 
-from ntrfc.cascade_case.case_modules.proberegistry import proberegistry
-from ntrfc.cascade_case.case_modules.sliceregistry import sliceregistry
-
+from ntrfc.cascade_case.solution.case_modules.postprocessing import postprocessing
+from ntrfc.cascade_case.solution.case_modules.proberegistry import proberegistry
+from ntrfc.cascade_case.solution.case_modules.sliceregistry import sliceregistry
 from ntrfc.filehandling.mesh import load_mesh
 
 
-class case(postprocessing,proberegistry,sliceregistry):
+class GenericCascadeCase(postprocessing, proberegistry, sliceregistry):
     def __init__(self):
         super().__init__()
         self.solver = None
@@ -23,7 +22,6 @@ class case(postprocessing,proberegistry,sliceregistry):
 
         self.probes = proberegistry()
         self.sliceseries = sliceregistry()
-
 
     def read_fluid(self, path):
         self.fluid = load_mesh(path)
@@ -48,7 +46,3 @@ class case(postprocessing,proberegistry,sliceregistry):
 
     def read_zper_high(self, path):
         self.zper_high = load_mesh(path)
-
-
-
-

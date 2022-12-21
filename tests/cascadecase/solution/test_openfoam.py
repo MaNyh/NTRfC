@@ -1,5 +1,5 @@
 def test_solution():
-    from ntrfc.cascade_case.openfoam import openfoam_case
+    from ntrfc.cascade_case.solution.openfoam import openfoam_case
     import numpy as np
     import pyvista as pv
 
@@ -26,7 +26,7 @@ def test_solution():
 
 def test_openfoam_probereading(tmpdir):
     from ntrfc.filehandling.datafiles import create_dirstructure
-    from ntrfc.cascade_case.openfoam import openfoam_case
+    from ntrfc.cascade_case.solution.openfoam import openfoam_case
 
     probefilestring="""# Probe 0 (-0.1599997156611697 -0.1430012427480623 0.02)  # Not Found
 # Probe 1 (-0.1411821182118212 -0.1216852152363719 0.02)  # Not Found
@@ -66,7 +66,7 @@ def test_openfoam_probereading(tmpdir):
 
 
 def test_read_openfoam_sliceseries(tmpdir):
-    from ntrfc.cascade_case.openfoam import openfoam_case
+    from ntrfc.cascade_case.solution.openfoam import openfoam_case
     import pyvista as pv
     import os
     import numpy as np
