@@ -4,8 +4,7 @@ def test_extractSidePolys():
     import numpy as np
     import pyvista as pv
 
-    d1, d2, d3, d4 = np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9), np.random.randint(0, 9)
-    digit_string = str(d1) + str(d2) + str(d3) + str(d4)
+    digit_string = "6509"
 
     res = 240
     X, Y = naca(digit_string, res, half_cosine_spacing=True)
