@@ -1,4 +1,5 @@
 import numpy as np
+
 from ntrfc.geometry.plane import massflowave_plane
 from ntrfc.math.vectorcalc import vecAngle
 from ntrfc.turbo.integrals import avdr

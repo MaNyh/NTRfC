@@ -166,8 +166,9 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     print("calculating wall-normal vectors...")
     surfacenormals_surface = surfaceMesh.extract_surface().compute_normals()
 
-    volmesh_walladjacent["wallNormal"] = [surfacenormals_surface.point_data["Normals"][surfacenormals_surface.find_closest_point(i)]
-                                          for i in volmesh_walladjacent.points]
+    volmesh_walladjacent["wallNormal"] = [
+        surfacenormals_surface.point_data["Normals"][surfacenormals_surface.find_closest_point(i)]
+        for i in volmesh_walladjacent.points]
     print("calculating cell spans from WallNormals and CellEdges...")
     spanS = cellSpans(volmesh_walladjacent, use_velfield)
     volmesh_walladjacent["xSpan"] = np.array([i[0] for i in spanS])  # calculate cell span in flow direction

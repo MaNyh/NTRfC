@@ -2,7 +2,9 @@
 History
 =======
 
-0.1.0 (2021-12-09)
+0.1.1 (2022-20-12)
 ------------------
 
-* First release on PyPI.
+* meshquality methods
+* example data sets
+* jupyter notebook examples

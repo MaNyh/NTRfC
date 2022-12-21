@@ -2,8 +2,9 @@ import os
 from dataclasses import dataclass, field
 
 import pyvista as pv
-from ntrfc.filehandling.mesh import load_mesh
 from tqdm import tqdm
+
+from ntrfc.filehandling.mesh import load_mesh
 
 
 @dataclass
@@ -13,21 +14,21 @@ class sliceregistry:
     """
     slicesets: list = field(default_factory=list)
 
-    def add_sliceset(self,slices,groupname,timestamps):
-        self.slicesets.append(sliceset(slices,groupname,timestamps))
+    def add_sliceset(self, slices, groupname, timestamps):
+        self.slicesets.append(sliceset(slices, groupname, timestamps))
 
-    def create_animation(self,slicegroup,variable,path,name):
+    def create_animation(self, slicegroup, variable, path, name):
         slicegroups = [self.slicesets[i].groupname for i in range(len(self.slicesets))]
         use_idx = slicegroups.index(slicegroup)
         use_slices = self.slicesets[use_idx].slices
-        use_timestamps =  self.slicesets[use_idx].timestamps
+        use_timestamps = self.slicesets[use_idx].timestamps
 
         pv.set_plot_theme("document")
         fontsize = 36
         labelsize = 36
         pv.global_theme.font.label_size = labelsize
 
-        gifpath = os.path.join(path,name)
+        gifpath = os.path.join(path, name)
 
         first_slice = load_mesh(use_slices[0])
 
@@ -40,8 +41,7 @@ class sliceregistry:
         p.camera.roll = 0
         p.camera.zoom = 1
 
-        for idx, (path,time) in tqdm(enumerate(zip(use_slices[1:],use_timestamps[1:]))):
-
+        for idx, (path, time) in tqdm(enumerate(zip(use_slices[1:], use_timestamps[1:]))):
             sliceframe = load_mesh(path)
             p.clear()
             p.add_mesh(sliceframe, scalars=variable)

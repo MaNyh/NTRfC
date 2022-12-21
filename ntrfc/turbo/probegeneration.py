@@ -5,6 +5,7 @@ from ntrfc.geometry.line import polyline_from_points, refine_spline
 from ntrfc.math.vectorcalc import vecAngle
 from ntrfc.turbo.cascade_geometry import calcmidpassagestreamline
 
+
 def create_profileprobes(ssPoly, psPoly, midspan_z, pden_ps, pden_ss, tolerance=1e-10):
     """
     Create profile probes from two PolyData objects.

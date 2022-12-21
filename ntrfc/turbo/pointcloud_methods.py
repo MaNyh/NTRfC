@@ -155,7 +155,7 @@ def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t, v
     p_inlet_y = y_mcl[0] - delta_y_vk
 
     delta_x_hk = x_outlet - x_mcl[-1]
-    delta_y_hk = delta_x_hk * np.tan(np.deg2rad(beta2))
+    delta_y_hk = delta_x_hk * np.tan(np.deg2rad(-beta2))
 
     p_outlet_x = x_mcl[-1] + delta_x_hk
     p_outlet_y = y_mcl[-1] + delta_y_hk
