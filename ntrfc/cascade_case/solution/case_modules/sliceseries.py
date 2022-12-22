@@ -8,7 +8,7 @@ from ntrfc.filehandling.mesh import load_mesh
 
 
 @dataclass
-class sliceregistry:
+class SliceSeries:
     """
     object for storing pathes to slices
     """

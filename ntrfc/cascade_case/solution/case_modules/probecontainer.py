@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 
 @dataclass
-class proberegistry:
+class ProbeContainer:
     probesets: list = field(default_factory=list)
 
     def add_probeset(self, variablename, groupname, time, values, timestamps=[]):

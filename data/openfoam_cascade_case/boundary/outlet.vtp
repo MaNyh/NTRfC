@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<VTKFile type="PolyData" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <PolyData>
+    <FieldData>
+      <DataArray type="Float32" Name="TimeValue" NumberOfTuples="1" format="binary" RangeMin="0.014845187775790691" RangeMax="0.014845187775790691">
+        AQAAAACAAAAEAAAADAAAAA==eJyztiy2AQACvQEk
+      </DataArray>
+    </FieldData>
+    <Piece NumberOfPoints="81" NumberOfVerts="0" NumberOfLines="0" NumberOfStrips="0" NumberOfPolys="52">
+      <PointData>
+        <DataArray type="Float32" Name="Co" format="binary" RangeMin="0.03148753568530083" RangeMax="0.04662404954433441">
+          AQAAAACAAABEAQAADAEAAA==eJw9zD1IAgEchnHJQfJC8SO7Ch08hJbCLcSea8s1CIKKusYucQgag4aCdCqLggi31i4iF4WmKLwhCCloaA5aLKKh7IL+eNLw43mnV80ksceTFJtxtId4Z5dk56ww1lmYpWCAJ3Eu25DWdJXWpEpdurivcVp2Vc0ou7aPasNHayXKZbejZYWjPYVDkRkOMTgUQhUf2/K95Zo99vN47eXq1kug4u80KHUivbSF0fYQ+fbwI3tZ9kJ9gFjNtWoleL1I0DOT5mY6jSO7T/ZmTMPs18hLLSfOfFfpYIQdsS4aE2Pc6a6imaWQz7IhfblXyDUV7EqKqZPU//41dJ6/dNY+dd7ndArSN+kfznxyhA==
+        </DataArray>
+        <DataArray type="Float32" Name="T" format="binary" RangeMin="266.1261901855469" RangeMax="271.8423767089844">
+          AQAAAACAAABEAQAA0gAAAA==eJx7uqPd+TkQT73S7jzlCoJ96XW782UgFn/Q7iz7AMHmeN7uzPkcQkdNa3eOhuJdue3Ov2zanX/bQNgw2pqx3dkKig/vaXPeD8UMpW3Ov0oguOpqm7OJVbuzDRA3AtkgugFIfzjQ7vwMiEO6gHZ1Idht2m3OtVD807fNmcUPaObeVucFQMwMZB8E0oqxrc5SQKwKxGcftjofheJy5VbneiCuBGLVWa3O/FCsLoDA0t6tzs+9Wp2vJrQ6MyUi2KslWp1XiLU6dwNxkQSCBgA5EI+m
+        </DataArray>
+        <DataArray type="Float32" Name="alphat" format="binary" RangeMin="0.012208480387926102" RangeMax="0.024669280275702477">
+          AQAAAACAAABEAQAAAAEAAA==eJwNxj1IAgEAR/EgOBQaGswbghqCqCFqu6H/1KQOB9kU0XCBtFTQjQc2BBGKuXVjkIs05GQqiEmQkJcN4RZl0AfRENRi0GJv+PHeQeNGczjcaOkFI/wmnQzXVA/VlFko6QMn/A51uk3VsYRFM9BrNNAVVmfbeu+0dIQhfov2Ztraf25qHqO4PqvKwzry3XMlYeGz6slMZHQaz2hQ8ZSnPfqXK6iETtTXtOnrmK/wv8WC7nCBYsfR062j4YStMur8Y9yWZcSUQwTWj68IBt++/PG4AngwLrPqN7J6w4RrKwUDD2FXXxhz0wrhnu/vppWMpbS8tyZhm5+iK/QfBLmQOA==
+        </DataArray>
+        <DataArray type="Float32" Name="epsilon" format="binary" RangeMin="2785891.5" RangeMax="3935535.5">
+          AQAAAACAAABEAQAABwEAAA==eJwNxk8oQwEAx/G0MA7eUg5yc+LZmLyp5bB6tdRv7faK7bALVtKrHawclDks5bDIgXKSP+VPTqLQDnZxcnFYcdBGGRnFbkq+h0/f727WVAU3xwPaxDd/T9eug5pA06WlHaR5gz5cBVTCOwptpu7whPGaqSMnoDJyfI2u0/OToB7xgboR0rAvJBue9jGtYhv+ZFwrjahef6LKJ+Jq0C268BxWuRpWJRdRcjmiF/6Tv523dZq1VYTbm5AHf61pbXjT6uR/+a8+V0v9rt7ofnNMey0xneHAyqiIQyxOO9KMo0nkfRl1oQD/0JQu0GGlNDuSUonv4b2Dc7JDroxRV1W+m9bpP5eMe5M=
+        </DataArray>
+        <DataArray type="Float32" Name="k" format="binary" RangeMin="2732.947265625" RangeMax="3316.9072265625">
+          AQAAAACAAABEAQAA9wAAAA==eJwNyzFIQgEARdFEQYwWF2nRHExCQ0gQK1HIeKFW31xqLQochOhHEhE6ubUrVIu0R1BTRA7RFOXiEkItDS1mkGAlQXc43Lc889tQAW2HoS622C26/Z7WKNzVBZ3DyXbR1vqS+nhExciqjH08xbKafzA0hTt2gN5Q786y7BjC39yi+vjE621KlkZKA9p5DuvNOq0VrLLTNEetu0kdmEkNSnEVy3GZ7B7bfy8doojaSEjjuHQENTYclJt9xo42AzrCBE74/eAL1zOTesEFXHsJrSGH+mZINRwj044qj1/brJrYYPdo5yOiwlVYp/B1I6pSD/0HO+969Q==
+        </DataArray>
+        <DataArray type="Float32" Name="nut" format="binary" RangeMin="0.17301014065742493" RangeMax="0.3554225564002991">
+          AQAAAACAAABEAQAABwEAAA==eJwNxk8oQwEAx/FJCoddaBeK3JSyJe8RfQ8vpS2RA7Xbi4Pk72kOLqy8naz14mLtwprFFGvKhQtxUIqb0k7Kae1PHEbkd/j0/R5UCkzKnjfPu/j1G+pyd4Y2eetPYfhT1Lsy3Omnes44lAGp1S9JiyPZUoHq8QVHEtY76og615LDJ9/NOfLhNEsyLVfDSTZlXiYcm99kBFNiOzbt6oLqjbvc7LqUOmKMdcbI6l/1nmqCl0qCa9lfDVJeCbI1alKTJ72t5noDlMWVJtOhaDg8yv1zgD85l76hCB9mhAdpXDewpLRmcGvNEhVf1GZGFvU/2zaDpyHGGyxa5eskxKfHoqj+A/9lib0=
+        </DataArray>
+        <DataArray type="Float32" Name="p" format="binary" RangeMin="5414.98193359375" RangeMax="5414.98193359375">
+          AQAAAACAAABEAQAAEQAAAA==eJy7bb7S9fYopggDABF1ogE=
+        </DataArray>
+        <DataArray type="Float32" Name="rho" format="binary" RangeMin="0.06923777610063553" RangeMax="0.0707249566912651">
+          AQAAAACAAABEAQAAzgAAAA==eJw7yNhnux+Izz3ptT0PxDB295le204gPnmj1/bwDQS76yKQfRFCv1ftg+OpAX22T5r7bB83Q9gw+sehPttfUNzG3W/bBcX3w/ttn0Jx1Mc+29ttfbaXgTj4I4QOAdIRP3ttk4F4klGfbTcQw9jxy/ptM6B4Q2O/7RIgjpGZYFsHxMuA7CggvbZlgu1WIF4JxJVf+20bodjh8ARbCyC2A+J1ThNsj0Gx/Q0E1p8xwTYdiJc2TLAtbUCwf52bYKt1cYKtFxBbnEfQANZxng0=
+        </DataArray>
+        <DataArray type="Float32" Name="U" NumberOfComponents="3" format="binary" RangeMin="213.32417882848105" RangeMax="232.1467291644472">
+          AQAAAACAAADMAwAARAMAAA==eJw9zm1MUwcUxnGNxMzQiIthqAgsU6KGpDEx0NvbYsuR0SYukIkymIgvkGBExVixbp0vtCjIRkUzt4hSdTAU51AmkXvqO2fMZBNbQ6KhFMvQlPYWlWQWt8Hczoebffvln+fDUzYZBm+KgW4NuNAxEYYD7MqjeVh0OwQrLmfSRV88zqUQONnT3qvGGmXzb146rlc2hdHpOP7yOTTE6Wjin6DU9/o5jM3W0cOFdsnVMAKf92sp7tcEqfnwCKSxK0u3Sh5lE9Rsl84pG7XtXakvdhS+W6eneXH3JVKNQl6BntKdGehR+o7lHdJAtwxvLxmpLrsFq7tkuMNOybaiQ/FfBz/F629kGEwDqp9s428yvGhYRapLvXhFluEpe8x5Bi//IcM93sxz1WGn0m0jR7FD6eObdqP/4wgUz/qQZtYH8GpuBNazV335A3YqfhQ6idOeRMBpz6GNLi9OeiNQw56KuYBTimdZT2Dx8QjYWk00pm7DUG0EIi0mKtj5NYbZY2z1jw5c5vTBV+kaavqow/3nb4MwI1NDsOGuYPt9EJLYycaDQtkFH3yWoaHG6G53DfcU7mc0W4VvuO/lvvnaJvehaADGmwRqbCrq7p8KgPW0QNBe2X365hCs6dLQqTK78P2VITjCrth2TnjMm328aUmv6j7Lm3zupYttwgd+GXZlmSnnmAUPeWWwGM2kf2BFu+LzG0pQPO4DT6JAX7xT4ra0+iArSaD9bxa77833gyVRJEoeEPvn+ME3X6SYaKLuAW9MvAlkpLqHeXOAN/EzUTzbMwS3qvTUY1Lp0m4PweY9ekr+Wa/bw/0G98YTf4uqR2FQ5ZnpcaYOY++HoTrXTBpjPqoUu4wGVBUG4OLESiqPtYsFnwSgL7qS+pe3in52K3frxiqxzBiC6mET1ZYn4YghBG3shHjt/16StBTLi4chzpxFb9UVWl3pMARNWeR1HNau5j6b+/m2fVqcHoTCeBO9qFiCr2KDMM5eUf8+9mIQenJN1PtLKrZ3BsHMPlKyACPKxnF1LpKyyehKwJOGUUj151ChZTX+5HkGOXXZtGV7r9R88xmsZS9qbpdeLxqFIt58G2PAY0qv8zglWem1ah3+B2Hz/pk=
+          <InformationKey name="L2_NORM_RANGE" location="vtkDataArray" length="2">
+            <Value index="0">
+              213.32417883
+            </Value>
+            <Value index="1">
+              232.14672916
+            </Value>
+          </InformationKey>
+        </DataArray>
+      </PointData>
+      <CellData>
+        <DataArray type="Float32" Name="Co" format="binary" RangeMin="0.03011433593928814" RangeMax="0.04676983878016472">
+          AQAAAACAAADQAAAA2wAAAA==eJwB0AAv/0j0Hz0O8R89spAQPeuPED3/sxs9yrAbPel9JD3jeyQ9lywGPV4qBj3cyxQ9P8oUPdKmIj3xpSI9iGYJPVNlCT3Suw09q7oNPZ96FD1JdxQ9fi4MPQg2DD37mAY9E5oGPUSPED1KjBA9plg0PUxfND1XsvY8grr2PC8ECT2ECwk9/Y4LPdyNCz3kSCw9MUssPXLlHj1Y4x497+EZPffjGT3pEx09thQdPSBFNz0fQzc95tALPajTCz39Xz494lM+PbuRPz0ojD89pmU/Pe9sPz2cfk04
+        </DataArray>
+        <DataArray type="Float32" Name="T" format="binary" RangeMin="266.091064453125" RangeMax="271.8563232421875">
+          AQAAAACAAADQAAAAqgAAAA==eJwlwz0LgWEUBuBFUiYxyNegWGwGkvHeWCRRNiz8ABbFoPOcWRkIWZA3g5JsJosfIGyslNFmcJerru1JsWfHS+Hi1kPRZK+lCPK1pLjx5K0Y8qSnGHMgrAhx+WGQ59jIIMI1p2LAm7ViyeecwZErX8GcbQ3Fp67ozwzaHL8o3HzvCHxdQdJuEOViWpDg6kFQ4JVTYLE/K9hlBGuvIMULz/+zJZjyD5IhWks=
+        </DataArray>
+        <DataArray type="Float32" Name="alphat" format="binary" RangeMin="0.012147636152803898" RangeMax="0.024695897474884987">
+          AQAAAACAAADQAAAA0gAAAA==eJxbOPu4zbtZx21eT9lswwHEylqHbbI1D9tk3T9ps+veSZulzCdsvjCdsAmu3WOzpGaPDa//KZtov1M2qtMO25RMPWxzX2OPjRMQr9TabCMLxF83Ndk82dhkI+w7x6bIZ45Ncc0KGz4gTu8PtjnYG2xj+bDfpvBBv80LzgKbFI4Cm0dnVtj4AzEjm6fNYxZPm+rLc2wsgFiC3d3mIZu7zSe+iTYrgbjGwNvmsb63zS3OIhsGriKbII9Um3Yg9t8SaHNyc6CNdG6LjRIQAwB2fVf+
+        </DataArray>
+        <DataArray type="Float32" Name="epsilon" format="binary" RangeMin="2785613.5" RangeMax="3946748">
+          AQAAAACAAADQAAAA0AAAAA==eJxLuKvldRWIs6qNvBKqjLzOV+p4sVXpeD3j1fLK5NPyCj+t7bUfiLf91fO6DcRmrFpem4D47109L497el75QH3bgDhnibmX0VJzr6LNnl4nNnp6SZ618eI5Y+M1K9/O60OBndcX50QvOyCeberkddTEyesZQ6DX1/8BXtd/mnkl/jDzMjyb5TXtdJbX90o3L8saN69zrfleWkAcMtHfi3uyv9f6xwVeH4BYRz/Zy9kg2YtDL9trr362V41Nvtdv23yvpeaRXsqWkV4AflZUPA==
+        </DataArray>
+        <DataArray type="Float32" Name="k" format="binary" RangeMin="2727.4814453125" RangeMax="3317.6357421875">
+          AQAAAACAAADQAAAAzwAAAA==eJxjW+fn+nmtn+uxEg/XncUerjdTfV1nAvEdJ3/Xa0BcIOvvGgLEYjHerqeivV11ovxdpYFYrNLP9XmFn6tmuo/r9zQf14syXq6vgdjPzNT1o4mpa4G2g2udloPruwR318hEd9eFs7Vdb8/Sdq26aOXadsHKtbfWwLWrxsB12g4X18TtLq5zK7Rct5RrucZpuri6abm4VqhpuwoB8Y2dDq6ZuxxcXXx1XaWB2Ou2uWszEL99Z+oa897U9WWlvqtdlb5riJ6N6wkgBgDU600j
+        </DataArray>
+        <DataArray type="Float32" Name="nut" format="binary" RangeMin="0.17197595536708832" RangeMax="0.35561415553092957">
+          AQAAAACAAADQAAAA0AAAAA==eJyLZ9hid/j/Zru/EovsbIA4U3aD3WGZDXbXHmy1swdipxOb7ZYe32x3W32VnTkQ8wtvs8sV2mY3v329HQsQq3avsOvvWmFnr7HAbpf6AjvXgiy79XlZdmuv9NgJA7GB9zS7I17T7K472Njts7exu53caCcBxMFzwuyuzgqzy3efYXfCbYYdj6WRXayFkd2Fad12zUB8UcrArhyILa832L2+1mCn1Wlst6TD2O6wU5idAxCbrvay27rKyy4q3NLucZil3bODWXa5QAwAl5hXDw==
+        </DataArray>
+        <DataArray type="Float32" Name="p" format="binary" RangeMin="5414.98193359375" RangeMax="5414.98193359375">
+          AQAAAACAAADQAAAADwAAAA==eJy7bb7S9fYwwgCZZmgB
+        </DataArray>
+        <DataArray type="Float32" Name="rho" format="binary" RangeMin="0.0692342221736908" RangeMax="0.07073428481817245">
+          AQAAAACAAADQAAAArwAAAA==eJwlyy8PQVEcBuAvYLPJCDTF7ig3vJJkAoEisJk/txA1Y1PPOb8Nc4MN0abcxGyiIlxBucUE8wFUhXcTnvjYb4UsOb5CnVqBQpsKEY08zToaU9pdFDya2xoLyqw1LDq9NM5UsgyqlDlofPc8YY0l9YYGI3oEBguaVDTmNE4ZuBR/KuQo1hDc64Kyb9Ck4lbQp01U4FHyLkhQ2hWs6OMLBldB7fZ37ApCjuAHphhepw==
+        </DataArray>
+        <DataArray type="Float32" Name="U" NumberOfComponents="3" format="binary" RangeMin="213.2827959696056" RangeMax="232.17617618778144">
+          AQAAAACAAABwAgAAYQIAAA==eJwNzFtIUwEYwPHyAjIobympoQaTINCk1HN2zqb2ke5QmmhaLmdZmFaiWaOoRCLNfLEsaRGCRrpg9pCGydmXaMoXXfawHqSE3XAe2twZSxs9GVbn7ffw549dQbjTWEzqyBM0dwbBaSwmVXmX7bNDgowOju6/stqqViXobufox3Kv2KFag9E/WhJNp3Eiag2WNrUUjBsT47tk2LtaQnWLVpy8JkO3r4TKw9H4ZVMGlwRkODCFL9ZlsCvu+2XE3fF+2PaGp2lrEsYk+yFtkqcHqgrR8lsGp+kwzX4awXGl71OckliBqZIM/5gjtKB2IeeRYUmx1dOJ4wshQGcZVa5L6MAQ+BQbatvRGA5B8349Xa2cw0x3CBIVx+bew0MBJzzfyZD/ShLLprsgPYEh7mSFbeC1FyxbDFWrzUVN770QVKwdNogNhSEYyhSoJWEQ7dkheLlHoNt5d/FE2Ak5LpYYdS9XG+eCaS9LG2WsZm7KDa1tDAmLGZoPS26ou8zQtw2JzS50wk0jQ4an+bOxrU54e4Yhfr3nnUnrAy2rIYv0VwwLPtjFaWhZfibWFHjgYT1P4VM3eJXOAxcaeNKNeji5R4bjzQLNbwkYuSiDcF6gzpnrGC14ofCRjqryo/mMai84hnTUOPiYy8sKgl0j0M/uXFQnBsGieP5rE060rEBLQyklRcVwl5pWgDWWUnPEpsHtfqhP0VO4bR+qU/3Qn6qnW9Y0NJcEIMddTvWmY1gTF4ABxd/NB9FxVvkUANm9C0VzR1dAo/hjVjI7fC4AbL+esqt34Eh7ACKKB2cE/A9IGjw2
+          <InformationKey name="L2_NORM_RANGE" location="vtkDataArray" length="2">
+            <Value index="0">
+              213.28279597
+            </Value>
+            <Value index="1">
+              232.17617619
+            </Value>
+          </InformationKey>
+        </DataArray>
+      </CellData>
+      <Points>
+        <DataArray type="Float32" Name="Points" NumberOfComponents="3" format="binary" RangeMin="0.121935682221599" RangeMax="0.16280048902113164">
+          AQAAAACAAADMAwAAHAEAAA==eJxVzCFLA1AYRmGZfYjYhOUFf8FkeYhpQTGYVFYMUzCICKaJRVZWxKQmy9CkQQ1D20REMAwRbMryrOoBz8e9Nz28nO+2e6Pqbm/zduzvtf9d3BpUcKG7lzltmpPjs+76oHcYDfZ2/rqTOW28Zdf3/f3osT22+X5djR3bY5vmcCGar59aZnsazZ7e6pWpStxie2zzVp6JBttgm8VqKRpsg22W2hfRdI7OM9vTaPb0Vhe7x3GL7Z/PTjOnjbfs+qk+EQ32FttMt66iwTbvO3eZ08Zbdn2y8RA9tsc2c41C7Nge26w1+rFje2zTGn3euGN7bFNefol/sD22Wa9dxj/Yfrv0mDltvGXX3dpH/D+sDzL7D41mT2/xL3Hgxzs=
+          <InformationKey name="L2_NORM_RANGE" location="vtkDataArray" length="2">
+            <Value index="0">
+              0.12193568222
+            </Value>
+            <Value index="1">
+              0.16280048902
+            </Value>
+          </InformationKey>
+        </DataArray>
+      </Points>
+      <Verts>
+        <DataArray type="Int64" Name="connectivity" format="binary" RangeMin="1e+299" RangeMax="-1e+299">
+          AAAAAACAAAAAAAAA
+        </DataArray>
+        <DataArray type="Int64" Name="offsets" format="binary" RangeMin="1e+299" RangeMax="-1e+299">
+          AAAAAACAAAAAAAAA
+        </DataArray>
+      </Verts>
+      <Lines>
+        <DataArray type="Int64" Name="connectivity" format="binary" RangeMin="1e+299" RangeMax="-1e+299">
+          AAAAAACAAAAAAAAA
+        </DataArray>
+        <DataArray type="Int64" Name="offsets" format="binary" RangeMin="1e+299" RangeMax="-1e+299">
+          AAAAAACAAAAAAAAA
+        </DataArray>
+      </Lines>
+      <Strips>
+        <DataArray type="Int64" Name="connectivity" format="binary" RangeMin="1e+299" RangeMax="-1e+299">
+          AAAAAACAAAAAAAAA
+        </DataArray>
+        <DataArray type="Int64" Name="offsets" format="binary" RangeMin="1e+299" RangeMax="-1e+299">
+          AAAAAACAAAAAAAAA
+        </DataArray>
+      </Strips>
+      <Polys>
+        <DataArray type="Int64" Name="connectivity" format="binary" RangeMin="0" RangeMax="80">
+          AQAAAACAAACABgAAPwEAAA==eJxdk8dSQkEUBTGhYhazGDFgQlRMmBBz9v+/xoWnN82mq7rOm3vmUlMo/P+6wu6wR7437FOuGPaHA+GgfCkcUo45nDccjsgzd1S5sXBcfQvyE7oHucmwHE6F0yJ+JpxVT/pw36I8vUvKMZ859B2TZ96EcnPhvHqW5RfUn9xiWFF+Tn5J55Dj++VwRd9V5Fd13lq4HlbDDRG/GW6F22Et3Al35ffCfeXofRDW1XdF/lD3aIRH4XF4It8MT5Xj3vSlV1XE0589sD/2xLyGPPtqKsf+eK+8y5qI5/2yT+7Jfc7Cc3nufaEce78MW2FdxF+F/A/M4bzr8EaeubfKMfcubGteS/5ePZjDeZ3wQZ65j8o9hc/hS/gq/xa+K/cRfoZf4beI/wl/1bOj3Kc8vX+UY2/0pVdbxNOfPf4Bt2sfVA==
+        </DataArray>
+        <DataArray type="Int64" Name="offsets" format="binary" RangeMin="4" RangeMax="208">
+          AQAAAACAAACgAQAAfgAAAA==eJwtxRECwgAAAMAgCAZBEAyCYBAEQTAYBMEgCIIgCIIgCIJgMAiCIBgEQRAEQRAEQRAEPSnoTq5c+qs4cNU11x264aYjt9x2x13HTtxz36kHHnrksSeeeua5F1565bUz59546533Lnzw0SefffHVN9/98NMvv/3x1z8e1BWJ
+        </DataArray>
+      </Polys>
+    </Piece>
+  </PolyData>
+</VTKFile>

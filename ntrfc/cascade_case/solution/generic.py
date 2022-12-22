@@ -1,12 +1,31 @@
+import numpy as np
 import pyvista as pv
 
-from ntrfc.cascade_case.solution.case_modules.postprocessing import postprocessing
-from ntrfc.cascade_case.solution.case_modules.proberegistry import proberegistry
-from ntrfc.cascade_case.solution.case_modules.sliceregistry import sliceregistry
+from ntrfc.cascade_case.solution.case_modules.postprocessing import PostProcessing
+from ntrfc.cascade_case.solution.case_modules.probecontainer import ProbeContainer
+from ntrfc.cascade_case.solution.case_modules.sliceseries import SliceSeries
 from ntrfc.filehandling.mesh import load_mesh
 
 
-class GenericCascadeCase(postprocessing, proberegistry, sliceregistry):
+class GenericCascadeCase(PostProcessing, ProbeContainer, SliceSeries):
+    """A container for data related to a cascade case, including geometry data and fluid flow data.
+
+    This class provides functionality for reading in data from file and storing it in instance variables, as well as
+    postprocessing, defining a probe proberegistry, and defining a sliceseriesregistry using inherited classes.
+
+    Attributes:
+        solver (object): An object representing the solver used to generate the data for this case.
+        inlet (pv.PolyData): Geometry data for the inlet region of the case.
+        outlet (pv.PolyData): Geometry data for the outlet region of the case.
+        blade (pv.PolyData): Geometry data for the blade in the case.
+        fluid (pv.UnstructuredGrid): Fluid flow data for the case.
+        yper_low (pv.PolyData): Geometry data for the lower y-perpendicular plane of the case.
+        yper_high (pv.PolyData): Geometry data for the upper y-perpendicular plane of the case.
+        zper_low (pv.PolyData): Geometry data for the lower z-perpendicular plane of the case.
+        zper_high (pv.PolyData): Geometry data for the upper z-perpendicular plane of the case.
+        probes (ProbeContainer): A registry of probes defined for this case.
+        sliceseries (SliceSeries): A registry of slices defined for this case.
+    """
     def __init__(self):
         super().__init__()
         self.solver = None
@@ -20,17 +39,40 @@ class GenericCascadeCase(postprocessing, proberegistry, sliceregistry):
         self.zper_low = pv.PolyData()
         self.zper_high = pv.PolyData()
 
-        self.probes = proberegistry()
-        self.sliceseries = sliceregistry()
-
-    def read_fluid(self, path):
-        self.fluid = load_mesh(path)
+        self.probes = ProbeContainer()
+        self.sliceseries = SliceSeries()
 
     def read_inlet(self, path):
-        self.inlet = load_mesh(path)
+        """
+        Read geometry data for the inlet region from a file and store it in the 'inlet' attribute.
+        Ensure that all surface normals are aligned with the x-axis.
+
+        Args:
+            path (str): Path to the file containing the inlet geometry data.
+        """
+        inlet = load_mesh(path)
+
+        normals = inlet.compute_normals()["Normals"]
+        if not all(np.isclose(normals[:, 0], -1)):
+            raise ValueError("Not all surface normals are aligned with the x-axis.")
+
+        self.inlet = inlet
 
     def read_outlet(self, path):
-        self.outlet = load_mesh(path)
+        """
+        Read geometry data for the outlet region from a file and store it in the 'outlet' attribute.
+        Ensure that all surface normals are aligned with the x-axis.
+
+        Args:
+            path (str): Path to the file containing the outlet geometry data.
+        """
+        outlet = load_mesh(path)
+
+        normals = outlet.compute_normals()["Normals"]
+        if not all(np.isclose(normals[:, 0], 1)):
+            raise ValueError("Not all surface normals are aligned with the x-axis.")
+
+        self.outlet = outlet
 
     def read_blade(self, path):
         self.blade = load_mesh(path)
@@ -46,3 +88,6 @@ class GenericCascadeCase(postprocessing, proberegistry, sliceregistry):
 
     def read_zper_high(self, path):
         self.zper_high = load_mesh(path)
+
+    def read_fluid(self,path):
+        self.fluid = load_mesh(path)
