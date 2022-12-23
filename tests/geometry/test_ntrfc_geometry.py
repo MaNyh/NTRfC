@@ -25,7 +25,7 @@ def test_extract_vk_hk(verbose=False):
     points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
     profile_points = pv.PolyData(points)
     sorted_poly = pv.PolyData(profile_points)
-    ind_hk, ind_vk = extract_vk_hk(sorted_poly, verbose=verbose)
+    ind_vk, ind_hk = extract_vk_hk(sorted_poly, verbose=verbose)
 
     if verbose:
         p = pv.Plotter()
@@ -34,8 +34,8 @@ def test_extract_vk_hk(verbose=False):
         p.add_mesh(sorted_poly)
         p.show()
 
-    assert ind_hk == ind_1, "wrong hk-index chosen"
-    assert ind_vk == ind_2, "wrong vk-index chosen"
+    assert ind_hk == ind_2, "wrong hk-index chosen"
+    assert ind_vk == ind_1, "wrong vk-index chosen"
 
 
 def test_midline_from_sides(verbose=False):
