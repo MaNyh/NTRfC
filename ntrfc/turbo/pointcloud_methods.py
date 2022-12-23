@@ -107,7 +107,7 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
         if sortedPoly.number_of_points == len(polyblade[arr]):
             sortedPoly[arr] = polyblade.point_data[arr][index_sort]
 
-    ind_hk, ind_vk = extract_vk_hk(sortedPoly)
+    ind_vk, ind_hk = extract_vk_hk(sortedPoly)
     psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly)
     midsPoly = midline_from_sides(psPoly, ssPoly)
 
