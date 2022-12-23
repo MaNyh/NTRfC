@@ -61,8 +61,8 @@ def test_openfoam_probereading(tmpdir):
 
     case = openfoam_case()
     case.read_openfoam_probes(f"{tmpdir}/{dirstructure[0]}")
-    case.plot_all()
-    case.plot_val("U")
+    case.probes.plot_all()
+    case.probes.plot_val("U")
 
 
 def test_read_openfoam_sliceseries(tmpdir):

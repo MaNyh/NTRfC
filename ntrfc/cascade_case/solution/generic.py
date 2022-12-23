@@ -4,10 +4,11 @@ import pyvista as pv
 from ntrfc.cascade_case.solution.case_modules.postprocessing import PostProcessing
 from ntrfc.cascade_case.solution.case_modules.probecontainer import ProbeContainer
 from ntrfc.cascade_case.solution.case_modules.sliceseries import SliceSeries
+from ntrfc.cascade_case.domain.domain import DomainParameters
 from ntrfc.filehandling.mesh import load_mesh
 
 
-class GenericCascadeCase(PostProcessing, ProbeContainer, SliceSeries):
+class GenericCascadeCase(PostProcessing ):
     """A container for data related to a cascade case, including geometry data and fluid flow data.
 
     This class provides functionality for reading in data from file and storing it in instance variables, as well as
@@ -41,6 +42,10 @@ class GenericCascadeCase(PostProcessing, ProbeContainer, SliceSeries):
 
         self.probes = ProbeContainer()
         self.sliceseries = SliceSeries()
+
+        self.domainparams = DomainParameters()
+
+        self.active_blade_slice = pv.PolyData()
 
     def read_inlet(self, path):
         """
@@ -91,3 +96,12 @@ class GenericCascadeCase(PostProcessing, ProbeContainer, SliceSeries):
 
     def read_fluid(self,path):
         self.fluid = load_mesh(path)
+
+    def set_active_blade_slice(self,z=None):
+        if not z:
+            bounds = self.blade.bounds
+            z = bounds[4]+(bounds[5]-bounds[4])/2
+        self.active_blade_slice = self.blade.slice(normal="z",origin=(0,0,z))
+
+    def compute_domainparams_from(self,alpha):
+        self.domainparams.generate_params_by_pointcloud(self.active_blade_slice,alpha)
