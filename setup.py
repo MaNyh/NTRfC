@@ -22,7 +22,7 @@ setup(
     author_email='nyhuis@tfd.uni-hannover.de',
     python_requires='>=3.10',
     classifiers=[
-        'Development Status :: 0.1.1',
+        'Development Status :: 0.1.2',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
@@ -43,6 +43,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC',
-    version='0.1.1',
+    version='0.1.2',
     zip_safe=False,
 )
