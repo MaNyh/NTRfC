@@ -59,9 +59,33 @@ def inplace_change(filename, old_string, new_string):
 
 def get_directory_structure(rootdir):
     """
-    Creates a nested dictionary that represents the folder structure of rootdir
+    Creates a nested dictionary representing the folder structure of the specified root directory.
+
+    Args:
+        rootdir (str): The root directory to traverse.
+
+    Returns:
+        dict: A nested dictionary representing the folder structure of the root directory. The keys
+              are the folder names and the values are dictionaries for subdirectories or None for files.
+
+    Example:
+        get_directory_structure('/home/user/documents')
+        {
+            'documents': {
+                'folder1': {
+                    'subfolder1': None,
+                    'subfolder2': {
+                        'file1.txt': None,
+                        'file2.txt': None
+                    },
+                    'file3.txt': None
+                },
+                'folder2': {
+                    'file4.txt': None
+                }
+            }
+        }
     """
-    # test method
     dir = {}
     rootdir = os.path.join(rootdir)
     rootdir = rootdir.rstrip(os.sep)
@@ -91,3 +115,5 @@ def create_dirstructure(directories, path):
     for d in directories:
         Path(os.path.join(path, d)).mkdir(parents=True, exist_ok=True)
     return 0
+
+

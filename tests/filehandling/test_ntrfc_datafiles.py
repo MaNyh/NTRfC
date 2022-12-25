@@ -1,6 +1,6 @@
 import os
 
-from ntrfc.filehandling.datafiles import inplace_change, get_filelist_fromdir
+from ntrfc.filehandling.datafiles import inplace_change, get_filelist_fromdir, get_directory_structure
 
 
 def test_yamlDictRead(tmpdir):
@@ -82,3 +82,26 @@ def test_get_filelist_fromdir(tmpdir):
     filebase = [os.path.relpath(i, tmpdir) for i in filelist]
     assert file_one in filebase
     assert file_two in filebase
+
+
+def test_get_directory_structure(tmpdir):
+    # create a directory structure in a temporary directory
+    tmpdir.mkdir('root')
+    tmpdir.join('root/folder1').mkdir()
+    tmpdir.join('root/folder2').mkdir()
+    tmpdir.join('root/folder1/subfolder1').mkdir()
+    tmpdir.join('root/folder1/subfolder2').mkdir()
+    tmpdir.join('root/folder1/subfolder2/file1.txt').write('test')
+    tmpdir.join('root/folder1/subfolder2/file2.txt').write('test')
+    tmpdir.join('root/folder1/file3.txt').write('test')
+    tmpdir.join('root/folder2/file4.txt').write('test')
+
+    # get the directory structure
+    directory_structure = get_directory_structure(str(tmpdir.join('root')))
+
+    # check that the directory structure is correct
+    assert directory_structure == {
+        'root': {'folder1': {'file3.txt': None,
+                              'subfolder1': {},
+                              'subfolder2': {'file1.txt': None, 'file2.txt': None}},
+                  'folder2': {'file4.txt': None}}}

@@ -1,8 +1,6 @@
-from dataclasses import dataclass
-
 import numpy as np
-
-from ntrfc.math.methods import autocorr
+import pandas as pd
+from ntrfc.math.methods import autocorr, reldiff, return_intersection
 
 
 def stationarity(timesteps, values, verbose=False):
@@ -15,26 +13,19 @@ def stationarity(timesteps, values, verbose=False):
 
     assert len(timesteps) == len(values)
     numts = len(timesteps)
-    mins = 2
-    maxs = 32
+    mins = 4
+    maxs = 16
     doinvestigate = []
 
     for split in range(mins, maxs):
         splitindex = numts - numts // split
-        ref_valsplit = values[splitindex:]
         splitlength = numts - splitindex
         # https://www.statisticshowto.com/choose-bin-sizes-statistics/
         numbins = int(1 + 3.22 * np.log(splitlength))
         _, histogram_bins = np.histogram(values, bins=numbins)
 
-        mean_all = np.mean(ref_valsplit)
-        var_ref = np.var(ref_valsplit)
-        autocorr_ref = autocorr(ref_valsplit)
-        hist_ref = np.histogram(ref_valsplit, bins=histogram_bins, density=True)
-
-        investigate = stationarity_investigation(mean_all, var_ref, autocorr_ref, hist_ref, splitindex, timesteps,
-                                                 values)
-
+        timeseries_df = pd.DataFrame({'values': values}, index=timesteps)
+        investigate = stationarity_investigation(timeseries_df, splitlength, histogram_bins)
         doinvestigate.append(investigate)
 
     for invest in doinvestigate:
@@ -42,88 +33,83 @@ def stationarity(timesteps, values, verbose=False):
     stationary_guesses = [i for i in doinvestigate if i.stationary == True]
     if len(stationary_guesses) > 0:
         best_guess = np.argmin([i.stationary_time for i in stationary_guesses])
-        return stationary_guesses[best_guess].stationary_time
+        return stationary_guesses[best_guess].stationary_time, stationary_guesses[best_guess].stationary_index
     else:
-        return False
+        return False, False
 
 
-@dataclass
 class stationarity_investigation:
-    mean_ref: float
-    var_ref: float
-    autocorr_ref: float
-    hist_ref: np.histogram
+    def __init__(self, timeseries_df, checksplit, histogram_bins):
+        self.timeseries_df = timeseries_df
+        self.window_size = checksplit
+        self.histogram_bins = histogram_bins
 
-    checkssplit: int
 
-    timesteps: np.array
-    values: np.array
+# Define a custom function
+def hist_intersect(values, compare, bins):
+    hist, _ = np.histogram(values, bins=bins)
+
+    return return_intersection(hist, compare)
+
+
+def acrr_intersect(values, compare):
+    accr = autocorr(values)
+
+    return return_intersection(accr, compare)
 
 
 def analize_stationarity_investigation(investigate: stationarity_investigation):
-    means = []
-    varis = []
-    acrrs = []
-    hists = []
-
     investigate.stationary = False
     investigate.stationary_time = np.inf
-    investigate.score = 1
+    investigate.stationary_index = None
 
-    mean_reldiffs = []
-    var_reldiffs = []
-    accr_reldiffs = []
-    hist_reldiffs = []
+    n_rows = investigate.timeseries_df.shape[0]
+    window_size = investigate.window_size
+    # Split the dataframe into two parts
 
-    lower_íds = np.arange(investigate.checkssplit - (len(investigate.timesteps) - investigate.checkssplit), -1, -1)
-    higher_ids = np.arange(len(investigate.timesteps) - (len(investigate.timesteps) - investigate.checkssplit),
-                           len(investigate.timesteps) - investigate.checkssplit - 1, -1)
+    df1 = investigate.timeseries_df.iloc[:n_rows - window_size, :]
+    df2 = investigate.timeseries_df.iloc[n_rows - window_size:, :]
+
+    df2_mean = df2.mean()
+    df2_vars = df2.var()
+    df2_acorrs = autocorr(df2.values.T[0])
+    df2_hist, _ = np.histogram(df2.values.T[0], bins=investigate.histogram_bins)
+
+    df1_rolling = df1.rolling(window_size, min_periods=window_size)
 
     accuracy_limit = 0.05
 
-    for l, h in zip(lower_íds, higher_ids):
+    # Check if the elements in means are close to the corresponding elements in df2_mean
+    means = df1_rolling.mean().values
+    mean_are_close = reldiff(means.T[0], df2_mean.values[0]) < accuracy_limit
+    last_false_index_mean = (~mean_are_close).argmin()
+    if last_false_index_mean == 0:
+        return
 
-        compare_vs = investigate.values[l:h]
+    vars = df1_rolling.var().values
+    vars_are_close = reldiff(vars.T[0], df2_vars.values[0]) < accuracy_limit
+    last_false_index_vars = (~vars_are_close).argmin()
+    if last_false_index_vars == 0:
+        return
 
-        mean_all = np.mean(compare_vs)
-        var_all = np.var(compare_vs)
-        autocorr_all = autocorr(compare_vs)
-        hist_all = np.histogram(compare_vs, bins=investigate.hist_ref[1], density=True)
+    hists_intersect = df1_rolling.apply(hist_intersect, args=(df2_hist, investigate.histogram_bins,), raw=True).values
+    hists_are_close = reldiff(hists_intersect.T[0], 1.0) < accuracy_limit
+    last_false_index_hists = (~hists_are_close).argmin()
+    if last_false_index_hists == 0:
+        return
 
-        means.append(mean_all)
-        varis.append(var_all)
-        acrrs.append(autocorr_all)
-        hists.append(hist_all)
+    accrs_intersect = df1_rolling.apply(acrr_intersect, args=(df2_acorrs,), raw=True).values
+    accrs_are_close = reldiff(accrs_intersect.T[0], 1.0) < accuracy_limit
+    last_false_index_accrs = (~accrs_are_close).argmin()
+    if last_false_index_accrs == 0:
+        return
 
-        mean_reldiffs.append(reldiff(investigate.mean_ref, mean_all))
-        var_reldiffs.append(reldiff(investigate.var_ref, var_all))
-        accr_reldiffs.append(1 - return_intersection(autocorr_all, investigate.autocorr_ref))
-
-        # https://mpatacchiola.github.io/blog/2016/11/12/the-simplest-classifier-histogram-intersection.html
-        histdiff = [1 - return_intersection(_a, _b) for _a, _b in zip(investigate.hist_ref[0], hist_all[0])]
-
-        meanhistdiff = np.nanmean(histdiff)
-        hist_reldiffs.append(meanhistdiff)
-
-        accuracylimit_reached = accuracy_limit > np.max(mean_reldiffs) and accuracy_limit > np.max(
-            var_reldiffs) and accuracy_limit > np.max(accr_reldiffs) and accuracy_limit > np.max(hist_reldiffs)
-        if accuracylimit_reached and investigate.timesteps[l] < investigate.stationary_time:
-            investigate.stationary = True
-            investigate.stationary_time = investigate.timesteps[l]
-            investigate.score = np.nanmean([mean_reldiffs, var_reldiffs, accr_reldiffs, hist_reldiffs])
-        elif not accuracylimit_reached:
-            break
-
-
-def reldiff(a, b):
-    # https://en.wikipedia.org/wiki/Relative_change_and_difference
-    if a == b:
-        return 0
-    else:
-        return abs(abs(a) - abs(b)) / ((abs(a) + abs(b)) / 2)
+    max_idx = np.max([last_false_index_mean, last_false_index_vars, last_false_index_hists, last_false_index_accrs])
+    # take into account that max_id is on the right side of the interval.
+    # also we need to concider that also df_1 is stationary
+    id = max_idx - window_size
+    investigate.stationary = True
+    investigate.stationary_time = investigate.timeseries_df.index[id]
+    investigate.stationary_index = id
 
 
-def return_intersection(hist_1, hist_2):
-    minima = np.minimum(hist_1, hist_2)
-    intersection = np.true_divide(np.sum(minima), np.sum(hist_2))
-    return intersection

@@ -62,3 +62,61 @@ def autocorr(signal):
 def zero_crossings(data_series):
     zcs = np.where(np.diff(np.sign(data_series)))[0]
     return zcs
+
+
+def reldiff(a, b):
+    """Calculates the relative difference between two values or arrays of values.
+
+    Parameters:
+    a (float or numpy array): The first value or array of values to compare.
+    b (float or numpy array): The second value or array of values to compare.
+
+    Returns:
+    float or numpy array: The relative difference between a and b. If a and b are both numpy arrays, the output will be a numpy array of the same shape. If one input is a float and the other is a numpy array, the output will be a numpy array of the same shape as the input array.
+
+    Notes:
+    The relative difference is defined as the absolute difference between the two values divided by the average of their absolute values.
+    If a and b are equal, the relative difference is 0.
+    If either a or b is zero, the absolute difference between the two values is returned instead of the relative difference.
+    """
+    if isinstance(a, np.ndarray) or isinstance(b, np.ndarray):
+        # Convert to numpy arrays if necessary
+        if isinstance(a, float):
+            a = np.full(b.shape, a)
+        if isinstance(b, float):
+            b = np.full(a.shape, b)
+        # Calculate relative difference element-wise
+        diff = np.abs(a - b) / ((np.abs(a) + np.abs(b)) / 2)
+        # Set elements where a or b is zero to the absolute difference
+        mask = np.logical_or(a == 0, b == 0)
+        diff[mask] = np.abs(a[mask] - b[mask])
+        return diff
+    else:
+        # Handle individual float values
+        if a == b:
+            return 0
+        elif a == 0 or b == 0:
+            return abs(a - b)
+        else:
+            return abs(a - b) / ((abs(a) + abs(b)) / 2)
+
+
+def return_intersection(hist_1, hist_2):
+    """
+    Calculate the intersection of two histograms.
+
+    Parameters
+    ----------
+    hist_1: numpy.ndarray
+        The first histogram to be compared.
+    hist_2: numpy.ndarray
+        The second histogram to be compared.
+
+    Returns
+    -------
+    float
+        The intersection of the two histograms.
+    """
+    minima = np.minimum(hist_1, hist_2)
+    intersection = np.true_divide(np.sum(minima), np.sum(hist_2))
+    return intersection
