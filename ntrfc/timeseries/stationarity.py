@@ -13,6 +13,11 @@ def stationarity(timesteps, values, verbose=False):
 
     assert len(timesteps) == len(values)
     numts = len(timesteps)
+
+    # the next two lines define the sensivity range of the analysiz.
+    # mins is the lower end of the sensivity
+    # maxs is the upper end of the sensivity.
+    # changing these values will affect the tendency of the method to find slow or fast changes of statistical properties
     mins = 4
     maxs = 16
     doinvestigate = []
