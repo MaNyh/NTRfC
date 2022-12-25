@@ -1,7 +1,8 @@
 import numpy as np
 import pyvista as pv
 
-from ntrfc.math.methods import calcAnisoMatrix, calcAnisoEigs, C_barycentric, autocorr, zero_crossings
+from ntrfc.math.methods import calcAnisoMatrix, calcAnisoEigs, C_barycentric, autocorr, zero_crossings, reldiff, \
+    return_intersection
 
 
 def test_ellipsoidVol():
@@ -152,3 +153,50 @@ def test_autocorr():
     zeroc = zero_crossings(corr)
 
     assert np.isclose(time[zeroc[0]], np.pi / 2, rtol=0.05)
+
+
+def test_reldiff():
+    # Test individual float values
+    assert np.isclose(reldiff(20, 10), 2 / 3)
+    assert np.isclose(reldiff(0, 9), 9)
+    assert np.isclose(reldiff(10, 0), 10)
+    assert np.isclose(reldiff(10, 10), 0)
+
+    # Test numpy arrays
+    a = np.array([[1, 2, 3], [4, 5, 6]])
+    b = np.array([[1, 2, 3], [4, 5, 7]])
+    assert np.allclose(reldiff(a, b), [[0, 0, 0], [0, 0, 0.15384615]])
+
+    a = np.array([0, 0, 0])
+    b = np.array([1, 2, 3])
+    assert np.allclose(reldiff(a, b), [1, 2, 3])
+
+    a = np.array([[1, 0, 3], [4, 5, 6]])
+    b = np.array([[1, 2, 3], [4, 5, 7]])
+    assert np.allclose(reldiff(a, b), [[0, 2, 0], [0, 0, 0.15384615]])
+
+    # Test float and array inputs
+    a = 1.0
+    b = np.array([[1, 2, 3], [4, 5, 6]])
+    assert np.allclose(reldiff(a, b), [[0, 2 / 3, 1], [1.2, 4 / 3, 1.42857143]])
+
+    a = np.array([[1, 2, 3], [4, 5, 6]])
+    b = 2.0
+    assert np.allclose(reldiff(a, b), [[2 / 3, 0, 0.4], [2 / 3, 0.8571428571428571, 1]])
+
+
+def test_return_intersection():
+    hist_1 = np.array([1, 2, 3, 4])
+    hist_2 = np.array([2, 3, 2, 3])
+    intersection = return_intersection(hist_1, hist_2)
+    assert intersection == 0.8, f"Expected 0.8, got {intersection}"
+
+    hist_1 = np.array([1, 1, 1, 1])
+    hist_2 = np.array([2, 2, 2, 2])
+    intersection = return_intersection(hist_1, hist_2)
+    assert intersection == 0.5, f"Expected 0.5, got {intersection}"
+
+    hist_1 = np.array([1, 1, 1, 1])
+    hist_2 = np.array([1, 1, 1, 1])
+    intersection = return_intersection(hist_1, hist_2)
+    assert intersection == 1.0, f"Expected 1.0, got {intersection}"

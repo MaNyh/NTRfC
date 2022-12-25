@@ -1,3 +1,6 @@
+from ntrfc.dictutils.dict_utils import nested_val_set, append_in_dict_list
+
+
 def test_nested_dict_pairs_iterator():
     """
     tests if nested_dict_pairs_iterator returns the right list for a nested dict
@@ -54,3 +57,40 @@ def test_merge():
     dict_1 = {"toplevel_1": {"value_11": 0}}
     dict_2 = {"toplevel_1": {"value_12": 1}, "toplevel_2": {"value_21": 3}}
     assert merge(dict_1, dict_2) == {'toplevel_1': {'value_11': 0, 'value_12': 1}, 'toplevel_2': {'value_21': 3}}
+
+
+def test_nested_val_set():
+    data = {}
+    keys = ['a', 'b', 'c']
+    nested_val_set(data, keys, 'hello')
+    assert data == {'a': {'b': {'c': 'hello'}}}
+
+    keys = ['a', 'b', 'd']
+    nested_val_set(data, keys, 'world')
+    assert data == {'a': {'b': {'c': 'hello', 'd': 'world'}}}
+
+    keys = ['e', 'f']
+    nested_val_set(data, keys, 'foo')
+    assert data == {'a': {'b': {'c': 'hello', 'd': 'world'}}, 'e': {'f': 'foo'}}
+
+
+def test_append_in_dict_list():
+    data_dict = {
+        'a': {
+            'b': {
+                'c': [1, 2, 3]
+            }
+        }
+    }
+    map_list = ['a', 'b', 'c']
+    value = 4
+
+    append_in_dict_list(data_dict, map_list, value)
+
+    assert data_dict == {
+        'a': {
+            'b': {
+                'c': [1, 2, 3, 4]
+            }
+        }
+    }

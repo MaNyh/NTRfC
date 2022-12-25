@@ -67,12 +67,28 @@ def merge(a, b, path=None):
 
 def append_in_dict_list(data_dict, map_list, value):
     """
-    appends value to nested dict with list-values
+    Appends a value to a list within a nested dictionary.
+
+    Args:
+        data_dict (dict): The dictionary to modify.
+        map_list (list): A list of keys that can be used to navigate to the list within the dictionary.
+            The last item in the list should be the key of the list that you want to append the value to.
+        value: The value to be appended to the list.
     """
     get_from_dict(data_dict, map_list[:-1])[map_list[-1]].append(value)
 
 
 def nested_val_set(dic, keys, value):
+    """Sets the value at the nested location specified by the list of keys in the dictionary.
+
+    Args:
+    - dic (dict): The dictionary to update.
+    - keys (list): A list of keys specifying the location to set the value in the dictionary.
+    - value: The value to set at the specified location.
+
+    Returns:
+    None
+    """
     for key in keys[:-1]:
         dic = dic.setdefault(key, {})
     dic[keys[-1]] = value

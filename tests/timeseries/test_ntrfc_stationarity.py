@@ -6,12 +6,13 @@ ON_CI = 'CI' in os.environ
 
 def test_stationarity_uncertainties_stationarysine(verbose=False):
     from ntrfc.timeseries.stationarity import stationarity
+    from ntrfc.math.methods import reldiff
     import numpy as np
     from itertools import product
     import matplotlib.pyplot as plt
 
     def signalgen_sine(amplitude, frequency, mean, time):
-        frequency_resolution = 512
+        frequency_resolution = 256
         tau = frequency ** -1
 
         step = tau / frequency_resolution
@@ -36,18 +37,20 @@ def test_stationarity_uncertainties_stationarysine(verbose=False):
         if minperiods > equals_periods:
             minperiods = int(equals_periods)
         timesteps, values = signalgen_sine(amplitude=amplitude, frequency=frequency, mean=mean, time=time)
-        stationary_timestep = stationarity(timesteps, values)
+        stationary_timestep,_ = stationarity(timesteps, values)
         analytic_stationary_limit = 0.0
-        assert stationary_timestep == analytic_stationary_limit, "computation failed"
-
         if verbose:
             plt.figure()
             plt.plot(timesteps, values)
             plt.axvline(stationary_timestep)
+            plt.show()
+        assert 0.05 > reldiff(time-analytic_stationary_limit, time-stationary_timestep), "computation failed"
+
 
 
 def test_stationarity_uncertainties_abatingsine(verbose=False):
-    from ntrfc.timeseries.stationarity import stationarity, reldiff
+    from ntrfc.timeseries.stationarity import stationarity
+    from ntrfc.math.methods import reldiff
     import numpy as np
     from itertools import product
     import matplotlib.pyplot as plt
@@ -71,7 +74,7 @@ def test_stationarity_uncertainties_abatingsine(verbose=False):
 
         timesteps, values = signalgen_abatingsine(amplitude=amplitude, frequency=frequency, mean=mean, time=time,
                                                   abate=abate)
-        stationary_timestep = stationarity(timesteps, values)
+        stationary_timestep,_ = stationarity(timesteps, values)
 
         well_computed_stationarity_limit = -np.log(0.05) / abate
         well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit
@@ -86,7 +89,8 @@ def test_stationarity_uncertainties_abatingsine(verbose=False):
 
 
 def test_stationarity_uncertainties_abatingsinenoise(verbose=False):
-    from ntrfc.timeseries.stationarity import stationarity, reldiff
+    from ntrfc.timeseries.stationarity import stationarity
+    from ntrfc.math.methods import reldiff
     import numpy as np
     from itertools import product
     import matplotlib.pyplot as plt
@@ -116,7 +120,7 @@ def test_stationarity_uncertainties_abatingsinenoise(verbose=False):
         timesteps, values = signalgen_abatingsine(amplitude=amplitude, noiseamplitude=noiseamplitude,
                                                   frequency=frequency, mean=mean, time=time,
                                                   abate=abate)
-        stationary_timestep = stationarity(timesteps, values)
+        stationary_timestep ,_= stationarity(timesteps, values)
 
         well_computed_stationarity_limit = -np.log(0.05) / abate
         well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit
@@ -156,7 +160,7 @@ def test_stationarity_transientonly(verbose=False):
 
         timesteps, values = signalgen_abatingsine(amplitude=amplitude,
                                                   frequency=frequency, mean=mean, time=time)
-        stationary_timestep = stationarity(timesteps, values)
+        stationary_timestep ,_= stationarity(timesteps, values)
 
 
         if verbose:
@@ -176,7 +180,7 @@ def test_stationarity_sinetransientonly():
 
     times = np.arange(0, 10, step)
     values = np.arange(0, 10, step)
-    stationary_timestep = stationarity(times, values)
+    stationary_timestep ,_= stationarity(times, values)
     assert stationary_timestep == False
 
 @pytest.mark.skipif(ON_CI, reason="currently cant render on ci-systems")
@@ -207,7 +211,7 @@ def test_stationarity_uncertainties_abating(verbose=False):
 
         timesteps, values = signalgen_abatingsine(noiseamplitude=noiseamplitude, mean=mean, time=time,
                                                   abate=abate)
-        stationary_timestep = stationarity(timesteps, values)
+        stationary_timestep ,_= stationarity(timesteps, values)
 
         well_computed_stationarity_limit = -np.log(0.05) / abate
         if verbose:
