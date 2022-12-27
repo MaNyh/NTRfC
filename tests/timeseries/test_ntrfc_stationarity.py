@@ -1,5 +1,9 @@
 import os
+
+import numpy as np
 import pytest
+
+from ntrfc.timeseries.classify_stationarity import recreate_signal
 
 ON_CI = 'CI' in os.environ
 
@@ -22,7 +26,7 @@ def test_stationarity_uncertainties_stationarysine(verbose=False):
 
     test_amplitudes = [1]  # 1,10
     test_frequencies = [1]  # 1,10
-    test_times = [10]  # 10, 60
+    test_times = [20]  # 10, 60
     test_mean = [-1]  # -1,0,1
 
     maxperiods = -1
@@ -221,3 +225,12 @@ def test_stationarity_uncertainties_abating(verbose=False):
             plt.axvline(well_computed_stationarity_limit, color="red")
             plt.show()
         assert stationary_timestep > well_computed_stationarity_limit, "computation failed"
+
+
+def test_recreatesignal():
+    timesteps = np.linspace(0,10,10000)
+    sine = np.sin(timesteps*2*np.pi*10)
+    new = recreate_signal(timesteps,sine)
+
+    diff = sine-new
+    assert all(np.isclose(diff,0,atol=0.05))

@@ -14,7 +14,7 @@ def stationarity(timesteps, values, verbose=False):
     assert len(timesteps) == len(values)
     numts = len(timesteps)
 
-    # the next two lines define the sensivity range of the analysiz.
+    # the next two lines define the sensivity range of the analysis.
     # mins is the lower end of the sensivity
     # maxs is the upper end of the sensivity.
     # changing these values will affect the tendency of the method to find slow or fast changes of statistical properties
@@ -37,7 +37,7 @@ def stationarity(timesteps, values, verbose=False):
         analize_stationarity_investigation(invest)
     stationary_guesses = [i for i in doinvestigate if i.stationary == True]
     if len(stationary_guesses) > 0:
-        best_guess = np.argmin([i.stationary_time for i in stationary_guesses])
+        best_guess = np.argmin([i.msescore for i in stationary_guesses])
         return stationary_guesses[best_guess].stationary_time, stationary_guesses[best_guess].stationary_index
     else:
         return False, False
@@ -49,6 +49,11 @@ class stationarity_investigation:
         self.window_size = checksplit
         self.histogram_bins = histogram_bins
 
+        self.msescore = None
+        self.varscore = None
+        self.histscore = None
+        self.arccrscore = None
+        self.score = None
 
 # Define a custom function
 def hist_intersect(values, compare, bins):
@@ -112,9 +117,15 @@ def analize_stationarity_investigation(investigate: stationarity_investigation):
     max_idx = np.max([last_false_index_mean, last_false_index_vars, last_false_index_hists, last_false_index_accrs])
     # take into account that max_id is on the right side of the interval.
     # also we need to concider that also df_1 is stationary
-    id = max_idx - window_size
+    id = max_idx - window_size +1
     investigate.stationary = True
     investigate.stationary_time = investigate.timeseries_df.index[id]
     investigate.stationary_index = id
+
+    investigate.msescore = ((df2.mean() - df1_rolling.mean()) ** 2).max()
+    investigate.varscore = ((df2.var() - df1_rolling.var()) ** 2).max()
+    investigate.histscore = ((1 - hists_intersect[~np.isnan(hists_intersect)]) ** 2).max()
+    investigate.arccrscore = ((1 - accrs_intersect[~np.isnan(accrs_intersect)]) ** 2).max()
+    investigate.score = investigate.msescore+investigate.varscore+investigate.histscore+investigate.arccrscore
 
 
