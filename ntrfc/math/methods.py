@@ -120,3 +120,9 @@ def return_intersection(hist_1, hist_2):
     minima = np.minimum(hist_1, hist_2)
     intersection = np.true_divide(np.sum(minima), np.sum(hist_2))
     return intersection
+
+
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
