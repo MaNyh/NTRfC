@@ -2,7 +2,7 @@ import numpy as np
 import pyvista as pv
 
 from ntrfc.math.methods import calcAnisoMatrix, calcAnisoEigs, C_barycentric, autocorr, zero_crossings, reldiff, \
-    return_intersection
+    return_intersection, is_equidistant
 
 
 def test_ellipsoidVol():
@@ -200,3 +200,10 @@ def test_return_intersection():
     hist_2 = np.array([1, 1, 1, 1])
     intersection = return_intersection(hist_1, hist_2)
     assert intersection == 1.0, f"Expected 1.0, got {intersection}"
+
+
+def test_is_equidistant():
+  assert is_equidistant([1, 3, 5, 7, 9]) == True
+  assert is_equidistant([1, 3, 5, 8, 9]) == False
+  assert is_equidistant([1]) == False
+  assert is_equidistant([]) == False

@@ -126,3 +126,19 @@ def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return idx
+
+
+def is_equidistant(arr, tolerance=1e-8):
+    # check if the array has fewer than 2 elements
+    if len(arr) < 2:
+        return False
+
+    # calculate the difference between the first two elements
+    diff = arr[1] - arr[0]
+
+    # create an array of the differences between each element and the next element
+    diffs = np.abs(np.diff(arr))
+
+    # use numpy.isclose to check if all of the differences are equal within the tolerance
+    return np.all(np.isclose(diffs, diff, atol=tolerance))
+
