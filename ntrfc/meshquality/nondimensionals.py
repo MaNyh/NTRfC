@@ -11,11 +11,6 @@ import pyvista as pv
 from ntrfc.math.vectorcalc import vecAbs, vecAbs_list, vecProjection, vecAngle, unitvec, unitvec_list
 
 
-def readDataSet(grid, dataName):
-    grid.set_active_scalars(dataName)
-    data = grid.active_scalars
-    return data
-
 
 #################################################################################
 #                                                                               #
@@ -160,7 +155,6 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     volmesh_walladjacent = volmesh.extract_cells(volmesh.find_containing_cell(volmesh.extract_surface().points))
     surfaceMeshcopy = surfaceMeshcopy.sample(volmesh_walladjacent)
     surfaceMesh["gradient"] = surfaceMeshcopy["gradient"]
-    volmesh_walladjacent[use_velfield] = readDataSet(volmesh_walladjacent, use_velfield)
     volmesh_walladjacent["cellCenters"] = volmesh_walladjacent.cell_centers().points
 
     print("calculating wall-normal vectors...")
