@@ -7,6 +7,7 @@ Created on Fri Apr 24 23:33:53 2020
 
 import numpy as np
 import pyvista as pv
+from itertools import combinations
 
 from ntrfc.math.vectorcalc import vecAbs, vecAbs_list, vecProjection, vecAngle, unitvec, unitvec_list
 
@@ -38,18 +39,9 @@ def cellDirections(cellUMean, wallNorm):
 
 
 def cellSpans(solutionMesh, calcFrom):
-    spans = []
+    cell_spans = []
     cellIds = np.arange(0, solutionMesh.number_of_cells)
     for cellIdx in cellIds:
-
-        x_span = 0
-        x_weight = 0
-
-        y_span = 0
-        y_weight = 0
-
-        z_span = 0
-        z_weight = 0
 
         wallNormal = solutionMesh["wallNormal"][cellIdx]
         uMean = solutionMesh[calcFrom][cellIdx]
@@ -59,31 +51,20 @@ def cellSpans(solutionMesh, calcFrom):
         yy = cellDirs[1]
         zz = cellDirs[2]
 
-        egdeVectors = []
+        cellfaces = solutionMesh.extract_cells(cellIdx).extract_surface()
+        facecenters = cellfaces.cell_centers().points
 
-        CELL = solutionMesh.GetCell(cellIdx)
-        # CELL.points=np.dot(np.array(cellDirs),CELL.points)
-        edgeNumbers = CELL.GetNumberOfEdges()
+        point_pairs = list(combinations(range(len(facecenters)), 2))
+        spans = [np.subtract(facecenters[pair[0]], facecenters[pair[1]]) for pair in point_pairs]
+        spans_x = [vecAbs(vecProjection(xx,i)) for i in spans]
+        spans_y = [vecAbs(vecProjection(yy,i)) for i in spans]
+        spans_z = [vecAbs(vecProjection(zz,i)) for i in spans]
+        x_span = np.max(spans_x)
+        y_span = np.max(spans_y)
+        z_span = np.max(spans_z)
 
-        for edgeIdx in range(edgeNumbers):
-            EDGE = CELL.GetEdge(edgeIdx)
-            EDGE = EDGE.GetPoints()
-            edgeVec = np.array(EDGE.GetPoint(0)) - np.array(EDGE.GetPoint(1))
-            egdeVectors.append(edgeVec)
-
-        for vec in egdeVectors:
-            x_span += vecAbs(vecProjection(xx, vec))
-            x_weight += abs(np.cos(vecAngle(xx, vec)))
-
-            y_span += vecAbs(vecProjection(yy, vec))
-            y_weight += abs(np.cos(vecAngle(yy, vec)))
-
-            z_span += vecAbs(vecProjection(zz, vec))
-            z_weight += abs(np.cos(vecAngle(zz, vec)))
-
-        spans.append([x_span / x_weight, y_span / y_weight, z_span / z_weight])
-        # pBarUpdate()
-    return spans
+        cell_spans.append([x_span , y_span , z_span ])
+    return cell_spans
 
 
 def getWalluTaus(solutionMesh, surfaceMesh, mu_0, rhofieldname, velfieldname):
