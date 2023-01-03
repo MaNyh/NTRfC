@@ -108,6 +108,7 @@ def gridSpacing(mu_0, volmesh):
     return [Deltax, Deltay, Deltaz]
 
 
+
 def constructWallMesh(surfaces):
     wall = pv.UnstructuredGrid()
     for surf in surfaces:
@@ -129,6 +130,25 @@ def compute_scalar_gradient(mesh,arrayname):
     mesh[f"grad_{arrayname}"] = mesh["gradient"].reshape((mesh.number_of_cells,3,3))
     return mesh
 
+
+def calc_dimensionless_yplus(volmesh, surfaces, use_velfield, use_rhofield, mu_0):
+    surfaceMesh = constructWallMesh(surfaces)
+    surfacenormals_surface = surfaceMesh.extract_surface().compute_normals()
+
+    volmesh = compute_scalar_gradient(volmesh,use_velfield)
+    walladjacentids = volmesh.find_containing_cell(surfacenormals_surface.points)
+    volmesh_walladjacent = volmesh.extract_cells(walladjacentids)
+    volmesh_walladjacent["cellCenters"] = volmesh_walladjacent.cell_centers().points
+    volmesh_walladjacent["wallNormal"] = [
+        surfacenormals_surface.point_data["Normals"][surfacenormals_surface.find_closest_point(i)]
+        for i in volmesh_walladjacent.points]
+    distcompute = pv.PolyData(volmesh_walladjacent["cellCenters"]).compute_implicit_distance(
+        surfaceMesh.extract_surface())
+    volmesh_walladjacent["cellCentersWallDistance"]=distcompute["implicit_distance"]
+    volmesh_walladjacent["uTaus"] = getWalluTaus(volmesh_walladjacent, mu_0, use_rhofield, use_velfield)
+    YPlus = volmesh_walladjacent["cellCentersWallDistance"] * volmesh_walladjacent["uTaus"] / mu_0
+    volmesh_walladjacent["yPlus"]=YPlus
+    return volmesh_walladjacent
 
 def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield, mu_0):
     """
