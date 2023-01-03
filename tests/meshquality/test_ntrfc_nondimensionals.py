@@ -20,9 +20,9 @@ def test_calc_dimensionless_gridspacing():
         velocity = 2
         gradient = velocity / height
         # analytical solution
-        span_x = length / (nodes - 1)
-        span_y = width / (nodes - 1)
-        span_z = height / (nodes - 1)
+        span_x = width / (nodes - 1)
+        span_y = height / (nodes - 1)
+        span_z = length / (nodes - 1)
         wallshearstress = mu_0 * gradient
         wallshearvelocity = np.sqrt(wallshearstress / rho)
         deltaxplus = wallshearvelocity * span_x / mu_0
@@ -36,7 +36,13 @@ def test_calc_dimensionless_gridspacing():
         grid = pv.StructuredGrid(x, y, z)
         # scale the mesh
         grid.points /= nodes - 1
-        grid.points *= np.array([length, height, width])
+        grid.points *= np.array([width, height, length])
+
+        # define velocityfield
+        bounds = grid.bounds
+        min_z = bounds[4]
+        grid["U"] = [gradient * (grid.cell_centers().points[::,1][i]-min_z) * np.array([0,0,1]) for i in range(grid.number_of_cells)]
+        grid["rho"] = np.ones(grid.number_of_cells)
         # extract surface
         surface = grid.extract_surface()
         facecellids = surface.surface_indices()
@@ -50,19 +56,16 @@ def test_calc_dimensionless_gridspacing():
                 upperwallids.append(faceid)
         lowerwall = surface.extract_cells(lowerwallids)
         upperwall = surface.extract_cells(upperwallids)
-        # define velocityfield
-        grid["U"] = np.array([gradient, 0, 0]) * grid.cell_centers().points
-        lowerwall["U"] = np.array([gradient, 0, 0]) * lowerwall.cell_centers().points
-        upperwall["U"] = np.array([gradient, 0, 0]) * upperwall.cell_centers().points
-        grid["rho"] = np.ones(grid.number_of_cells)
+        lowerwall["U"] =  [gradient * (lowerwall.cell_centers().points[::,1][i]-min_z) * np.array([0,0,1]) for i in range(lowerwall.number_of_cells)]
+        upperwall["U"] = [gradient * (upperwall.cell_centers().points[::,1][i]-min_z) * np.array([0,0,1]) for i in range(upperwall.number_of_cells)]
         lowerwall["rho"] = np.ones(lowerwall.number_of_cells) * rho
         upperwall["rho"] = np.ones(upperwall.number_of_cells) * rho
         dimless_gridspacings = calc_dimensionless_gridspacing(grid, [lowerwall, upperwall], "U", "rho", mu_0)
-        assert all(np.isclose(deltaxplus, dimless_gridspacings[
+        assert all(np.isclose(deltazplus, dimless_gridspacings[
             "DeltaXPlus"], rtol=0.05)), "calc_dimensionelss_gridspcing in x direction not accurate"
         assert all(np.isclose(deltayplus, dimless_gridspacings[
             "DeltaYPlus"], rtol=0.05)), "calc_dimensionelss_gridspcing in y direction not accurate"
-        assert all(np.isclose(deltazplus, dimless_gridspacings[
+        assert all(np.isclose(deltaxplus, dimless_gridspacings[
             "DeltaZPlus"], rtol=0.05)), "calc_dimensionelss_gridspcing in z direction not accurate"
 
     runtest(height=1, length=1, width=1)

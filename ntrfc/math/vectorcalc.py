@@ -209,6 +209,16 @@ def ellipsoidVol(sig):
 
 
 def vecProjection(direction, vector):
+    """
+    Calculate the projection of a vector onto a direction vector.
+
+    Parameters:
+    direction (list or numpy array): The direction vector onto which the projection will be calculated.
+    vector (list or numpy array): The vector to be projected onto the direction vector.
+
+    Returns:
+    projection (numpy array): A vector representing the projection of the input vector onto the direction vector.
+    """
     unitDir = vecDir(direction)
     return np.dot(vector, unitDir) * unitDir
 
