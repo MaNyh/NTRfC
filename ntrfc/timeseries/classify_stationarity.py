@@ -1,7 +1,6 @@
-
-from ntrfc.math.methods import find_nearest
 import numpy as np
 
+from ntrfc.math.methods import find_nearest
 from ntrfc.timeseries.integral_scales import get_self_correlating_frequencies
 
 
@@ -49,8 +48,6 @@ def classify_stationarity(timesteps, values):
     deterministic_signal = recreate_signal(timesteps, normed_values)
     noise = normed_values - deterministic_signal
 
-
-
     transformed_normed_signal = np.fft.fft(normed_values)
 
     energy_normed = np.sum(np.abs(np.fft.fft(transformed_normed_signal)) ** 2)
@@ -63,21 +60,19 @@ def classify_stationarity(timesteps, values):
         noise_bool = False
     else:
         const_bool = False
-        deterministic_bool= True if std_noise < std_deterministic else False
+        deterministic_bool = True if std_noise < std_deterministic else False
         noise_bool = True if std_deterministic < std_noise else False
 
     return const_bool, deterministic_bool, noise_bool
 
 
-def recreate_signal(timesteps,signal):
+def recreate_signal(timesteps, signal):
     # Find self-correlating frequencies
     mean = np.mean(signal)
-    signal_zeroed = signal-mean
+    signal_zeroed = signal - mean
 
     self_correlating_frequencies = get_self_correlating_frequencies(timesteps, signal_zeroed)
     # Decompose the signal into its frequency components using the FFT
-
-
 
     frequencies = np.fft.fftfreq(len(timesteps), d=timesteps[1] - timesteps[0])
     nearfreqs = np.unique([find_nearest(frequencies, i) for i in self_correlating_frequencies])
@@ -86,17 +81,13 @@ def recreate_signal(timesteps,signal):
     select = [True if i not in nearfreqs else False for i in range(len(transformed))]
     transformed[select] = complex(0)
 
-
     recreated = np.real(np.fft.ifft(transformed))
 
     # Calculate the energy of the signals
     energy_1 = np.sum(np.abs(transformed) ** 2)
     energy_2 = np.sum(np.abs(np.fft.fft(recreated)) ** 2)
 
-    scaling = energy_1/ energy_2
-    recreated = recreated*scaling+mean
-
+    scaling = energy_1 / energy_2
+    recreated = recreated * scaling + mean
 
     return recreated
-
-

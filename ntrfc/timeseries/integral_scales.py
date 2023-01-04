@@ -27,7 +27,7 @@ def integralscales(signal, timesteparray):
     return integral_time_scale, integral_length_scale
 
 
-def get_self_correlating_frequencies(timesteps,signal):
+def get_self_correlating_frequencies(timesteps, signal):
     """
     Calculate the self-correlating frequencies in a signal.
 
@@ -52,7 +52,7 @@ def get_self_correlating_frequencies(timesteps,signal):
 
     # Find self-correlating frequencies by finding the local maxima in the autocorrelation signal
     self_correlating_frequencies = argrelmax(autocorr_signal)[0]
-    ts_shifted = timesteps-timesteps[0]
+    ts_shifted = timesteps - timesteps[0]
     periods = ts_shifted[self_correlating_frequencies]
-    frequencies = 1/periods
+    frequencies = 1 / periods
     return frequencies

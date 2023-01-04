@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 from ntrfc.math.methods import autocorr, reldiff, return_intersection
 
 
@@ -54,6 +55,7 @@ class stationarity_investigation:
         self.histscore = None
         self.arccrscore = None
         self.score = None
+
 
 # Define a custom function
 def hist_intersect(values, compare, bins):
@@ -117,7 +119,7 @@ def analize_stationarity_investigation(investigate: stationarity_investigation):
     max_idx = np.max([last_false_index_mean, last_false_index_vars, last_false_index_hists, last_false_index_accrs])
     # take into account that max_id is on the right side of the interval.
     # also we need to concider that also df_1 is stationary
-    id = max_idx - window_size +1
+    id = max_idx - window_size + 1
     investigate.stationary = True
     investigate.stationary_time = investigate.timeseries_df.index[id]
     investigate.stationary_index = id
@@ -126,6 +128,4 @@ def analize_stationarity_investigation(investigate: stationarity_investigation):
     investigate.varscore = ((df2.var() - df1_rolling.var()) ** 2).max()
     investigate.histscore = ((1 - hists_intersect[~np.isnan(hists_intersect)]) ** 2).max()
     investigate.arccrscore = ((1 - accrs_intersect[~np.isnan(accrs_intersect)]) ** 2).max()
-    investigate.score = investigate.msescore+investigate.varscore+investigate.histscore+investigate.arccrscore
-
-
+    investigate.score = investigate.msescore + investigate.varscore + investigate.histscore + investigate.arccrscore

@@ -1,5 +1,7 @@
 import os
+
 import pyvista as pv
+
 
 def read_vtk(path_to_mesh):
     """Read a vtk/vtp/vtu file and return the corresponding mesh object.
@@ -16,6 +18,7 @@ def read_vtk(path_to_mesh):
     """
     return pv.read(path_to_mesh)
 
+
 def read_vtm(path_to_mesh):
     """Read a vtm file and return the corresponding mesh object.
 
@@ -31,6 +34,7 @@ def read_vtm(path_to_mesh):
     """
     multi_block_mesh = pv.read(path_to_mesh)
     return multi_block_mesh.combine()
+
 
 def read_cgns(path_to_mesh):
     """Read a cgns file and return the corresponding mesh object.
@@ -96,5 +100,3 @@ def load_mesh(path_to_mesh):
     elif extension == ".cgns":
         mesh = read_cgns(path_to_mesh)
     return mesh
-
-
