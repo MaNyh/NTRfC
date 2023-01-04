@@ -141,4 +141,3 @@ def is_equidistant(arr, tolerance=1e-8):
 
     # use numpy.isclose to check if all of the differences are equal within the tolerance
     return np.all(np.isclose(diffs, diff, atol=tolerance))
-

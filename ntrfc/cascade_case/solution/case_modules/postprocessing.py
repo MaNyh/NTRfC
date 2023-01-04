@@ -1,11 +1,11 @@
 import numpy as np
-import pyvista as pv
 from matplotlib import pyplot as plt
 
 from ntrfc.geometry.plane import massflowave_plane
 from ntrfc.math.vectorcalc import vecAngle, vecAbs
-from ntrfc.turbo.integrals import avdr
 from ntrfc.turbo.bladeloading import calc_inflow_cp
+from ntrfc.turbo.integrals import avdr
+
 
 class PostProcessing:
     def compute_avdr(self):
@@ -26,7 +26,7 @@ class PostProcessing:
         pspoints = self.domainparams.pspoly.points
 
         inlet = self.inlet
-        inlet["u"] = inlet["U"][::,0]
+        inlet["u"] = inlet["U"][::, 0]
         inlet["v"] = inlet["U"][::, 1]
         inlet["w"] = inlet["U"][::, 1]
         p1 = massflowave_plane(inlet, valname="p", rhoname="rho", velocityname="U")
@@ -34,8 +34,8 @@ class PostProcessing:
         u = massflowave_plane(inlet, valname="u", rhoname="rho", velocityname="U")
         v = massflowave_plane(inlet, valname="v", rhoname="rho", velocityname="U")
         w = massflowave_plane(inlet, valname="w", rhoname="rho", velocityname="U")
-        U = vecAbs([u,v,w])
-        pt1 = p1 + 1/2*rho*U**2
+        U = vecAbs([u, v, w])
+        pt1 = p1 + 1 / 2 * rho * U ** 2
 
         bladepoly = self.domainparams.profile_points
 
@@ -47,9 +47,9 @@ class PostProcessing:
 
         ind_le = self.domainparams.leading_edge_index
         ind_te = self.domainparams.trailing_edge_index
-        ssmeshpoints.points -=bladepoly.points[ind_le]
-        psmeshpoints.points -=bladepoly.points[ind_le]
-        bladepoly.points  -=bladepoly.points[ind_le]
+        ssmeshpoints.points -= bladepoly.points[ind_le]
+        psmeshpoints.points -= bladepoly.points[ind_le]
+        bladepoly.points -= bladepoly.points[ind_le]
         camber_length = vecAbs(bladepoly.points[ind_le] - bladepoly.points[ind_te])
 
         camber_angle = self.domainparams.stagger_angle
@@ -80,4 +80,3 @@ class PostProcessing:
         plt.grid()
         plt.legend()
         plt.show()
-

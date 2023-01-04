@@ -2,6 +2,7 @@ import numpy as np
 import pyvista as pv
 import vtk
 
+
 def compute_cell_aspect_ratios(grid: pv.UnstructuredGrid) -> np.ndarray:
     """Compute the aspect ratio of each cell in an unstructured grid.
 
@@ -22,10 +23,8 @@ def compute_cell_aspect_ratios(grid: pv.UnstructuredGrid) -> np.ndarray:
         # Get the indices of the points that make up the cell
         cell = grid.extract_cells(cellid)
 
-        edges = cell.extract_all_edges().compute_cell_sizes(length=True,area=False,volume=False)
+        edges = cell.extract_all_edges().compute_cell_sizes(length=True, area=False, volume=False)
 
         aspect_ratios.append(max(edges["Length"]) / min(edges["Length"]))
 
-
     return np.array(aspect_ratios)
-

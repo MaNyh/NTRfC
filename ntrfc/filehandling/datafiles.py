@@ -115,5 +115,3 @@ def create_dirstructure(directories, path):
     for d in directories:
         Path(os.path.join(path, d)).mkdir(parents=True, exist_ok=True)
     return 0
-
-
