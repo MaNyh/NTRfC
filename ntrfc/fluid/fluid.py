@@ -120,3 +120,26 @@ def isentropic_total_temperature(kappa, mach_number, temperature):
     isentropic_total_temperature = temperature / (1 + (kappa - 1) / 2 * mach_number ** 2) ** -1
     return isentropic_total_temperature
 
+
+
+def speed_of_sound(*, gamma, R=None, p=None, rho=None, T=None):
+    """Calculate the speed of sound based on the given equation.
+    https://www.grc.nasa.gov/www/BGH/isentrop.html
+
+    Args:
+        gamma (float): The specific heat ratio.
+        p (float): The pressure of the gas.
+        rho (float): The density of the gas.
+        R (float): The specific gas constant.
+        T (float): The temperature of the gas.
+
+    Returns:
+        float: The speed of sound.
+    """
+    if not T and not R:
+        a = np.sqrt(gamma * p / rho)
+    elif not rho:
+        a = np.sqrt(gamma * R * T)
+    return a
+
+
