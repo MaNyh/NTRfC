@@ -1,7 +1,7 @@
 import numpy as np
 
 from ntrfc.fluid.fluid import total_pressure, mach_number, sutherland_viscosity, ma_is, isentropic_reynolds_number, \
-    isentropic_total_temperature
+    isentropic_total_temperature, speed_of_sound
 
 
 def test_total_pressure():
@@ -50,3 +50,12 @@ def test_isentropic_total_temperature():
     expected_output = 315
     output = isentropic_total_temperature(1.4, 0.5, 300)
     assert abs(output - expected_output) < 1e-2
+
+
+def test_speed_of_sound():
+        assert abs(speed_of_sound(gamma=1.4, p=101325, rho=1.225) - 340.29) < 0.01
+        assert abs(speed_of_sound(gamma=1.3, p=101325, rho=1.225) - 327.92) < 0.01
+        assert abs(speed_of_sound(gamma=1.4, p=80000, rho=1.225) - 302.37) < 0.01
+        assert abs(speed_of_sound(gamma=1.3, p=80000, rho=1.225) - 291.37) < 0.01
+        assert abs(speed_of_sound(gamma=1.4, R=287.05, T=288.15) - 340.29) < 0.01
+        assert abs(speed_of_sound(gamma=1.3, R=287.05, T=288.15) - 327.91) < 0.01
