@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.spatial import Delaunay
-
+from scipy.optimize import minimize
 
 def calc_concavehull(x, y, alpha):
     """
@@ -103,8 +103,25 @@ def calc_concavehull(x, y, alpha):
     x_new = []
     y_new = []
 
-    for i in range(len(boundary_lst[0])):
-        x_new.append(points[boundary_lst[0][i][0]][0])
-        y_new.append(points[boundary_lst[0][i][0]][1])
+    if not len(boundary_lst)==0:
+        for i in range(len(boundary_lst[0])):
+            x_new.append(points[boundary_lst[0][i][0]][0])
+            y_new.append(points[boundary_lst[0][i][0]][1])
 
     return x_new, y_new
+
+
+
+def auto_concaveHull(xs,ys):
+    # Define the loss function
+    def loss(alpha, xs, ys):
+        xd, yd = calc_concavehull(xs, ys, alpha)
+        loss = abs(len(xs) - len(xd))
+        return loss
+    points = np.stack([xs,ys,np.zeros(len(xs))]).T
+
+    dist = np.max(np.sqrt(np.sum((points[:, None, :] - points)**2, axis=-1)))
+
+    result = minimize(loss, dist, args=(xs, ys,), method='nelder-mead').x[0]
+    xans,yans = calc_concavehull(xs,ys,result)
+    return xans,yans,result

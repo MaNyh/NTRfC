@@ -290,4 +290,6 @@ def naca(number, n, finite_te=False, half_cosine_spacing=True):
         x = radius * np.cos(theta)
         y = radius * np.sin(theta)
         """
-    return X, Y
+    poly = pv.PolyData(np.stack([X,Y,np.zeros(len(X))]).T)
+    poly = poly.clean(tolerance=1e-6)
+    return poly.points[::,0],poly.points[::,1]
