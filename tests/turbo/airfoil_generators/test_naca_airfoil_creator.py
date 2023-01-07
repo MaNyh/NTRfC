@@ -7,12 +7,12 @@ def test_naca():
     xs, ys = naca("6510", res, half_cosine_spacing=False, finite_te=False)
     points = np.stack([xs, ys, np.zeros(len(xs))]).T
     poly = pv.PolyData(points)
-    assert poly.number_of_points == res * 2 + 1
+    assert poly.number_of_points == res * 2
 
     xs, ys = naca("6510", res, half_cosine_spacing=True, finite_te=False)
     points = np.stack([xs, ys, np.zeros(len(xs))]).T
     poly = pv.PolyData(points)
-    assert poly.number_of_points == res * 2 + 1
+    assert poly.number_of_points == res * 2
 
     xs, ys = naca("6510", res, half_cosine_spacing=False, finite_te=True)
     points = np.stack([xs, ys, np.zeros(len(xs))]).T
@@ -27,12 +27,12 @@ def test_naca():
     xs, ys = naca("23112", res, half_cosine_spacing=False, finite_te=False)
     points = np.stack([xs, ys, np.zeros(len(xs))]).T
     poly = pv.PolyData(points)
-    assert poly.number_of_points == res * 2 + 1
+    assert poly.number_of_points == res * 2
 
     xs, ys = naca("23112", res, half_cosine_spacing=True, finite_te=False)
     points = np.stack([xs, ys, np.zeros(len(xs))]).T
     poly = pv.PolyData(points)
-    assert poly.number_of_points == res * 2 + 1
+    assert poly.number_of_points == res * 2
 
     xs, ys = naca("23112", res, half_cosine_spacing=False, finite_te=True)
     points = np.stack([xs, ys, np.zeros(len(xs))]).T
