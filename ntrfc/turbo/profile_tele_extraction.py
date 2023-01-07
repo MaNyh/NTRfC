@@ -4,37 +4,8 @@ from matplotlib import path
 from scipy import interpolate
 from scipy.spatial import Delaunay
 
-from ntrfc.geometry.alphashape import calc_concavehull
 from ntrfc.geometry.line import lines_from_points, polyline_from_points, refine_spline
 from ntrfc.math.vectorcalc import findNearest, vecDir
-
-
-# read the base-data
-def read_data(sortedPoly, alpha):
-    # set data to m from mm
-    X = sortedPoly.points[:, 0]
-    Y = sortedPoly.points[:, 1]
-    Z = sortedPoly.points[:, 2]
-    # find smallest values for shifting to touch x and y axis
-    move_X = min(X)
-    move_Y = min(Y)
-    # shift
-    X = X - min(X)
-    Y = Y - min(Y)
-    idx = np.argsort(X)
-    X = np.sort(X)
-    Y = Y[idx]
-    Z = Z[idx]
-    # find geometry with boundary function. Given parameter is
-    # sensibility for ignoring konvex outliners.
-    ord_x, ia = np.unique(X, return_index=True)
-    Y = Y[ia]
-    Z = Z[ia]
-    X = ord_x
-
-    X, Y = calc_concavehull(X, Y, alpha)
-
-    return X, Y, Z, move_X, move_Y
 
 
 def split_up(ordering):
