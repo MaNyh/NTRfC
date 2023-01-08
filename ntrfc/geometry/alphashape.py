@@ -120,7 +120,7 @@ def auto_concaveHull(xs,ys):
         return loss
     points = np.stack([xs,ys,np.zeros(len(xs))]).T
 
-    dist = np.max(np.sqrt(np.sum((points[:, None, :] - points)**2, axis=-1)))
+    dist = np.max(np.sqrt(np.sum((points[:, None, :] - points)**2, axis=-1)))/2
 
     result = minimize(loss, dist, args=(xs, ys,), method='nelder-mead').x[0]
     xans,yans = calc_concavehull(xs,ys,result)

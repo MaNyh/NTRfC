@@ -50,20 +50,19 @@ class DomainParameters:
             pv.Plotter: The PyVista plotter object used for plotting.
         """
         plotter = pv.Plotter()
-
         # Plot the suction side and pressure side polys
-        plotter.add_mesh(self.sspoly, color='b', show_edges=True)
-        plotter.add_mesh(self.pspoly, color='r', show_edges=True)
-        plotter.add_mesh(self.midspoly, color='green', show_edges=True)
+        plotter.add_mesh(self.sspoly, color='b', show_edges=True, label="suction-side")
+        plotter.add_mesh(self.pspoly, color='r', show_edges=True, label="pressure-side")
+        plotter.add_mesh(self.midspoly, color='k', label="camber")
 
         # Plot the profile points
         plotter.add_points(self.profile_points, point_size=1, color='w', opacity=0.8)
-
+        plotter.add_legend()
         plotter.add_axes()
-        plotter.show(cpos=(0, 0, 1))
+        plotter.show(cpos=(0,0,1))
 
-    def generate_params_by_pointcloud(self, points, alpha):
-        sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
+    def generate_params_by_pointcloud(self, points,alpha=None):
+        sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle, alpha = extract_geo_paras(
             points, alpha)
 
         self.profile_points = sortedPoly

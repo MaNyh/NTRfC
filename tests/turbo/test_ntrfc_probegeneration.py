@@ -12,7 +12,7 @@ def test_createprofileprobes():
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle)
-    sorted_extracted_poly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
+    sorted_extracted_poly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle , alpha= extract_geo_paras(
         sorted_poly, 1)
     n_psprobes = 24
     n_ssprobes = 36
@@ -31,7 +31,7 @@ def test_create_midpassageprobes():
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle, inplace=True)
-    sorted_extracted_poly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
+    sorted_extracted_poly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle, alpha = extract_geo_paras(
         sorted_poly, 1)
     nop = 40
     midspan_probes = create_midpassageprobes(1, -0.3, 0.3, 0.1, beta_leading, beta_trailing, midsPoly, nop)

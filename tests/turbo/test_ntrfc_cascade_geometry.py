@@ -14,7 +14,7 @@ def test_calcmidpassagestreamline():
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle)
 
-    poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
+    poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle , alpha = extract_geo_paras(
         sorted_poly, alpha)
 
     calcmidpassagestreamline(mids_poly.points[::, 0], mids_poly.points[::, 1], beta_leading, beta_trailing, -1, 2, 1)

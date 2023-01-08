@@ -112,7 +112,7 @@ def test_extract_geo_paras(verbose=False):
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle)
 
-    poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
+    poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle , alpha = extract_geo_paras(
         sorted_poly, alpha)
 
     if verbose:
@@ -129,6 +129,7 @@ def test_extract_geo_paras(verbose=False):
     assert np.isclose(beta_trailing, angle, rtol=0.03), "wrong leading edge angle"
     assert np.isclose(mids_poly.length, 1, rtol=0.03)
     assert np.isclose(camber_angle, angle, rtol=0.03)
+    assert alpha > 0
 
 
 def test_inside_poly():

@@ -1,7 +1,7 @@
 import numpy as np
 import pyvista as pv
 
-from ntrfc.geometry.alphashape import calc_concavehull
+from ntrfc.geometry.alphashape import calc_concavehull, auto_concaveHull
 from ntrfc.geometry.line import polyline_from_points, refine_spline
 from ntrfc.math.vectorcalc import vecAngle
 from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
@@ -84,7 +84,7 @@ def extract_points_fromsortedpoly(sorted_indices, sorted_poly):
     return side_two
 
 
-def extract_geo_paras(polyblade, alpha, verbose=False):
+def extract_geo_paras(polyblade, alpha=None, verbose=False):
     """
     This function is extracting profile-data as stagger-angle, midline, psPoly, ssPoly and more from a set of points
     Be careful, you need a suitable alpha-parameter in order to get the right geometry
@@ -93,10 +93,14 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
     :param polyblade: pyvista polymesh of the blade
     :param alpha: nondimensional alpha-coefficient (calcConcaveHull)
     :param verbose: bool for plots
-    :return: points, psPoly, ssPoly, ind_vk_, ind_vk, midsPoly, beta_leading, beta_trailing
+    :return: points, psPoly, ssPoly, ind_vk_, ind_vk, midsPoly, beta_leading, beta_trailing, alpha
     """
     points = polyblade.points
-    xs, ys = calc_concavehull(points[:, 0], points[:, 1], alpha)
+
+    if alpha:
+        xs, ys = calc_concavehull(points[:, 0], points[:, 1], alpha)
+    else:
+        xs, ys, alpha = auto_concaveHull(points[:, 0], points[:, 1])
 
     index_sort = [np.where(points[:, 0] == xs[i])[0][0] for i in range(len(xs)) if
                   len(np.where(points[:, 0] == xs[i])) == 1 and np.where(points[:, 0] == xs[i])[0][0] == np.where(
@@ -132,7 +136,7 @@ def extract_geo_paras(polyblade, alpha, verbose=False):
         p.add_legend()
         p.show()
 
-    return sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle
+    return sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle, alpha
 
 
 def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t, verbose=False):

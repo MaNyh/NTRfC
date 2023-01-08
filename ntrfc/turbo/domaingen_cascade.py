@@ -22,7 +22,7 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
     # =============================================================================
     # Bestimmung Profilparameter
     # =============================================================================
-    sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle = extract_geo_paras(
+    sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle , alpha = extract_geo_paras(
         profilepoints2d,
         alpha,
         verbose)
