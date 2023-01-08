@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib import path as mpltPath
 
 from ntrfc.math.vectorcalc import vecAbs, vecProjection
 
@@ -35,3 +36,14 @@ def areaave_plane(mesh, valname):
     areas = mesh["Area"]
     area_ave = np.sum((array.T * areas).T) / np.sum(areas)
     return area_ave
+
+
+def inside_poly(polygon, points):
+    """
+    :param polygon: (x,y)
+    :param points: (x,y)
+    :return: list of True or False for indicating weather inside or not
+    """
+    path = mpltPath.Path(polygon)
+    inside = path.contains_points(points)
+    return inside

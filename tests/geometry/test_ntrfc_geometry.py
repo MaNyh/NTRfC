@@ -1,3 +1,6 @@
+from ntrfc.geometry.plane import inside_poly
+
+
 def test_extract_vk_hk(verbose=False):
     """
     tests a NACA  profile in a random angle as a minimal example.
@@ -126,3 +129,20 @@ def test_extract_geo_paras(verbose=False):
     assert np.isclose(beta_trailing, angle, rtol=0.03), "wrong leading edge angle"
     assert np.isclose(mids_poly.length, 1, rtol=0.03)
     assert np.isclose(camber_angle, angle, rtol=0.03)
+
+
+def test_inside_poly():
+  # Test for a simple polygon and point
+  polygon = [(0,0), (0,1), (1,1), (1,0)]
+  point = [(0.5, 0.5)]
+  assert inside_poly(polygon, point)[0] == True
+
+  # Test for a point outside the polygon
+  polygon = [(0,0), (0,1), (1,1), (1,0)]
+  point = [(1.5, 1.5)]
+  assert inside_poly(polygon, point)[0] == False
+
+  # Test for a point on the boundary of the polygon
+  polygon = [(0,0), (0,1), (1,1), (1,0)]
+  point = [(1, 1)]
+  assert inside_poly(polygon, point)[0] == False
