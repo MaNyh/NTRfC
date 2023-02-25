@@ -1,7 +1,7 @@
+import os
+
 import numpy as np
 import pyvista as pv
-
-import os
 
 ON_CI = 'CI' in os.environ
 
@@ -11,14 +11,14 @@ def test_solution(tmpdir):
 
     inletname = tmpdir / "fake_inlet.vtk"
     outletname = tmpdir / "fake_outlet.vtk"
-    fake_inlet = pv.Plane(direction=(1,0,0))
+    fake_inlet = pv.Plane(direction=(1, 0, 0))
     fake_inlet["U"] = np.array([1] * fake_inlet.number_of_cells)
     fake_inlet["u"] = np.array([1] * fake_inlet.number_of_cells)
     fake_inlet["v"] = np.array([0] * fake_inlet.number_of_cells)
     fake_inlet["w"] = np.array([0] * fake_inlet.number_of_cells)
     fake_inlet["rho"] = np.array([1] * fake_inlet.number_of_cells)
     fake_inlet.save(inletname)
-    fake_outlet = pv.Plane(direction=(-1,0,0))
+    fake_outlet = pv.Plane(direction=(-1, 0, 0))
     fake_outlet["U"] = np.array([1] * fake_outlet.number_of_cells)
     fake_outlet["u"] = np.array([1] * fake_outlet.number_of_cells)
     fake_outlet["v"] = np.array([0] * fake_outlet.number_of_cells)

@@ -36,7 +36,6 @@ def test_calc_concavehull():
     assert any([yi in ys_raw for yi in ys])
 
 
-
 def test_calc_optimize_alphashape():
     """
     in these simple geometries, each point must be found by calcConcaveHull
@@ -57,21 +56,17 @@ def test_calc_optimize_alphashape():
     xs_raw = boxpoints[:, 0]
     ys_raw = boxpoints[:, 1]
 
-    xs, ys,alpha = auto_concaveHull(xs_raw, ys_raw)
+    xs, ys, alpha = auto_concaveHull(xs_raw, ys_raw)
 
     assert len(xs) == len(xs_raw)
     assert any([yi in ys_raw for yi in ys])
-
 
     digit_string = "6509"
 
     res = 240
     X, Y = naca(digit_string, res, half_cosine_spacing=True)
-    points = np.stack((X[:], Y[:], np.zeros(res * 2 ))).T
+    points = np.stack((X[:], Y[:], np.zeros(res * 2))).T
 
-    xs, ys,alpha = auto_concaveHull(points[::, 0], points[::, 1])
-
+    xs, ys, alpha = auto_concaveHull(points[::, 0], points[::, 1])
 
     assert len(xs) == len(X)
-
-

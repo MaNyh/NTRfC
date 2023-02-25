@@ -102,6 +102,6 @@ def test_get_directory_structure(tmpdir):
     # check that the directory structure is correct
     assert directory_structure == {
         'root': {'folder1': {'file3.txt': None,
-                              'subfolder1': {},
-                              'subfolder2': {'file1.txt': None, 'file2.txt': None}},
-                  'folder2': {'file4.txt': None}}}
+                             'subfolder1': {},
+                             'subfolder2': {'file1.txt': None, 'file2.txt': None}},
+                 'folder2': {'file4.txt': None}}}

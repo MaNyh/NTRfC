@@ -1,5 +1,4 @@
 def test_skewness():
-
     from ntrfc.meshquality.skewness import compute_cell_skewness
     import pyvista as pv
     import numpy as np
@@ -14,9 +13,6 @@ def test_skewness():
     grid.origin = (100, 33, 55.6)  # The bottom left corner of the data set
     grid.spacing = (1, 5, 2)  # These are the cell sizes along each axis
 
-
-
-
     aspect_ratios = compute_cell_skewness(grid)
 
-    assert np.all(aspect_ratios,0)
+    assert np.all(aspect_ratios, 0)

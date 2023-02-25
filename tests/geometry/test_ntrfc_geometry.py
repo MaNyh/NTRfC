@@ -54,7 +54,7 @@ def test_midline_from_sides(verbose=False):
     ind_hk = 0
     ind_vk = res
 
-    points = np.stack((x[:], y[:], np.zeros(res * 2 ))).T
+    points = np.stack((x[:], y[:], np.zeros(res * 2))).T
     poly = pv.PolyData(points)
     sspoly, pspoly = extractSidePolys(ind_hk, ind_vk, poly)
 
@@ -112,7 +112,7 @@ def test_extract_geo_paras(verbose=False):
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle)
 
-    poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle , alpha = extract_geo_paras(
+    poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle, alpha = extract_geo_paras(
         sorted_poly, alpha)
 
     if verbose:
@@ -133,17 +133,17 @@ def test_extract_geo_paras(verbose=False):
 
 
 def test_inside_poly():
-  # Test for a simple polygon and point
-  polygon = [(0,0), (0,1), (1,1), (1,0)]
-  point = [(0.5, 0.5)]
-  assert inside_poly(polygon, point)[0] == True
+    # Test for a simple polygon and point
+    polygon = [(0, 0), (0, 1), (1, 1), (1, 0)]
+    point = [(0.5, 0.5)]
+    assert inside_poly(polygon, point)[0] == True
 
-  # Test for a point outside the polygon
-  polygon = [(0,0), (0,1), (1,1), (1,0)]
-  point = [(1.5, 1.5)]
-  assert inside_poly(polygon, point)[0] == False
+    # Test for a point outside the polygon
+    polygon = [(0, 0), (0, 1), (1, 1), (1, 0)]
+    point = [(1.5, 1.5)]
+    assert inside_poly(polygon, point)[0] == False
 
-  # Test for a point on the boundary of the polygon
-  polygon = [(0,0), (0,1), (1,1), (1,0)]
-  point = [(1, 1)]
-  assert inside_poly(polygon, point)[0] == False
+    # Test for a point on the boundary of the polygon
+    polygon = [(0, 0), (0, 1), (1, 1), (1, 0)]
+    point = [(1, 1)]
+    assert inside_poly(polygon, point)[0] == False

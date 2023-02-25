@@ -7,8 +7,9 @@ Created on Fri Apr 24 23:33:53 2020
 
 from itertools import combinations
 
-import pyvista as pv
 import numpy as np
+import pyvista as pv
+
 from ntrfc.math.vectorcalc import vecAbs, vecAbs_list, vecProjection, unitvec
 
 
@@ -136,13 +137,14 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     volmesh_walladjacent["ySpan"] = np.array([i[1] for i in spanS])  # calculate cell span in wall normal direction
     volmesh_walladjacent["zSpan"] = np.array([i[2] for i in spanS])  # calculate cell span in span direction
 
-
     print("calculating wall-shear and friction-velocity")
     volmesh_walladjacent["uTaus"] = getWalluTaus(volmesh_walladjacent, mu_0, use_rhofield, use_velfield)
     uTaus = volmesh_walladjacent["uTaus"]
-    volmesh_walladjacent["DeltaXPlus"] = volmesh_walladjacent["xSpan"] * uTaus / mu_0  # calculate cell span in flow direction
-    volmesh_walladjacent["DeltaYPlus"] = volmesh_walladjacent["ySpan"] * uTaus / mu_0 # calculate cell span in wall normal direction
-    volmesh_walladjacent["DeltaZPlus"] = volmesh_walladjacent["zSpan"] * uTaus / mu_0  # calculate cell span in span direction
-
+    volmesh_walladjacent["DeltaXPlus"] = volmesh_walladjacent[
+                                             "xSpan"] * uTaus / mu_0  # calculate cell span in flow direction
+    volmesh_walladjacent["DeltaYPlus"] = volmesh_walladjacent[
+                                             "ySpan"] * uTaus / mu_0  # calculate cell span in wall normal direction
+    volmesh_walladjacent["DeltaZPlus"] = volmesh_walladjacent[
+                                             "zSpan"] * uTaus / mu_0  # calculate cell span in span direction
 
     return volmesh_walladjacent

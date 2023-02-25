@@ -2,7 +2,8 @@ import numpy as np
 import pyvista as pv
 
 from ntrfc.math.methods import calcAnisoMatrix, calcAnisoEigs, C_barycentric, autocorr, zero_crossings, reldiff, \
-    return_intersection, is_equidistant
+    return_intersection, is_equidistant, autocorrelate, minmax_normalize
+from ntrfc.timeseries.stationarity import estimate_error
 
 
 def test_ellipsoidVol():
@@ -203,7 +204,73 @@ def test_return_intersection():
 
 
 def test_is_equidistant():
-  assert is_equidistant([1, 3, 5, 7, 9]) == True
-  assert is_equidistant([1, 3, 5, 8, 9]) == False
-  assert is_equidistant([1]) == False
-  assert is_equidistant([]) == False
+    assert is_equidistant([1, 3, 5, 7, 9]) == True
+    assert is_equidistant([1, 3, 5, 8, 9]) == False
+    assert is_equidistant([1]) == False
+    assert is_equidistant([]) == False
+
+
+def test_estimate_error():
+    # Generate correlated time series using sine function
+    res = 10000
+    timeseries = np.sin(np.linspace(0, 8 * np.pi, res)) + np.random.normal(size=res) * 0.1
+    mean_error, var_error, acorr_error = estimate_error(timeseries, block_size=res // 4)
+    assert mean_error <= 0.1
+    assert var_error <= 0.1
+    assert acorr_error <= 0.1
+
+    # Generate a simple Gaussian, non self-correlated distributed timeseries with a mean of 0
+    timeseries = np.random.randn(res * 6)
+    mean_error, var_error, acorr_error = estimate_error(timeseries, block_size=res // 2)
+    assert mean_error <= 0.2
+    assert var_error <= 0.2
+    assert acorr_error <= 4
+
+
+def test_autocorrelate():
+    # Test with a simple sinusoidal signal
+    res = 48
+    signal = np.sin(np.linspace(0, 4 * np.pi, res))
+    expected = res / 4
+    assert np.argmin(autocorrelate(signal)) == expected
+
+    # Test with a constant signal
+    signal = np.zeros(100)
+    expected = 0
+    assert np.argmin(autocorrelate(signal)) == expected
+
+
+def test_deterministic_timescale():
+    # Test with a simple sinusoidal signal
+    signal = np.sin(np.linspace(0, 4 * np.pi, 100))
+    expected = 1 / 2
+    assert np.isclose(deterministic_timescale(signal), expected)
+
+
+def deterministic_timescale(series):
+    accr = autocorrelate(series)
+    zcs = np.where(np.diff(np.sign(accr)))[0]
+    if len(zcs) < 2:
+        return False
+    tsc = (zcs[1] - zcs[0]) * 2 / len(series)
+    return tsc
+
+
+def test_minmax_normalize():
+    # Test case 1: all values are the same
+    assert min(minmax_normalize(np.array([3, 3, 3, 3]))) == 3
+
+    # Test case 3: typical input array
+    input_array = np.array([1, 2, 3, 4, 5])
+    expected_output = np.array([0.0, 0.25, 0.5, 0.75, 1.0])
+    assert np.allclose(minmax_normalize(input_array), expected_output)
+
+    # Test case 4: negative values in input array
+    input_array = np.array([-5, -2, 0, 2, 5])
+    expected_output = np.array([0., 0.3, 0.5, 0.7, 1.])
+    assert np.allclose(minmax_normalize(input_array), expected_output)
+
+    # Test case 5: positive and negative values in input array
+    input_array = np.array([-3, -1, 0, 2, 5])
+    expected_output = np.array([0., 0.25, 0.375, 0.625, 1.])
+    assert np.allclose(minmax_normalize(input_array), expected_output)

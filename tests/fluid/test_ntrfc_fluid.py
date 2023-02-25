@@ -53,9 +53,9 @@ def test_isentropic_total_temperature():
 
 
 def test_speed_of_sound():
-        assert abs(speed_of_sound(gamma=1.4, p=101325, rho=1.225) - 340.29) < 0.01
-        assert abs(speed_of_sound(gamma=1.3, p=101325, rho=1.225) - 327.92) < 0.01
-        assert abs(speed_of_sound(gamma=1.4, p=80000, rho=1.225) - 302.37) < 0.01
-        assert abs(speed_of_sound(gamma=1.3, p=80000, rho=1.225) - 291.37) < 0.01
-        assert abs(speed_of_sound(gamma=1.4, R=287.05, T=288.15) - 340.29) < 0.01
-        assert abs(speed_of_sound(gamma=1.3, R=287.05, T=288.15) - 327.91) < 0.01
+    assert abs(speed_of_sound(gamma=1.4, p=101325, rho=1.225) - 340.29) < 0.01
+    assert abs(speed_of_sound(gamma=1.3, p=101325, rho=1.225) - 327.92) < 0.01
+    assert abs(speed_of_sound(gamma=1.4, p=80000, rho=1.225) - 302.37) < 0.01
+    assert abs(speed_of_sound(gamma=1.3, p=80000, rho=1.225) - 291.37) < 0.01
+    assert abs(speed_of_sound(gamma=1.4, R=287.05, T=288.15) - 340.29) < 0.01
+    assert abs(speed_of_sound(gamma=1.3, R=287.05, T=288.15) - 327.91) < 0.01

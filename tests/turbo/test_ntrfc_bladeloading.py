@@ -1,5 +1,6 @@
 from ntrfc.turbo.bladeloading import calc_inflow_cp
 
+
 def test_calc_inflow_cp():
     # Test case with positive pressure difference
     px = 101325  # Pa
