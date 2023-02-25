@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def sutherland_viscosity(temperature, sutherland_constant=1.458e-06, reference_temperature=110.4):
     """
     Calculate the dynamic viscosity of a gas using Sutherland's Law.
@@ -16,6 +17,7 @@ def sutherland_viscosity(temperature, sutherland_constant=1.458e-06, reference_t
     dynamic_viscosity = sutherland_constant * (temperature) ** (0.5) / (1 + reference_temperature / temperature)
     return dynamic_viscosity
 
+
 def total_pressure(kappa, mach_number, pressure):
     """
     Calculates the total pressure at a point in a gas using the isentropic flow equations.
@@ -29,7 +31,7 @@ def total_pressure(kappa, mach_number, pressure):
     Returns:
     - the total pressure at the point
     """
-    total_pressure = pressure * (1 + (kappa - 1) / 2 * mach_number**2)**(kappa / (kappa - 1))
+    total_pressure = pressure * (1 + (kappa - 1) / 2 * mach_number ** 2) ** (kappa / (kappa - 1))
     return total_pressure
 
 
@@ -67,10 +69,11 @@ def ma_is(outflow_static_pressure, isentropic_exponent, pressure, velocity, gas_
         float: isentropic Mach number at the outflow
     """
     reference_point_total_pressure = total_pressure(isentropic_exponent,
-                                            mach_number(velocity, isentropic_exponent, gas_constant, temperature), pressure)
+                                                    mach_number(velocity, isentropic_exponent, gas_constant,
+                                                                temperature), pressure)
     q2th = reference_point_total_pressure - outflow_static_pressure
     isentropic_mach_number = np.sqrt(2.0 / (isentropic_exponent - 1.0) * (
-            pow(1.0 + (q2th / outflow_static_pressure), (isentropic_exponent - 1.0) / isentropic_exponent) - 1.0))
+        pow(1.0 + (q2th / outflow_static_pressure), (isentropic_exponent - 1.0) / isentropic_exponent) - 1.0))
     return isentropic_mach_number
 
 
@@ -121,7 +124,6 @@ def isentropic_total_temperature(kappa, mach_number, temperature):
     return isentropic_total_temperature
 
 
-
 def speed_of_sound(*, gamma, R=None, p=None, rho=None, T=None):
     """Calculate the speed of sound based on the given equation.
     https://www.grc.nasa.gov/www/BGH/isentrop.html
@@ -141,5 +143,3 @@ def speed_of_sound(*, gamma, R=None, p=None, rho=None, T=None):
     elif not rho:
         a = np.sqrt(gamma * R * T)
     return a
-
-

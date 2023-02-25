@@ -59,9 +59,9 @@ class DomainParameters:
         plotter.add_points(self.profile_points, point_size=1, color='w', opacity=0.8)
         plotter.add_legend()
         plotter.add_axes()
-        plotter.show(cpos=(0,0,1))
+        plotter.show(cpos=(0, 0, 1))
 
-    def generate_params_by_pointcloud(self, points,alpha=None):
+    def generate_params_by_pointcloud(self, points, alpha=None):
         sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle, alpha = extract_geo_paras(
             points, alpha)
 

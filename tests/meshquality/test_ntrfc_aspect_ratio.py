@@ -1,5 +1,4 @@
 def test_aspect_ratio():
-
     from ntrfc.meshquality.aspect_ratio import compute_cell_aspect_ratios
     import pyvista as pv
     import numpy as np
@@ -14,7 +13,6 @@ def test_aspect_ratio():
     grid.origin = (100, 33, 55.6)  # The bottom left corner of the data set
     grid.spacing = (1, 5, 2)  # These are the cell sizes along each axis
 
-
     aspect_ratios = compute_cell_aspect_ratios(grid)
 
-    assert np.all(aspect_ratios==max(grid.spacing)/min(grid.spacing))
+    assert np.all(aspect_ratios == max(grid.spacing) / min(grid.spacing))

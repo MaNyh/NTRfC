@@ -1,5 +1,4 @@
 def test_mesh_expansion():
-
     from ntrfc.meshquality.meshexpansion import compute_expansion_factors
     import pyvista as pv
     import numpy as np
@@ -14,11 +13,8 @@ def test_mesh_expansion():
     grid.origin = (100, 33, 55.6)  # The bottom left corner of the data set
     grid.spacing = (1, 5, 2)  # These are the cell sizes along each axis
 
-
     grid = grid.cast_to_unstructured_grid()
 
     expansionfactors = compute_expansion_factors(grid)
 
-    assert np.all(expansionfactors==1)
-
-
+    assert np.all(expansionfactors == 1)

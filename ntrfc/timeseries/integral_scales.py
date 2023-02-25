@@ -20,7 +20,7 @@ def integralscales(signal, timesteparray):
         acorr_zero_crossings = np.where(autocorrelated == min(autocorrelated))[0][0]
 
     if all(np.isnan(autocorrelated)) or acorr_zero_crossings == 0:
-        return 0, 0
+        return 0
     integral_time_scale = simps(autocorrelated[:acorr_zero_crossings], timesteps[:acorr_zero_crossings])
     integral_length_scale = integral_time_scale * mean
 

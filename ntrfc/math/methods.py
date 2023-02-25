@@ -141,3 +141,42 @@ def is_equidistant(arr, tolerance=1e-8):
 
     # use numpy.isclose to check if all of the differences are equal within the tolerance
     return np.all(np.isclose(diffs, diff, atol=tolerance))
+
+
+def autocorrelate(series):
+    """Compute the autocorrelation function of a given time series.
+
+    Args:
+        series (array-like): The 1D time series to be autocorrelated.
+
+    Returns:
+        array-like: The autocorrelation function of the input series.
+    """
+    series = series - np.mean(series)
+    norm = np.sum(np.array(series) ** 2)
+    result = np.correlate(np.array(series), np.array(series), 'full') / norm
+    accr = result[int(len(result) / 2):]
+    return accr
+
+
+def minmax_normalize(series_array):
+    """Normalize a given 1D array to the range [0, 1] using min-max normalization.
+
+    Args:
+        series_array (array-like): The 1D array to be normalized.
+
+    Returns:
+        array-like: The normalized 1D array with values in the range [0, 1].
+
+    Note:
+        If all values in the input array are the same, the function will return the
+        input array unchanged.
+    """
+
+    if not np.all(series_array == series_array[0]):
+        mins = min(series_array)
+        maxs = max(series_array)
+        f = (-mins + series_array) / (maxs - mins)
+        return f
+    else:
+        return series_array

@@ -10,7 +10,7 @@ def test_extractSidePolys():
     X, Y = naca(digit_string, res, half_cosine_spacing=True)
     ind_hk = 0
     ind_vk = res
-    points = np.stack((X[:], Y[:], np.zeros(res * 2 ))).T
+    points = np.stack((X[:], Y[:], np.zeros(res * 2))).T
 
     poly = pv.PolyData(points)
     poly["A"] = np.ones(poly.number_of_points)
