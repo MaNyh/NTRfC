@@ -5,7 +5,7 @@ image: python:3.10
 variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     LIBGL_ALWAYS_INDIRECT : 0
-    SREGISTRY_TOKEN : "singularitybuild/sylabstoken"
+    SINGULARITY_REMOTE_TOKEN : SYLABS_TOKEN
     SREGISTRY_URL : "https://cloud.sylabs.io/"
     SREGISTRY_USERNAME : nyhuma
 
@@ -81,7 +81,7 @@ build-singularity:
     - tags
     - master
   script:
-    - singularity remote login --username $SREGISTRY_USERNAME --tokenfile $SREGISTRY_TOKEN
+    - singularity remote login --username $SREGISTRY_USERNAME --tokenfile $SINGULARITY_REMOTE_TOKEN
     - singularity build --remote library://nyhuma/ntrflows/ntr.sif:latest singularitybuild/ntrfc_container.def
   interruptible: true
 
