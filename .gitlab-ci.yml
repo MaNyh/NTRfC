@@ -91,7 +91,6 @@ build-singularity:
     entrypoint: [""]
   stage: deploy 
   only:
-    - tags
     - master
   script:
     - echo $sylabstoken  > SYLABS_TOKEN_FILE
