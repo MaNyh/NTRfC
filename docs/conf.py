@@ -19,10 +19,9 @@
 #
 import os
 import sys
+sys.path.insert(0, os.path.abspath('..'))
 
 import ntrfc
-
-sys.path.insert(0, os.path.abspath('..'))
 
 # -- General configuration ---------------------------------------------
 
@@ -65,7 +64,7 @@ release = ntrfc.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -77,6 +76,7 @@ pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
+
 
 # -- Options for HTML output -------------------------------------------
 
@@ -96,10 +96,12 @@ html_theme = 'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+
 # -- Options for HTMLHelp output ---------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'ntrfcdoc'
+
 
 # -- Options for LaTeX output ------------------------------------------
 
@@ -130,6 +132,7 @@ latex_documents = [
      'Malte Nyhuis', 'manual'),
 ]
 
+
 # -- Options for manual page output ------------------------------------
 
 # One entry per manual page. List of tuples
@@ -153,3 +156,6 @@ texinfo_documents = [
      'One line description of project.',
      'Miscellaneous'),
 ]
+
+
+

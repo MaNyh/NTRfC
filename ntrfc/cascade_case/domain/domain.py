@@ -16,7 +16,7 @@ class CascadeDomain2D:
     inlet: pv.PolyData = None
     outlet: pv.PolyData = None
 
-    def from_cascade_parameters(self, domainparams: DomainParameters):
+    def generate_from_cascade_parameters(self, domainparams: DomainParameters):
         # Use params attributes to generate attributes of CascadeDomain2D
 
         x_mids = domainparams.midspoly.points[::, 0]

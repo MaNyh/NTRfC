@@ -3,7 +3,7 @@ import pyvista as pv
 
 from ntrfc.math.methods import calcAnisoMatrix, calcAnisoEigs, C_barycentric, autocorr, zero_crossings, reldiff, \
     return_intersection, is_equidistant, autocorrelate, minmax_normalize
-from ntrfc.timeseries.stationarity import estimate_error
+from ntrfc.timeseries.stationarity import estimate_error_jacknife
 
 
 def test_ellipsoidVol():
@@ -214,14 +214,14 @@ def test_estimate_error():
     # Generate correlated time series using sine function
     res = 10000
     timeseries = np.sin(np.linspace(0, 8 * np.pi, res)) + np.random.normal(size=res) * 0.1
-    mean_error, var_error, acorr_error = estimate_error(timeseries, block_size=res // 4)
+    mean_error, var_error, acorr_error = estimate_error_jacknife(timeseries, block_size=res // 4)
     assert mean_error <= 0.1
     assert var_error <= 0.1
     assert acorr_error <= 0.1
 
     # Generate a simple Gaussian, non self-correlated distributed timeseries with a mean of 0
     timeseries = np.random.randn(res * 6)
-    mean_error, var_error, acorr_error = estimate_error(timeseries, block_size=res // 2)
+    mean_error, var_error, acorr_error = estimate_error_jacknife(timeseries, block_size=res // 2)
     assert mean_error <= 0.2
     assert var_error <= 0.2
     assert acorr_error <= 4

@@ -78,7 +78,39 @@ def extractSidePolys(ind_1, ind_2, sortedPoly, verbose=False):
 
 
 def extract_points_fromsortedpoly(sorted_indices, sorted_poly):
-    side_two = pv.PolyData(sorted_poly.points[sorted_indices])  # polyblade.extract_cells(index_sort)
+    """
+    Extract a subset of points and associated data from a sorted polygon.
+
+    Parameters
+    ----------
+    sorted_indices : numpy.ndarray
+        1D array of shape `(n_points,)` containing the indices of the points
+        in `sorted_poly.points` that should be extracted and used to create a
+        new polygon. The indices should be sorted in the order that they
+        should appear in the new polygon.
+    sorted_poly : pyvista.PolyData
+        Polygon represented as a `PolyData` object from the `pyvista`
+        library. The `sorted_poly.points` attribute should be a NumPy array
+        of shape `(n_points, 3)` containing the 3D coordinates of the polygon
+        vertices, and the `sorted_poly.point_data` attribute should be a
+        dictionary of NumPy arrays containing additional per-vertex data.
+
+    Returns
+    -------
+    pyvista.PolyData
+        A new `PolyData` object representing the subset of the original polygon
+        specified by `sorted_indices`, with all per-vertex data preserved.
+
+    Notes
+    -----
+    This function assumes that the input polygon is sorted in a specific way.
+    Specifically, the `sorted_indices` parameter should contain the indices of
+    the points in the order that they should appear in the new polygon. If the
+    input polygon is not sorted in this way, the resulting polygon may not be
+    valid.
+    """
+
+    side_two = pv.PolyData(sorted_poly.points[sorted_indices])
     for arr in sorted_poly.array_names:
         side_two[arr] = sorted_poly.point_data[arr][sorted_indices]
     return side_two
@@ -141,15 +173,33 @@ def extract_geo_paras(polyblade, alpha=None, verbose=False):
 
 def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t, verbose=False):
     """
+    Calculate the midpoint stream line curve through a passage.
 
-    Returns two lists of Points representing a curve through the passage
+    Parameters:
+    -----------
+    x_mcl : array_like
+        The x-coordinates of the mid-chord line.
+    y_mcl : array_like
+        The y-coordinates of the mid-chord line.
+    beta1 : float
+        The angle in degrees representing the inflow angle at the inlet.
+    beta2 : float
+        The angle in degrees representing the outflow angle at the outlet.
+    x_inlet : float
+        The x-coordinate of the inlet position.
+    x_outlet : float
+        The x-coordinate of the outlet position.
+    t : float
+        The pitch of the midpoint stream line.
+    verbose : bool, optional
+        If True, a plot of the midpoint stream line is displayed.
 
-
-    Input:
-    x_mcl, y_mcl = Tuple
-    beta1, beta2 = Angle in deg - Beta = Anströmwinkel
-    x_inlet, x_outlet = scalar - representing position x-component of in/outlet
-    t = scalar pitch
+    Returns:
+    --------
+    x_mpsl_ref : array_like
+        The refined x-coordinates of the midpoint stream line.
+    y_mpsl_ref : array_like
+        The refined y-coordinates of the midpoint stream line.
     """
 
     delta_x_vk = x_mcl[0] - x_inlet
