@@ -12,19 +12,24 @@ def test_optimal_timewindow(verbose=False):
     nper = 4
     x = np.linspace(0, 2 * np.pi * nper, res)
 
-    # noise
+    # sin
+    # we have four periods, at least one period should be captured
+    # thats res // 4 as a return
     ysin = np.sin(x)
-    ans = optimal_window_size(ysin)
-    assert ans == res // nper / 4 + 1
+    opt_window, opt_window_size, nperiods = optimal_window_size(ysin)
+    assert opt_window_size == res // (nper * nperiods) - 1
+    assert nperiods == 1
     # tanh
-    eul = np.tanh(x)
-    ans = optimal_window_size(eul)
-    assert ans == res // 20
+    eul = np.tanh(x * 2)
+    opt_window, opt_window_size, nperiods = optimal_window_size(eul)
+    assert opt_window_size == res // 10
+    assert nperiods == 0
     # euler
 
-    eul = np.e ** (-x * 4)
-    ans = optimal_window_size(eul)
-    assert ans == res // 20
+    eul = np.e ** (-x * 60)
+    opt_window, opt_window_size, nperiods = optimal_window_size(eul)
+    assert opt_window_size == res // 10
+    assert nperiods == 0
 
 
 def test_stationarity_uncertainties_stationarysine(verbose=False):
@@ -79,17 +84,17 @@ def test_stationarity_uncertainties_abatingsine(verbose=False):
     import matplotlib.pyplot as plt
 
     def signalgen_abatingsine(amplitude, frequency, mean, abate, time):
-        resolution = 2048
-        step = (resolution * frequency ** -1) ** -1
+        resolution = 48
+        step = (1 / frequency) / resolution
         times = np.arange(0, time, step)
         values = amplitude * np.sin(frequency * (2 * np.pi) * times) + mean + np.e ** -(times * abate)
         return times, values
 
-    test_amplitudes = [0.2]
-    test_frequencies = [10]
+    test_amplitudes = [0.3]
+    test_frequencies = [6]
     test_times = [20]
     test_mean = [-1]
-    test_abate = [1, 5]
+    test_abate = [2, 5]
 
     test_configs = list(product(test_amplitudes, test_frequencies, test_times, test_mean, test_abate))
 
@@ -99,7 +104,7 @@ def test_stationarity_uncertainties_abatingsine(verbose=False):
                                                   abate=abate)
         stationary_timestep = estimate_stationarity(values)
 
-        well_computed_stationarity_limit = -np.log(0.01) / abate
+        well_computed_stationarity_limit = -np.log(0.02) / abate
         well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit
         stationary_time = timesteps[-1] - timesteps[stationary_timestep]
         if verbose:
@@ -119,8 +124,9 @@ def test_stationarity_uncertainties_abatingsinenoise(verbose=False):
     import matplotlib.pyplot as plt
 
     def signalgen_abatingsine(amplitude, noiseamplitude, frequency, mean, abate, time):
-        resolution = 2048
-        step = (resolution * frequency ** -1) ** -1
+        # todo zu hoch aufgelöste signale können fehlerhaft sein
+        resolution = 64
+        step = (1 / frequency) / resolution
 
         times = np.arange(0, time, step)
         noise = np.random.normal(-1, 1, len(times)) * noiseamplitude
@@ -129,7 +135,7 @@ def test_stationarity_uncertainties_abatingsinenoise(verbose=False):
         return times, values
 
     test_amplitudes = [0.1]
-    test_noiseamplitude = [0.005]
+    test_noiseamplitude = [0.01]
     test_frequencies = [6]
     test_times = [40]
     test_mean = [-1]
@@ -145,7 +151,7 @@ def test_stationarity_uncertainties_abatingsinenoise(verbose=False):
                                                   abate=abate)
         stationary_timestep = estimate_stationarity(values)
 
-        well_computed_stationarity_limit = -np.log(0.03) / abate
+        well_computed_stationarity_limit = -np.log(0.02) / abate
         well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit
         stationary_time = timesteps[-1] - timesteps[stationary_timestep]
         if verbose:
@@ -164,8 +170,8 @@ def test_stationarity_transientonly(verbose=False):
     import matplotlib.pyplot as plt
 
     def signalgen_abatingsine(amplitude, frequency, mean, time):
-        resolution = 2048
-        step = (resolution * frequency ** -1) ** -1
+        resolution = 36
+        step = (1 / frequency) / resolution
 
         times = np.arange(0, time, step)
 
@@ -211,7 +217,7 @@ def test_stationarity_uncertainties_abating(verbose=False):
     import matplotlib.pyplot as plt
 
     from ntrfc.math.methods import reldiff
-    def signalgen_abatingsine(noiseamplitude, mean, abate, time):
+    def signalgen_abating(noiseamplitude, mean, abate, time):
         resolution = 20000
         step = (time / resolution)
 
@@ -221,20 +227,19 @@ def test_stationarity_uncertainties_abating(verbose=False):
         values = mean + np.e ** -(times * abate) + noise
         return times, values
 
-    test_noiseamplitude = [0.005]
-    test_times = [10]
+    test_noiseamplitude = [0.01]
+    test_times = [30]
     test_mean = [-1]
-    test_abate = [3]
+    test_abate = [3, 2]
 
     test_configs = list(product(test_noiseamplitude, test_times, test_mean, test_abate))
 
     for noiseamplitude, time, mean, abate in test_configs:
 
-        timesteps, values = signalgen_abatingsine(noiseamplitude=noiseamplitude, mean=mean, time=time,
-                                                  abate=abate)
+        timesteps, values = signalgen_abating(noiseamplitude=noiseamplitude, mean=mean, abate=abate, time=time)
         stationary_timestep = estimate_stationarity(values)
 
-        well_computed_stationarity_limit = -np.log(0.01) / abate
+        well_computed_stationarity_limit = -np.log(0.02) / abate
         well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit
         stationary_time = timesteps[-1] - timesteps[stationary_timestep]
         if verbose:
@@ -244,3 +249,40 @@ def test_stationarity_uncertainties_abating(verbose=False):
             plt.axvline(well_computed_stationarity_limit, color="red")
             plt.show()
         assert 0.05 >= reldiff(stationary_time, well_computed_stationary_time), "computation failed"
+
+
+def test_snr_pod():
+    from ntrfc.timeseries.stationarity import snr_pod, optimal_window_size
+    import numpy as np
+    from itertools import product
+
+    def signalgen(noiseamplitude, amplitude, frequency, mean, time):
+        resolution = 48
+        step = (1 / frequency) / resolution
+
+        times = np.arange(0, time, step)
+        noise = np.random.randn(len(times)) * noiseamplitude
+
+        values = np.sin(times) * amplitude + mean
+        return values, noise
+
+    test_noiseamplitude = [0.05, 0.1]
+    test_amplitudes = [1]
+    test_frequencies = [4, 8]
+    test_times = [40]
+    test_mean = [-2]
+
+    test_configs = list(product(test_noiseamplitude, test_amplitudes, test_frequencies, test_times, test_mean))
+
+    for noiseamplitude, amplitude, frequencies, time, mean in test_configs:
+        sine, noise = signalgen(noiseamplitude=noiseamplitude, amplitude=amplitude, frequency=frequencies, mean=mean,
+                                time=time)
+        signal = sine + noise
+        # Compute the SNR using the snr_pod function
+        optimal_window, optimal_window_s, nperiods = optimal_window_size(signal)
+        window = int((optimal_window_s / nperiods) / 16)
+        reconstructed_mean, fluct, snr = snr_pod(signal, window)
+
+        # Check that the SNR is close to the expected value
+        expected_snr = np.trapz(sine ** 2) / np.trapz(noise ** 2)
+        assert np.isclose(snr, expected_snr, rtol=0.05)

@@ -14,4 +14,4 @@ def test_cascade_2d_domain():
     domainparas.pitch = 2
     domainparas.blade_yshift = 0.1
     domain2d = CascadeDomain2D()
-    domain2d.from_cascade_parameters(domainparas)
+    domain2d.generate_from_cascade_parameters(domainparas)

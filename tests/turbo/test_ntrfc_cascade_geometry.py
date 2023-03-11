@@ -12,7 +12,7 @@ def test_calcmidpassagestreamline():
     res = 240
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
-    sorted_poly.rotate_z(angle)
+    sorted_poly.rotate_z(angle, inplace=True)
 
     poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle, alpha = extract_geo_paras(
         sorted_poly, alpha)

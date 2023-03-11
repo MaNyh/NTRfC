@@ -5,7 +5,7 @@
 from pip._internal.req import parse_requirements
 from setuptools import setup, find_packages
 
-with open('README.md') as readme_file:
+with open('README.rst') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
@@ -22,7 +22,7 @@ setup(
     author_email='nyhuis@tfd.uni-hannover.de',
     python_requires='>=3.10',
     classifiers=[
-        'Development Status :: 0.1.2',
+        'Development Status :: 0.1.3',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
@@ -43,6 +43,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC',
-    version='0.1.2',
+    version='0.1.3',
     zip_safe=False,
 )

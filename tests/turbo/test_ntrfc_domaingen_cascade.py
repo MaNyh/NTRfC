@@ -13,7 +13,7 @@ def test_cascade_3d_domain():
     res = 420
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
-    sorted_poly.rotate_z(angle)
+    sorted_poly.rotate_z(angle, inplace=True)
 
     sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cascade_2d_domain(sorted_poly, -1, 2,
                                                                                                     1,
@@ -32,7 +32,7 @@ def test_cascade_2d_domain():
     res = 420
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
-    sorted_poly.rotate_z(angle)
+    sorted_poly.rotate_z(angle, inplace=True)
     X, Y = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
     points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
     pointspoly = pv.PolyData(points)

@@ -1,5 +1,6 @@
-# NTRfC
-
+============
+NTRfC README
+============
 
 Numerical Test Rig for Cascades.
 
@@ -10,37 +11,26 @@ Numerical Test Rig for Cascades.
 
 
 
-## Features
+Features
 
+Easy geometry and post-processing visualization and manipulation with pyvista.
+Tested methods and functions for math, time-series, and mesh quality analysis.
 
-- Easy geometry and postprocessing visualization and manipulation with (pyvista)[https://github.com/pyvista]
-- Tested methods and functions for math, timeseries and meshquality-analysis
+Dependencies
 
-## Dependencies
+NTRfC v0.1.0 and any following version is based on Python 3.10. Only older versions can be used with older versions of Python. Library requirements will be installed with the package itself.
+Installation
 
-
-NTRfC v0.1.0 and any following version is based on Python 3.10.
-Only older versions can be used with older versions of Python.
-
-Library-requirements will be installed with the package itself.
-
-## Installation
-
-
-NTRfC is utilizing powerful and complex dependencies like pyvista and gmsh.
-It is strongly recommanded to use virtual environments or conda-environments
+NTRfC is utilizing powerful and complex dependencies like pyvista and gmsh. We strongly recommend using virtual or conda environments for installation.
 
 For more information, see:
 
-- virtualenv: https://pypi.org/project/virtualenv/
-- miniconda: https://docs.conda.io/en/latest/miniconda.html
-- anaconda: https://docs.anaconda.com/anaconda/install/index.html
-- mamba: https://mamba.readthedocs.io/en/latest/installation.html
+    virtualenv: https://pypi.org/project/virtualenv/
+    miniconda: https://docs.conda.io/en/latest/miniconda.html
+    anaconda: https://docs.anaconda.com/anaconda/install/index.html
+    mamba: https://mamba.readthedocs.io/en/latest/installation.html
 
-**Installation from gitlab with pip**
 
-You can install the package with pip from gitlab directly.
-Type:
 
 ### Installation from gitlab with pip
 
@@ -57,7 +47,7 @@ python setup.py install
 ```
 
 
-### Editable installation from source with pip**
+### Editable installation from source with pip
 
 After cloning the repository, go to the project root dir and type
 
@@ -73,8 +63,6 @@ This speeds up testing and will lead to less debugging time.
 
 use a singularity container from ntrfc singularity releases:  https://cloud.sylabs.io/library/nyhuma/ntrflows/ntr.sif].
 The containers will come with a virtual graphics card and a xvfb display-server, enabling you to render on hpc-systems and any other unprepared system with limited graphics capability.
-
-## Credits
 
 ## Credits
 

@@ -9,7 +9,7 @@ def test_calc_concavehull():
     square = pv.Plane()
     boxedges = square.extract_feature_edges()
 
-    boxedges.rotate_z(np.random.randint(0, 360))
+    boxedges.rotate_z(np.random.randint(0, 360), inplace=True)
     boxpoints = boxedges.points
 
     np.random.shuffle(boxpoints)
@@ -23,7 +23,7 @@ def test_calc_concavehull():
     assert any([yi in ys_raw for yi in ys])
 
     polygon = pv.Polygon()
-    polygon.rotate_z(np.random.randint(0, 360))
+    polygon.rotate_z(np.random.randint(0, 360), inplace=True)
     polyedges = polygon.extract_feature_edges()
     polypoints = polyedges.points
     np.random.shuffle(polypoints)
@@ -48,7 +48,7 @@ def test_calc_optimize_alphashape():
     square = pv.Plane()
     boxedges = square.extract_feature_edges()
 
-    boxedges.rotate_z(np.random.randint(0, 360))
+    boxedges.rotate_z(np.random.randint(0, 360), inplace=True)
     boxpoints = boxedges.points
 
     np.random.shuffle(boxpoints)

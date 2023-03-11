@@ -31,6 +31,7 @@ stages: # List of stages for jobs, and their order of execution
     - build
     - test
     - quality
+    - docs
     - deploy
 
 build:
@@ -70,6 +71,19 @@ coverage:
       - coverage.xml
     when: always
 
+pages:
+  stage: docs
+  <<: *build_test
+  script:
+    - pip install sphinx sphinx-rtd-theme
+    - cd doc
+    - make html
+    - mv build/html/ ../public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 build-singularity:
   image: 

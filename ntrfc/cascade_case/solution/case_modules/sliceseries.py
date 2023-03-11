@@ -26,7 +26,6 @@ class SliceSeries:
         pv.set_plot_theme("document")
         fontsize = 36
         labelsize = 36
-        pv.global_theme.font.label_size = labelsize
 
         gifpath = os.path.join(path, name)
 
@@ -36,7 +35,7 @@ class SliceSeries:
         p.window_size = [3840, 2160]
         p.open_gif(gifpath)
         p.add_mesh(first_slice, scalars=variable)
-        p.add_text(f"framenumber: 0 - time {use_timestamps[0]}", font_size=fontsize)
+        p.add_text(f"framenumber: 0 - time {use_timestamps[0]}", font_size=labelsize, position='upper_left')
         p.camera.position = (0, 0, 1)
         p.camera.roll = 0
         p.camera.zoom = 1
@@ -45,7 +44,7 @@ class SliceSeries:
             sliceframe = load_mesh(path)
             p.clear()
             p.add_mesh(sliceframe, scalars=variable)
-            p.add_text(f"framenumber: {idx} - time {time}", font_size=fontsize)
+            p.add_text(f"framenumber: {idx} - time {time}", font_size=fontsize, position='upper_left')
             p.scalar_bar.SetTitleRatio(2)
             p.write_frame()
 

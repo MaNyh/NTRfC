@@ -100,7 +100,7 @@ def create_stagnationpointprobes(length, nop, sortedpoly, ind_vk, u_inlet, midsp
     angle = vecAngle(u_inlet, np.array([1, 0, 0]) * 180 / np.pi)
     stagnationLine = pv.Line((0, 0, 0), (-length, 0, 0), nop - 1)
     stagnationLine.rotate_z(angle, inplace=False)
-    stagnationLine.translate(vk_point)
+    stagnationLine.translate(vk_point, inplace=False)
     x_probes = stagnationLine.points[::, 0]
     y_probes = stagnationLine.points[::, 1]
     z_probes = stagnationLine.points[::, 2] + midspan_z

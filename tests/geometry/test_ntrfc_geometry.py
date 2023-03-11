@@ -20,7 +20,7 @@ def test_extract_vk_hk(verbose=False):
     res = 420
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
-    sorted_poly.rotate_z(angle)
+    sorted_poly.rotate_z(angle, inplace=True)
     X, Y = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
     ind_1 = res
     ind_2 = 0
@@ -110,7 +110,7 @@ def test_extract_geo_paras(verbose=False):
     res = 240
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
-    sorted_poly.rotate_z(angle)
+    sorted_poly.rotate_z(angle, inplace=True)
 
     poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle, alpha = extract_geo_paras(
         sorted_poly, alpha)

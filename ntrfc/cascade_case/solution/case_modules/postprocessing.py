@@ -8,16 +8,24 @@ from ntrfc.turbo.integrals import avdr
 
 
 class PostProcessing:
-    def compute_avdr(self):
+    def compute_avdr_inout_massave(self):
+
+        self.inlet["u"] = self.inlet["U"][::, 0]
+        self.inlet["v"] = self.inlet["U"][::, 1]
+        self.inlet["w"] = self.inlet["U"][::, 2]
+
+        self.outlet["u"] = self.outlet["U"][::, 0]
+        self.outlet["v"] = self.outlet["U"][::, 1]
+        self.outlet["w"] = self.outlet["U"][::, 2]
         rho_1 = massflowave_plane(self.inlet, "rho")
-        mag_u_1 = massflowave_plane(self.inlet, "U")
+        mag_u_1 = vecAbs(np.array([massflowave_plane(self.inlet, "u"),massflowave_plane(self.inlet, "v"),massflowave_plane(self.inlet, "w")]))
         U_1 = np.stack([massflowave_plane(self.inlet, "u"), massflowave_plane(self.inlet, "v"),
                         massflowave_plane(self.inlet, "w")])
         beta_1 = vecAngle(U_1, np.array([1, 0, 0]))
         rho_2 = massflowave_plane(self.outlet, "rho")
-        U_2 = np.stack([massflowave_plane(self.inlet, "u"), massflowave_plane(self.inlet, "v"),
-                        massflowave_plane(self.inlet, "w")])
-        mag_u_2 = massflowave_plane(self.outlet, "U")
+        U_2 = np.stack([massflowave_plane(self.outlet, "u"), massflowave_plane(self.outlet, "v"),
+                        massflowave_plane(self.outlet, "w")])
+        mag_u_2 =  vecAbs(np.array([massflowave_plane(self.outlet, "u"),massflowave_plane(self.outlet, "v"),massflowave_plane(self.outlet, "w")]))
         beta_2 = vecAngle(U_2, np.array([1, 0, 0]))
         self.avdr = avdr(rho_1, mag_u_1, beta_1, rho_2, mag_u_2, beta_2)
 
@@ -28,7 +36,7 @@ class PostProcessing:
         inlet = self.inlet
         inlet["u"] = inlet["U"][::, 0]
         inlet["v"] = inlet["U"][::, 1]
-        inlet["w"] = inlet["U"][::, 1]
+        inlet["w"] = inlet["U"][::, 2]
         p1 = massflowave_plane(inlet, valname="p", rhoname="rho", velocityname="U")
         rho = massflowave_plane(inlet, valname="rho", rhoname="rho", velocityname="U")
         u = massflowave_plane(inlet, valname="u", rhoname="rho", velocityname="U")
@@ -54,8 +62,8 @@ class PostProcessing:
 
         camber_angle = self.domainparams.stagger_angle
 
-        ssmeshpoints.rotate_z(camber_angle)
-        psmeshpoints.rotate_z(camber_angle)
+        ssmeshpoints.rotate_z(camber_angle, inplace=True)
+        psmeshpoints.rotate_z(camber_angle, inplace=True)
 
         ps_xc = np.zeros(psmeshpoints.number_of_points)
         ps_cp = np.zeros(psmeshpoints.number_of_points)
@@ -80,3 +88,5 @@ class PostProcessing:
         plt.grid()
         plt.legend()
         plt.show()
+
+        return 0
