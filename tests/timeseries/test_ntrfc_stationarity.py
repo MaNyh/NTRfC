@@ -104,7 +104,7 @@ def test_stationarity_uncertainties_abatingsine(verbose=False):
                                                   abate=abate)
         stationary_timestep = estimate_stationarity(values)
 
-        well_computed_stationarity_limit = -np.log(0.02) / abate
+        well_computed_stationarity_limit = -np.log(0.01) / abate
         well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit
         stationary_time = timesteps[-1] - timesteps[stationary_timestep]
         if verbose:
@@ -151,7 +151,7 @@ def test_stationarity_uncertainties_abatingsinenoise(verbose=False):
                                                   abate=abate)
         stationary_timestep = estimate_stationarity(values)
 
-        well_computed_stationarity_limit = -np.log(0.02) / abate
+        well_computed_stationarity_limit = -np.log(0.01) / abate
         well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit
         stationary_time = timesteps[-1] - timesteps[stationary_timestep]
         if verbose:
@@ -239,7 +239,7 @@ def test_stationarity_uncertainties_abating(verbose=False):
         timesteps, values = signalgen_abating(noiseamplitude=noiseamplitude, mean=mean, abate=abate, time=time)
         stationary_timestep = estimate_stationarity(values)
 
-        well_computed_stationarity_limit = -np.log(0.02) / abate
+        well_computed_stationarity_limit = -np.log(0.01) / abate
         well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit
         stationary_time = timesteps[-1] - timesteps[stationary_timestep]
         if verbose:

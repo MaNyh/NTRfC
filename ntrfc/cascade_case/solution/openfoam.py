@@ -28,7 +28,7 @@ class openfoam_case(GenericCascadeCase):
 
         vals = os.listdir(os.path.join(path_to_probes, openfoam_probesets_starttimes[0]))
         for val in vals:
-            times, values = readprobes(f"{postprocessing_dir}", basename, time_name="mergeTime", name=val)
+            _, times, values = readprobes(f"{postprocessing_dir}", basename, time_name="mergeTime", name=val)
             values[values == -1e300] = np.nan
             probe_time[val] = times
             probe_vals[val] = values

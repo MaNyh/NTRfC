@@ -124,7 +124,7 @@ def optimal_window_size(time_series, verbose=False):
     allowed_window_sizes = np.array(range(series_length // 10, series_length // 4))
 
     # Define a threshold for the sanity test
-    sanity_threshold = 2.83
+    sanity_threshold = 2.82
 
     # Iterate through the allowed window sizes and perform the Kolmogorov-Smirnov test and correlation coefficient calculation
     corr_coeff_scores = np.zeros(len(allowed_window_sizes))
@@ -196,7 +196,7 @@ def estimate_seasonal_error(series, opt_window_size):
 
 
 def estimate_stationarity(timeseries, verbose=False):
-    sigma_threshold = 6
+    sigma_threshold = 4
     normalized_series = minmax_normalize(timeseries)
     opt_window, opt_window_size, nperiods = optimal_window_size(normalized_series)
     if not opt_window_size:
