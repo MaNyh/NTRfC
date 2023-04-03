@@ -82,7 +82,8 @@ def constructWallMesh(surfaces):
 
 def compute_scalar_gradient(mesh, arrayname):
     mesh = mesh.compute_derivative(scalars=arrayname)
-    mesh[f"grad_{arrayname}"] = mesh["gradient"].reshape((mesh.number_of_cells, 3, 3))
+    mesh = mesh.ptc()
+    mesh[f"grad_{arrayname}"] = mesh["gradient"]
     return mesh
 
 
