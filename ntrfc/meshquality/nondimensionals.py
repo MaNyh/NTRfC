@@ -48,29 +48,27 @@ def cellSpans(solutionMesh, calcFrom):
     return cell_spans
 
 
-def getWalluTaus(solutionMesh, mu_0, rhofieldname, velfieldname):
+def get_wall_shear_stress(mesh, dynamic_viscosity, density_fieldname, velocity_fieldname):
     """
-    Calculate the wall shear stress at various points on a surface in a CFD simulation.
+    Calculate the wall shear stress velocity at various points on a surface in a CFD simulation.
 
     Parameters:
-    solutionMesh (pv.PolyData): A mesh that represents the solution of the CFD simulation.
-    surfaceMesh (pv.PolyData): A mesh that represents the surface on which the wall shear stress is to be calculated.
-    mu_0 (float): The dynamic viscosity of the fluid.
-    rhofieldname (str): The name of the field that contains the density of the fluid.
-    velfieldname (str): The name of the field that contains the velocity of the fluid.
+    mesh (pv.PolyData): A mesh that represents the solution of the CFD simulation.
+    dynamic_viscosity (float): The dynamic viscosity of the fluid.
+    density_fieldname (str): The name of the field that contains the density of the fluid.
+    velocity_fieldname (str): The name of the field that contains the velocity of the fluid.
 
     Returns:
-    u_taus (np.ndarray): An array containing the wall shear stress at each point on the surface.
+    wall_shear_stress_velocity (np.ndarray): An array containing the velocity at which a fluid layer adjacent to the surface would need to move in order to experience the same shear stress as the actual fluid layer in contact with the surface.
     """
+    grad_velocity = mesh[f"grad_{velocity_fieldname}"].reshape(mesh.number_of_cells, 3, 3)
+    wall_normals = mesh["wallNormal"]
+    velocity_gradient_normal = vecAbs_list([np.dot(grad_velocity[i], wall_normals[i]) for i in range(mesh.number_of_cells)])
+    fluid_density = mesh[density_fieldname]
+    wall_shear_stress = velocity_gradient_normal * dynamic_viscosity
+    wall_shear_stress_velocity = (wall_shear_stress / fluid_density) ** 0.5
 
-    graduwall = solutionMesh[f"grad_{velfieldname}"].reshape(solutionMesh.number_of_cells, 3, 3)
-    wallnormals = solutionMesh["wallNormal"]
-    dudy = vecAbs_list([np.dot(graduwall[i], wallnormals[i]) for i in range(solutionMesh.number_of_cells)])
-    rhoWs = solutionMesh[rhofieldname]
-    tauWs = dudy * mu_0
-    u_taus = (tauWs / rhoWs) ** 0.5
-
-    return u_taus
+    return wall_shear_stress_velocity
 
 
 def constructWallMesh(surfaces):
@@ -81,8 +79,8 @@ def constructWallMesh(surfaces):
 
 
 def compute_scalar_gradient(mesh, arrayname):
-    mesh = mesh.compute_derivative(scalars=arrayname)
     mesh = mesh.ptc()
+    mesh = mesh.compute_derivative(arrayname)
     mesh[f"grad_{arrayname}"] = mesh["gradient"]
     return mesh
 
@@ -92,7 +90,7 @@ def calc_dimensionless_yplus(volmesh, surfaces, use_velfield, use_rhofield, mu_0
     surfacenormals_surface = surfaceMesh.extract_surface().compute_normals()
 
     volmesh = compute_scalar_gradient(volmesh, use_velfield)
-    walladjacentids = volmesh.find_containing_cell(surfacenormals_surface.points)
+    walladjacentids = volmesh.find_containing_cell(surfacenormals_surface.cell_centers().points)
     volmesh_walladjacent = volmesh.extract_cells(walladjacentids)
     volmesh_walladjacent["cellCenters"] = volmesh_walladjacent.cell_centers().points
     volmesh_walladjacent["wallNormal"] = [
@@ -101,8 +99,8 @@ def calc_dimensionless_yplus(volmesh, surfaces, use_velfield, use_rhofield, mu_0
     distcompute = pv.PolyData(volmesh_walladjacent["cellCenters"]).compute_implicit_distance(
         surfaceMesh.extract_surface())
     volmesh_walladjacent["cellCentersWallDistance"] = distcompute["implicit_distance"]
-    volmesh_walladjacent["uTaus"] = getWalluTaus(volmesh_walladjacent, mu_0, use_rhofield, use_velfield)
-    YPlus = volmesh_walladjacent["cellCentersWallDistance"] * volmesh_walladjacent["uTaus"] / mu_0
+    volmesh_walladjacent["uTaus"] = get_wall_shear_stress(volmesh_walladjacent, mu_0, use_rhofield, use_velfield)
+    YPlus = np.abs(volmesh_walladjacent["cellCentersWallDistance"]) * volmesh_walladjacent["uTaus"] / mu_0
     volmesh_walladjacent["yPlus"] = YPlus
     return volmesh_walladjacent
 
@@ -124,7 +122,8 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
 
     print("finding walladjacent cells")
     volmesh = compute_scalar_gradient(volmesh, use_velfield)
-    walladjacentids = volmesh.find_containing_cell(surfacenormals_surface.points)
+
+    walladjacentids = volmesh.find_containing_cell(surfacenormals_surface.cell_centers().points)
     volmesh_walladjacent = volmesh.extract_cells(walladjacentids)
 
     volmesh_walladjacent["cellCenters"] = volmesh_walladjacent.cell_centers().points
@@ -139,7 +138,7 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     volmesh_walladjacent["zSpan"] = np.array([i[2] for i in spanS])  # calculate cell span in span direction
 
     print("calculating wall-shear and friction-velocity")
-    volmesh_walladjacent["uTaus"] = getWalluTaus(volmesh_walladjacent, mu_0, use_rhofield, use_velfield)
+    volmesh_walladjacent["uTaus"] = get_wall_shear_stress(volmesh_walladjacent, mu_0, use_rhofield, use_velfield)
     uTaus = volmesh_walladjacent["uTaus"]
     volmesh_walladjacent["DeltaXPlus"] = volmesh_walladjacent[
                                              "xSpan"] * uTaus / mu_0  # calculate cell span in flow direction
