@@ -213,7 +213,7 @@ def test_calc_dimensionless_gridspacing():
 
 
 def test_compute_wallshearstress():
-    from ntrfc.meshquality.nondimensionals import get_wall_shear_stress
+    from ntrfc.meshquality.nondimensionals import get_wall_shear_stress_velocity
     # 11**3 nodes are enough
     nodes = 11
     # needs to be something simple
@@ -271,7 +271,7 @@ def test_compute_wallshearstress():
         surfacenormals_surface.point_data["Normals"][surfacenormals_surface.find_closest_point(i)]
         for i in volmesh_walladjacent.points]
 
-    utaus = get_wall_shear_stress(volmesh_walladjacent, mu_0, "rho", "U")
+    utaus = get_wall_shear_stress_velocity(volmesh_walladjacent, mu_0, "rho", "U")
 
     assert np.all(np.isclose(utaus, wallshearvelocity))
 
