@@ -32,18 +32,13 @@ def cellSpans(solutionMesh, calcFrom):
         xx = cellDirs[0]
         yy = cellDirs[1]
         zz = cellDirs[2]
-
         cellfaces = solutionMesh.extract_cells(cellIdx).extract_surface()
         facecenters = cellfaces.cell_centers().points
-
-        point_pairs = list(combinations(range(len(facecenters)), 2))
-        spans = [np.subtract(facecenters[pair[0]], facecenters[pair[1]]) for pair in point_pairs]
-        spans_x = [vecAbs(vecProjection(xx, i)) for i in spans]
-        spans_y = [vecAbs(vecProjection(yy, i)) for i in spans]
-        spans_z = [vecAbs(vecProjection(zz, i)) for i in spans]
-        x_span = np.max(spans_x)
-        y_span = np.max(spans_y)
-        z_span = np.max(spans_z)
+        spans = facecenters[:, np.newaxis] - facecenters
+        spans_x = np.abs(np.dot(spans, xx))
+        spans_y = np.abs(np.dot(spans, yy))
+        spans_z = np.abs(np.dot(spans, zz))
+        x_span, y_span, z_span = np.max(spans_x), np.max(spans_y), np.max(spans_z)
 
         cell_spans.append([x_span, y_span, z_span])
     return cell_spans
@@ -69,9 +64,8 @@ def get_wall_shear_stress_velocity(mesh, dynamic_viscosity, density_fieldname, v
     wall_normals = mesh["wallNormal"]
     velocity_gradient_normal = vecAbs_list([np.dot(grad_velocity[i], wall_normals[i]) for i in range(mesh.number_of_cells)])
     fluid_density = mesh[density_fieldname]
-    tau_w = fluid_density*dynamic_viscosity*velocity_gradient_normal
-
-    return tau_w
+    tau_w = dynamic_viscosity/fluid_density*velocity_gradient_normal
+    return np.sqrt(tau_w/fluid_density)
 
 
 def constructWallMesh(surfaces):
@@ -82,7 +76,6 @@ def constructWallMesh(surfaces):
 
 
 def compute_scalar_gradient(mesh, arrayname):
-    mesh = mesh.ptc()
     mesh = mesh.compute_derivative(arrayname)
     mesh[f"grad_{arrayname}"] = mesh["gradient"]
     return mesh
@@ -125,25 +118,40 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     surfacenormals_surface = surfaceMesh.extract_surface().compute_normals()
 
     print("finding walladjacent cells")
-    merged_mesh = surfaceMesh + volmesh
-
+    merged_mesh = surfacenormals_surface + volmesh
+    merged_mesh = merged_mesh.ctp()
     # Compute cell-based derivative of a vector field
     derivatives = compute_scalar_gradient(merged_mesh,"U")
 
     # Extract the volumetric mesh of the derivative-field
     cell_types = merged_mesh.celltypes
     volumetric_cells = np.where(cell_types == vtk.VTK_HEXAHEDRON)[0]
-
+    face_cells = np.where(cell_types == vtk.VTK_QUAD)[0]
     # Extract the derivative-field
     volmesh = derivatives.extract_cells(volumetric_cells)
-
+    facemesh = derivatives.extract_cells(face_cells).ctp()
     walladjacentids = volmesh.find_containing_cell(surfacenormals_surface.cell_centers().points)
     volmesh_walladjacent = volmesh.extract_cells(walladjacentids)
-
     volmesh_walladjacent["cellCenters"] = volmesh_walladjacent.cell_centers().points
-    volmesh_walladjacent["wallNormal"] = [
-        surfacenormals_surface.point_data["Normals"][surfacenormals_surface.find_closest_point(i)]
-        for i in volmesh_walladjacent.points]
+
+    from scipy.spatial import KDTree
+    facemesh=facemesh.extract_surface().compute_normals()
+    # Extract the cell centers of the wall-adjacent cells and the surface cells
+    volmesh_walladjacent_centers = volmesh_walladjacent.cell_centers().points
+    surfacemesh_surface_centers = facemesh.cell_centers().points
+    facemesh = facemesh.ptc()
+    # Construct a KDTree from the surface cell centers and their normals
+    surface_normals = facemesh["Normals"]
+    surface_gradients = facemesh["grad_U"]
+    tree = KDTree(surfacemesh_surface_centers)
+
+    # Find the indices of the closest surface cell centers to each wall-adjacent cell center
+    distances, indices = tree.query(volmesh_walladjacent_centers)
+
+    # Assign the corresponding surface normals to the wall-adjacent cells
+    volmesh_walladjacent["wallNormal"] = surface_normals[indices]
+    volmesh_walladjacent["wallUGradient"] = surface_gradients[indices]
+
 
     print("calculating cell spans from WallNormals...")
     spanS = cellSpans(volmesh_walladjacent, use_velfield)
@@ -152,15 +160,20 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     volmesh_walladjacent["zSpan"] = np.array([i[2] for i in spanS])  # calculate cell span in span direction
 
     print("calculating wall-shear and friction-velocity")
-    volmesh_walladjacent["uTaus"] = get_wall_shear_stress_velocity(volmesh_walladjacent, mu_0, use_rhofield,
-                                                                   use_velfield)
-
-    uTaus = volmesh_walladjacent["uTaus"]
+    volmesh_walladjacent = volmesh_walladjacent.ptc()
+    grad_velocity = volmesh_walladjacent["wallUGradient"].reshape(volmesh_walladjacent.number_of_cells, 3, 3)
+    wall_normals = volmesh_walladjacent["wallNormal"]
+    velocity_gradient_normal = vecAbs_list(
+        [np.dot(grad_velocity[i], wall_normals[i]) for i in range(volmesh_walladjacent.number_of_cells)])
+    fluid_density = volmesh_walladjacent[use_rhofield]
+    u_tau = np.sqrt(mu_0 * velocity_gradient_normal / fluid_density)
+    #uTaus = volmesh_walladjacent["uTaus"]
+    d_v = mu_0/volmesh_walladjacent[use_rhofield] / u_tau
     volmesh_walladjacent["DeltaXPlus"] = volmesh_walladjacent[
-                                             "xSpan"] * uTaus / mu_0  # calculate cell span in flow direction
+                                             "xSpan"] / d_v  # calculate cell span in flow direction
     volmesh_walladjacent["DeltaYPlus"] = volmesh_walladjacent[
-                                             "ySpan"] * uTaus / mu_0  # calculate cell span in wall normal direction
+                                             "ySpan"] / d_v  # calculate cell span in wall normal direction
     volmesh_walladjacent["DeltaZPlus"] = volmesh_walladjacent[
-                                             "zSpan"] * uTaus / mu_0  # calculate cell span in span direction
+                                             "zSpan"] / d_v  # calculate cell span in span direction
 
     return volmesh_walladjacent
