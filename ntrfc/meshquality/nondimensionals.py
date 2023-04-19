@@ -10,6 +10,7 @@ from itertools import combinations
 import numpy as np
 import pyvista as pv
 import vtk
+from scipy.spatial import KDTree
 
 from ntrfc.math.vectorcalc import vecAbs, vecAbs_list, vecProjection, unitvec
 
@@ -119,10 +120,10 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
 
     print("finding walladjacent cells")
     merged_mesh = surfacenormals_surface + volmesh
-    merged_mesh = merged_mesh.ctp()
     # Compute cell-based derivative of a vector field
     derivatives = compute_scalar_gradient(merged_mesh,"U")
 
+    derivatives = derivatives.ctp()
     # Extract the volumetric mesh of the derivative-field
     cell_types = merged_mesh.celltypes
     volumetric_cells = np.where(cell_types == vtk.VTK_HEXAHEDRON)[0]
@@ -134,7 +135,6 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     volmesh_walladjacent = volmesh.extract_cells(walladjacentids)
     volmesh_walladjacent["cellCenters"] = volmesh_walladjacent.cell_centers().points
 
-    from scipy.spatial import KDTree
     facemesh=facemesh.extract_surface().compute_normals()
     # Extract the cell centers of the wall-adjacent cells and the surface cells
     volmesh_walladjacent_centers = volmesh_walladjacent.cell_centers().points
