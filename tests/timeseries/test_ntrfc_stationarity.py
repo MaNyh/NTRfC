@@ -11,24 +11,24 @@ def test_optimal_timewindow(verbose=False):
 
     nper = 8
     x = np.linspace(0, 2 * np.pi * nper, res)
-
+    min_interval = 0.05
+    max_interval = 0.25
     # sin
     # we have four periods, at least one period should be captured
     # thats res // 4 as a return
     ysin = np.sin(x)
-    opt_window, opt_window_size, nperiods = optimal_window_size(ysin)
-    assert opt_window_size == res // (nper * nperiods) - 1
+    opt_window, opt_window_size, nperiods = optimal_window_size(ysin,min_interval, max_interval)
+    assert opt_window_size == res // (nper * nperiods)
     assert nperiods == 1
     # tanh
-    eul = np.tanh(x * 2)
-    opt_window, opt_window_size, nperiods = optimal_window_size(eul)
-    assert opt_window_size == res // 10
+    tanh = np.tanh(x * 2)
+    opt_window, opt_window_size, nperiods = optimal_window_size(tanh, min_interval, max_interval)
+    assert opt_window_size == res * min_interval
     assert nperiods == 0
     # euler
-
     eul = np.e ** (-x * 60)
-    opt_window, opt_window_size, nperiods = optimal_window_size(eul)
-    assert opt_window_size == res // 10
+    opt_window, opt_window_size, nperiods = optimal_window_size(eul, min_interval, max_interval)
+    assert opt_window_size == res * min_interval
     assert nperiods == 0
 
 
@@ -124,7 +124,7 @@ def test_stationarity_uncertainties_abatingsine(verbose=False):
     import matplotlib.pyplot as plt
 
     def signalgen_abatingsine(amplitude, frequency, mean, abate, time):
-        resolution = 48
+        resolution = 64
         step = (1 / frequency) / resolution
         times = np.arange(0, time, step)
         values = amplitude * np.sin(frequency * (2 * np.pi) * times) + mean + np.e ** -(times * abate)
@@ -151,7 +151,8 @@ def test_stationarity_uncertainties_abatingsine(verbose=False):
             plt.figure()
             plt.plot(timesteps, values)
             plt.axvline(timesteps[stationary_timestep], color="green")
-            plt.axvline(well_computed_stationarity_limit, color="red")
+            plt.axvline(well_computed_stationarity_limit, color="red",label="computed")
+            plt.legend()
             plt.show()
         assert 0.05 > reldiff(stationary_time, well_computed_stationary_time), "computation failed"
 
@@ -164,7 +165,6 @@ def test_stationarity_uncertainties_abatingsinenoise(verbose=False):
     import matplotlib.pyplot as plt
 
     def signalgen_abatingsine(amplitude, noiseamplitude, frequency, mean, abate, time):
-        # todo zu hoch aufgelöste signale können fehlerhaft sein
         resolution = 64
         step = (1 / frequency) / resolution
 
@@ -239,13 +239,13 @@ def test_stationarity_transientonly(verbose=False):
         assert statidx == False
 
 
-def test_stationarity_sinetransientonly():
+def test_stationarity_transientonly():
     from ntrfc.timeseries.stationarity import estimate_stationarity
     import numpy as np
 
     res = 20000
 
-    values = np.arange(0, 10, res)
+    values = np.linspace(0, 10, res)
     stationary_timestep = estimate_stationarity(values)
     assert stationary_timestep == False
 
