@@ -1,25 +1,35 @@
-**Describe the issue**
+**Summary:**
+Provide a brief summary of the issue.
 
-A clear and concise description of what the problem is.
+**Description:**
 
-**To Reproduce**
+Describe the issue in detail, including any relevant background information.
+Be as specific as possible and include steps to reproduce the issue if applicable.
 
-Steps to reproduce the behavior:
+**Expected Behavior:**
 
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+Describe what you expected to happen instead of the observed behavior.
 
-**Expected behavior**
+**Actual Behavior:**
 
-A clear and concise description of what you expected to happen.
+Explain the behavior that you observed and why it is problematic or unexpected.
 
-**Screenshots**
+**Steps to Reproduce:**
 
-If applicable, add screenshots to help explain your problem.
+1. Describe the necessary steps to reproduce the issue.
+2. Be as detailed as possible, including any specific inputs or conditions required.
 
-**Additional context**
+**Environment:**
 
-Add any other context about the problem here.
+- Operating System:
+- Browser/Version (if applicable):
+- Application/Tool Version:
+- Any other relevant environment information:
 
+**Screenshots or Code Snippets:**
+
+If applicable, provide any screenshots, error logs, or code snippets that can help in understanding and resolving the issue.
+
+**Additional Information:**
+
+Add any additional information that you think might be helpful, such as related issues, workarounds, or possible causes.

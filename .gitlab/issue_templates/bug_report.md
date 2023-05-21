@@ -12,15 +12,15 @@ Describe what you expected to happen instead of the observed behavior.
 
 **Steps to Reproduce:**
 
-    Describe the necessary steps to reproduce the bug.
-    Be as detailed as possible, including any specific inputs or conditions required.
+1. Describe the necessary steps to reproduce the issue.
+2. Be as detailed as possible, including any specific inputs or conditions required.
 
 **Environment:**
 
-    Operating System:
-    Browser/Version (if applicable):
-    Application/Tool Version:
-    Any other relevant environment information:
+- Operating System:
+- Browser/Version (if applicable):
+- Application/Tool Version:
+- Any other relevant environment information:
 
 **Screenshots or Code Snippets:**
 
