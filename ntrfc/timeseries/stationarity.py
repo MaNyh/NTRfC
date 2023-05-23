@@ -221,7 +221,7 @@ def estimate_stationarity(timeseries,  verbose=False):
 
     outer_mean_uncertainty = 0.00175
     outer_var_uncertainty = outer_mean_uncertainty *0.25# variance can only be 25% of minmax normed series
-    outer_freq_uncertainty = 0.05
+    outer_freq_uncertainty = np.std(reference_freqs)*3
     outer_hists_errors = 0.003
 
     rolling_means_errors_reversed = np.abs(rolling_means_reversed - reference_mean)

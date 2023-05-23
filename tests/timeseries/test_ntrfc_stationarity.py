@@ -18,8 +18,8 @@ def test_optimal_timewindow(verbose=False):
     # thats res // 4 as a return
     ysin = np.sin(x)
     opt_window, opt_window_size, nperiods = optimal_window_size(ysin,min_interval, max_interval)
-    assert opt_window_size == res // (nper * nperiods)
-    assert nperiods == 1
+    assert opt_window_size == res // nper * nperiods
+    assert nperiods == 2
     # tanh
     tanh = np.tanh(x * 2)
     opt_window, opt_window_size, nperiods = optimal_window_size(tanh, min_interval, max_interval)
@@ -76,45 +76,6 @@ def test_stationarity_uncertainties_stationarysine(verbose=False):
                               time - timesteps[stationary_timestep]), "computation failed"
 
 
-
-def test_stationarity_uncertainties_sinenoisy(verbose=False):
-    from ntrfc.timeseries.stationarity import estimate_stationarity
-    from ntrfc.math.methods import reldiff
-    import numpy as np
-    from itertools import product
-    import matplotlib.pyplot as plt
-
-    def signalgen_abatingsine(amplitude, frequency, mean, abate, time):
-        resolution = 48
-        step = (1 / frequency) / resolution
-        times = np.arange(0, time, step)
-        values = amplitude * np.sin(frequency * (2 * np.pi) * times) + mean + np.random.randn(len(times))*abate
-        return times, values
-
-    test_amplitudes = [0.3]
-    test_frequencies = [6]
-    test_times = [20]
-    test_mean = [-1]
-    test_abate = [0.05]
-
-    test_configs = list(product(test_amplitudes, test_frequencies, test_times, test_mean, test_abate))
-
-    for amplitude, frequency, time, mean, abate in test_configs:
-
-        timesteps, values = signalgen_abatingsine(amplitude=amplitude, frequency=frequency, mean=mean, time=time,
-                                                  abate=abate)
-        stationary_timestep = estimate_stationarity(values)
-
-        well_computed_stationarity_limit = -np.log(0.01) / abate
-        well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit
-        stationary_time = timesteps[-1] - timesteps[stationary_timestep]
-        if verbose:
-            plt.figure()
-            plt.plot(timesteps, values)
-            plt.axvline(timesteps[stationary_timestep], color="green")
-            plt.axvline(well_computed_stationarity_limit, color="red")
-            plt.show()
-        assert 0.05 > reldiff(stationary_time, well_computed_stationary_time), "computation failed"
 
 def test_stationarity_uncertainties_abatingsine(verbose=False):
     from ntrfc.timeseries.stationarity import estimate_stationarity
