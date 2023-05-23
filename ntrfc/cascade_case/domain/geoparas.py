@@ -50,6 +50,7 @@ class DomainParameters:
             pv.Plotter: The PyVista plotter object used for plotting.
         """
         plotter = pv.Plotter()
+        plotter.window_size = 6400, 6400
         # Plot the suction side and pressure side polys
         plotter.add_mesh(self.sspoly, color='b', show_edges=True, label="suction-side")
         plotter.add_mesh(self.pspoly, color='r', show_edges=True, label="pressure-side")
