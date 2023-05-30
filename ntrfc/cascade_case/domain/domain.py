@@ -66,6 +66,7 @@ class CascadeDomain2D:
         """
         plotter = pv.Plotter()
 
+        plotter.window_size = 2400, 2400
         # Plot the suction side and pressure side polys
         plotter.add_mesh(self.suctionside, color='b', show_edges=True)
         plotter.add_mesh(self.pressureside, color='r', show_edges=True)
@@ -75,4 +76,7 @@ class CascadeDomain2D:
         plotter.add_mesh(self.outlet)
 
         plotter.add_axes()
+        camera = plotter.camera
+        camera.roll+=90
         plotter.show(cpos=(0, 0, 1))
+        plotter.update()
