@@ -173,10 +173,8 @@ def estimate_stationarity(timeseries,  verbose=False):
         return False
 
     reference_window = opt_window
-    reference_freqs, reference_psd = signal.periodogram(reference_window, return_onesided=False)
 
     reference_mean = np.mean(reference_window)
-    reference_autocorr_freq = reference_freqs[np.argmax(reference_psd)]
     reference_variance = np.var(reference_window)
     opt_rolling_window = np.lib.stride_tricks.sliding_window_view(opt_window, opt_window_size)
 
@@ -189,14 +187,6 @@ def estimate_stationarity(timeseries,  verbose=False):
     mean_uncertainty = np.std(rolling_means)
     var_uncertainty = np.std(rolling_vars)
 
-    freqs_rolling = []
-    for win in opt_rolling_window:
-        freqs, psd = signal.periodogram(win, return_onesided=False)
-        maxpsdid = np.argmax(psd)
-        freq = freqs[maxpsdid]
-        freqs_rolling.append(freq)
-
-    freq_uncertainty = np.std(freqs_rolling)
 
     checkseries = normalized_series[:-opt_window_size * 2]
 
@@ -206,39 +196,17 @@ def estimate_stationarity(timeseries,  verbose=False):
     rolling_means_reversed = rolling_win_reversed.mean().values
     rolling_vars_reversed = rolling_win_reversed.var().values
 
-    def get_rolling_max_freq(window):
-        freqs, psd = signal.periodogram(window, return_onesided=False)
-        return freqs[np.argmax(psd)]
-
-    def get_rolling_histcompare(window):
-        return 1-smd_probability_compare(window,reference_window)
-
-
-    rolling_win_reversed = checkseries_reversed.rolling(window=opt_window_size)
-    rolling_freqs_reversed = rolling_win_reversed.apply(get_rolling_max_freq, raw=False)
-
-
-
-    outer_mean_uncertainty = 0.00175
+    outer_mean_uncertainty = 0.0015
     outer_var_uncertainty = outer_mean_uncertainty *0.25# variance can only be 25% of minmax normed series
-    outer_freq_uncertainty = np.std(reference_freqs)*3
-    outer_hists_errors = 0.003
 
     rolling_means_errors_reversed = np.abs(rolling_means_reversed - reference_mean)
     rolling_vars_errors_reversed = np.abs(rolling_vars_reversed - reference_variance)
-    rolling_freqs_errors_reversed = np.array([np.abs(i - reference_autocorr_freq) for i in rolling_freqs_reversed.values])
-    rolling_hists_errors_reversed = rolling_win_reversed.apply(get_rolling_histcompare, raw=False).values
 
     mean_limits = sigma_threshold * (mean_uncertainty)+outer_mean_uncertainty
     var_limits = sigma_threshold * (var_uncertainty)+outer_var_uncertainty
-    freq_limits = sigma_threshold * (freq_uncertainty)+outer_freq_uncertainty
-    hist_limits = sigma_threshold *(outer_hists_errors)
 
-
-    rolling_freqs_errors_inliers_reversed = rolling_freqs_errors_reversed[opt_window_size :] <= freq_limits
     rolling_means_errors_inliers_reversed = rolling_means_errors_reversed[opt_window_size:] <= mean_limits
     rolling_vars_errors_inliers_reversed = rolling_vars_errors_reversed[opt_window_size:] <= var_limits
-    rolling_hists_errors_inliers_reversed = rolling_hists_errors_reversed[opt_window_size:] <= hist_limits
 
     def last_coherent_interval(arr, threshold=1):
         reversed_arr = arr[::-1]
@@ -251,15 +219,13 @@ def estimate_stationarity(timeseries,  verbose=False):
 
     mean_index = datalength - last_coherent_interval(rolling_means_errors_inliers_reversed)-3*opt_window_size
 
-    hist_index = datalength - last_coherent_interval(rolling_hists_errors_inliers_reversed)-3*opt_window_size
-    autocorr_timescale_index = datalength - last_coherent_interval(rolling_freqs_errors_inliers_reversed)-3*opt_window_size
     variance_index = datalength - last_coherent_interval(rolling_vars_errors_inliers_reversed)-3*opt_window_size
 
-    stationary_start_index = max(mean_index,autocorr_timescale_index, hist_index, variance_index)
+    stationary_start_index = max(mean_index, variance_index)
 
     if verbose:
 
-        fig ,axs = plt.subplots(5,1,figsize=(24,20))
+        fig ,axs = plt.subplots(3,1,figsize=(24,20))
         axs[0].plot(normalized_series, label="normalized series", color="blue")
         axs[0].vlines(x=stationary_start_index, ymin=0, ymax=np.nanmax(normalized_series), label="stationary_start",color="k")
 
@@ -269,26 +235,12 @@ def estimate_stationarity(timeseries,  verbose=False):
         axs[1].vlines(x=mean_index, ymin=0, ymax=max(mean_limits, np.nanmax(rolling_means_errors_reversed)), label="mean_index", color="green")
         axs[1].legend()
 
-
         axs[2].plot(np.nan_to_num(rolling_vars_errors_reversed[::-1], 0), label="variance error", color="red")
         axs[2].hlines(y=(var_limits), xmin=0, xmax=len(normalized_series), label="var_limits", color="k")
         axs[2].vlines(x=stationary_start_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)), label="stationary_start", color="k")
         axs[2].vlines(x=variance_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)), label="variance_index", color="k")
         axs[2].legend()
 
-
-        axs[3].plot(np.nan_to_num(rolling_freqs_errors_reversed[::-1], 0), label="autocorr error", color="red")
-        axs[3].hlines(y=(freq_limits), xmin=0, xmax=len(normalized_series), label="freq_limits", color="k")
-        axs[3].vlines(x=stationary_start_index, ymin=0, ymax=max(freq_limits, np.nanmax(rolling_freqs_errors_reversed)), label="stationary_start", color="k")
-        axs[3].vlines(x=autocorr_timescale_index, ymin=0, ymax=max(freq_limits, np.nanmax(rolling_freqs_errors_reversed)), label="autocorr_timescale_index", color="k")
-        axs[3].legend()
-
-
-        axs[4].plot(np.nan_to_num(rolling_hists_errors_reversed[::-1], 0), label="histogram error", color="red")
-        axs[4].hlines(y=(hist_limits), xmin=0, xmax=len(normalized_series), label="hist_limits", color="k")
-        axs[4].vlines(x=stationary_start_index, ymin=0, ymax=max(hist_limits, np.nanmax(rolling_hists_errors_reversed)), label="stationary_start", color="k")
-        axs[4].vlines(x=hist_index, ymin=0, ymax=max(hist_limits, np.nanmax(rolling_hists_errors_reversed)), label="hist_index", color="k")
-        axs[4].legend()
         plt.show()
 
     return stationary_start_index
