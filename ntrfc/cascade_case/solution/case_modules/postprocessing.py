@@ -18,14 +18,16 @@ class PostProcessing:
         self.outlet["v"] = self.outlet["U"][::, 1]
         self.outlet["w"] = self.outlet["U"][::, 2]
         rho_1 = massflowave_plane(self.inlet, "rho")
-        mag_u_1 = vecAbs(np.array([massflowave_plane(self.inlet, "u"),massflowave_plane(self.inlet, "v"),massflowave_plane(self.inlet, "w")]))
+        mag_u_1 = vecAbs(np.array([massflowave_plane(self.inlet, "u"), massflowave_plane(self.inlet, "v"),
+                                   massflowave_plane(self.inlet, "w")]))
         U_1 = np.stack([massflowave_plane(self.inlet, "u"), massflowave_plane(self.inlet, "v"),
                         massflowave_plane(self.inlet, "w")])
         beta_1 = vecAngle(U_1, np.array([1, 0, 0]))
         rho_2 = massflowave_plane(self.outlet, "rho")
         U_2 = np.stack([massflowave_plane(self.outlet, "u"), massflowave_plane(self.outlet, "v"),
                         massflowave_plane(self.outlet, "w")])
-        mag_u_2 =  vecAbs(np.array([massflowave_plane(self.outlet, "u"),massflowave_plane(self.outlet, "v"),massflowave_plane(self.outlet, "w")]))
+        mag_u_2 = vecAbs(np.array([massflowave_plane(self.outlet, "u"), massflowave_plane(self.outlet, "v"),
+                                   massflowave_plane(self.outlet, "w")]))
         beta_2 = vecAngle(U_2, np.array([1, 0, 0]))
         self.avdr = avdr(rho_1, mag_u_1, beta_1, rho_2, mag_u_2, beta_2)
 

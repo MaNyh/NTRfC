@@ -53,5 +53,3 @@ def test_isentropic_total_temperature():
     expected_output = 315
     output = isentropic_total_temperature(1.4, 0.5, 300)
     assert abs(output - expected_output) < 1e-2
-
-

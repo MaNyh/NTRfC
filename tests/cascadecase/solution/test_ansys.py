@@ -9,7 +9,7 @@ def test_solution(tmpdir):
     fake_inlet["v"] = np.array([0] * fake_inlet.number_of_cells)
     fake_inlet["w"] = np.array([0] * fake_inlet.number_of_cells)
     fake_inlet["rho"] = np.array([1] * fake_inlet.number_of_cells)
-    fake_inlet["U"] = np.stack([fake_inlet["u"],fake_inlet["v"],fake_inlet["w"]]).T
+    fake_inlet["U"] = np.stack([fake_inlet["u"], fake_inlet["v"], fake_inlet["w"]]).T
 
     fake_outlet = pv.Plane()
 

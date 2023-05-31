@@ -5,14 +5,12 @@ Created on Fri Apr 24 23:33:53 2020
 @author: malte
 """
 
-from itertools import combinations
-
 import numpy as np
 import pyvista as pv
 import vtk
 from scipy.spatial import KDTree
 
-from ntrfc.math.vectorcalc import vecAbs, vecAbs_list, vecProjection, unitvec
+from ntrfc.math.vectorcalc import vecAbs_list, unitvec
 
 
 def cellDirections(cellUMean, wallNorm):
@@ -63,10 +61,11 @@ def get_wall_shear_stress_velocity(mesh, dynamic_viscosity, density_fieldname, v
 
     grad_velocity = mesh[f"grad_{velocity_fieldname}"].reshape(mesh.number_of_cells, 3, 3)
     wall_normals = mesh["wallNormal"]
-    velocity_gradient_normal = vecAbs_list([np.dot(grad_velocity[i], wall_normals[i]) for i in range(mesh.number_of_cells)])
+    velocity_gradient_normal = vecAbs_list(
+        [np.dot(grad_velocity[i], wall_normals[i]) for i in range(mesh.number_of_cells)])
     fluid_density = mesh[density_fieldname]
-    tau_w = dynamic_viscosity/fluid_density*velocity_gradient_normal
-    return np.sqrt(tau_w/fluid_density)
+    tau_w = dynamic_viscosity / fluid_density * velocity_gradient_normal
+    return np.sqrt(tau_w / fluid_density)
 
 
 def constructWallMesh(surfaces):
@@ -121,7 +120,7 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     print("finding walladjacent cells")
     merged_mesh = surfacenormals_surface + volmesh
     # Compute cell-based derivative of a vector field
-    derivatives = compute_scalar_gradient(merged_mesh,"U")
+    derivatives = compute_scalar_gradient(merged_mesh, "U")
 
     derivatives = derivatives.ctp()
     # Extract the volumetric mesh of the derivative-field
@@ -135,7 +134,7 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     volmesh_walladjacent = volmesh.extract_cells(walladjacentids)
     volmesh_walladjacent["cellCenters"] = volmesh_walladjacent.cell_centers().points
 
-    facemesh=facemesh.extract_surface().compute_normals()
+    facemesh = facemesh.extract_surface().compute_normals()
     # Extract the cell centers of the wall-adjacent cells and the surface cells
     volmesh_walladjacent_centers = volmesh_walladjacent.cell_centers().points
     surfacemesh_surface_centers = facemesh.cell_centers().points
@@ -152,7 +151,6 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     volmesh_walladjacent["wallNormal"] = surface_normals[indices]
     volmesh_walladjacent["wallUGradient"] = surface_gradients[indices]
 
-
     print("calculating cell spans from WallNormals...")
     spanS = cellSpans(volmesh_walladjacent, use_velfield)
     volmesh_walladjacent["xSpan"] = np.array([i[0] for i in spanS])  # calculate cell span in flow direction
@@ -167,8 +165,8 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
         [np.dot(grad_velocity[i], wall_normals[i]) for i in range(volmesh_walladjacent.number_of_cells)])
     fluid_density = volmesh_walladjacent[use_rhofield]
     u_tau = np.sqrt(mu_0 * velocity_gradient_normal / fluid_density)
-    #uTaus = volmesh_walladjacent["uTaus"]
-    d_v = mu_0/volmesh_walladjacent[use_rhofield] / u_tau
+    # uTaus = volmesh_walladjacent["uTaus"]
+    d_v = mu_0 / volmesh_walladjacent[use_rhofield] / u_tau
     volmesh_walladjacent["DeltaXPlus"] = volmesh_walladjacent[
                                              "xSpan"] / d_v  # calculate cell span in flow direction
     volmesh_walladjacent["DeltaYPlus"] = volmesh_walladjacent[

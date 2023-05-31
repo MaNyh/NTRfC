@@ -17,7 +17,7 @@ def test_optimal_timewindow(verbose=False):
     # we have four periods, at least one period should be captured
     # thats res // 4 as a return
     ysin = np.sin(x)
-    opt_window, opt_window_size, nperiods = optimal_window_size(ysin,min_interval, max_interval)
+    opt_window, opt_window_size, nperiods = optimal_window_size(ysin, min_interval, max_interval)
     assert opt_window_size == res // nper * nperiods
     assert nperiods == 2
     # tanh
@@ -76,7 +76,6 @@ def test_stationarity_uncertainties_stationarysine(verbose=False):
                               time - timesteps[stationary_timestep]), "computation failed"
 
 
-
 def test_stationarity_uncertainties_abatingsine(verbose=False):
     from ntrfc.timeseries.stationarity import estimate_stationarity
     from ntrfc.math.methods import reldiff
@@ -112,7 +111,7 @@ def test_stationarity_uncertainties_abatingsine(verbose=False):
             plt.figure()
             plt.plot(timesteps, values)
             plt.axvline(timesteps[stationary_timestep], color="green")
-            plt.axvline(well_computed_stationarity_limit, color="red",label="computed")
+            plt.axvline(well_computed_stationarity_limit, color="red", label="computed")
             plt.legend()
             plt.show()
         assert 0.05 > reldiff(stationary_time, well_computed_stationary_time), "computation failed"
