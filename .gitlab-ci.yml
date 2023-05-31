@@ -35,7 +35,7 @@ stages: # List of stages for jobs, and their order of execution
     - deploy
 
 build:
-    stage: build  
+    stage: build
     <<: *build_test
     script:
         - pip install .
@@ -86,12 +86,13 @@ pages:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 build-singularity:
-  image: 
+  image:
     name: quay.io/singularity/singularity:v3.7.0
     entrypoint: [""]
-  stage: deploy 
+  stage: deploy
   only:
     - master
+    - tags
   script:
     - echo $sylabstoken  > SYLABS_TOKEN_FILE
     - singularity remote login --username $SREGISTRY_USERNAME --tokenfile SYLABS_TOKEN_FILE
