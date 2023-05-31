@@ -8,8 +8,9 @@ def calc_inflow_cp(px, pt1, p1):
     cp = (px - pt1) / (p1 - pt1)
     return cp
 
+
 # Totaldruckverlustbeiwert
-def calc_zeta(pt1,pt2x,p2):
+def calc_zeta(pt1, pt2x, p2):
     """
     Calculates the Total Pressure Loss Coefficient (Zeta) for a fluid system.
 
@@ -23,7 +24,7 @@ def calc_zeta(pt1,pt2x,p2):
     --------
     zeta : float : Total Pressure Loss Coefficient (Zeta) [dimensionless]
     """
-    zeta=(pt1-pt2x)/(pt1-p2)
+    zeta = (pt1 - pt2x) / (pt1 - p2)
     return zeta
 
 
@@ -42,5 +43,3 @@ def calc_cf(tau_w, u_inf, rho_inf):
     """
     cf = 2 * tau_w / (rho_inf * u_inf ** 2)
     return cf
-
-

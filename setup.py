@@ -22,7 +22,7 @@ setup(
     author_email='nyhuis@tfd.uni-hannover.de',
     python_requires='>=3.10',
     classifiers=[
-        'Development Status :: 0.1.3',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',

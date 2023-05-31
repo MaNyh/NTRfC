@@ -1,6 +1,3 @@
-import numpy as np
-
-
 def sutherland_viscosity(temperature, sutherland_constant=1.458e-06, reference_temperature=110.4):
     """
     Calculate the dynamic viscosity of a gas using Sutherland's Law.
@@ -48,6 +45,5 @@ def mach_number(speed, specific_heat_ratio, specific_gas_constant, temperature):
     Returns:
     - the Mach number at the point
     """
-    mach_number = speed/ ((specific_heat_ratio * specific_gas_constant * temperature) ** 0.5)
+    mach_number = speed / ((specific_heat_ratio * specific_gas_constant * temperature) ** 0.5)
     return mach_number
-

@@ -1,5 +1,6 @@
-from ntrfc.fluid.fluid import mach_number, total_pressure
 import numpy as np
+
+from ntrfc.fluid.fluid import mach_number, total_pressure
 
 
 def p_t_is_from_mach(kappa, mach_number, static_pressure):
@@ -22,6 +23,7 @@ def temp_t_is(kappa, ma, T):
     T_t_is = T / (((1.0 + (kappa - 1.0) * 0.5 * ma ** 2.0)) ** (-1.0))
     return T_t_is
 
+
 def temp_is(kappa, ma, Tt):
     # Calculates static temperature in isentropic flow
     # Source: https://www.grc.nasa.gov/www/BGH/isentrop.html
@@ -38,7 +40,7 @@ def mach_is_x(kappa, p, pt):
     return y
 
 
-def isentropic_mach_number(isentropic_pressure, kappa, static_pressure,  mach, gas_constant, static_temperature):
+def isentropic_mach_number(isentropic_pressure, kappa, static_pressure, mach, gas_constant, static_temperature):
     """
     Calculates the isentropic Mach number.
 
@@ -62,7 +64,8 @@ def isentropic_mach_number(isentropic_pressure, kappa, static_pressure,  mach, g
     dynamic_pressure = total_pressure - isentropic_pressure
 
     # Calculate the isentropic Mach number
-    isentropic_mach_number = np.sqrt(2.0 / (kappa - 1.0) * (pow(1.0 + (dynamic_pressure / isentropic_pressure), (kappa - 1.0) / kappa) - 1.0))
+    isentropic_mach_number = np.sqrt(
+        2.0 / (kappa - 1.0) * (pow(1.0 + (dynamic_pressure / isentropic_pressure), (kappa - 1.0) / kappa) - 1.0))
 
     return isentropic_mach_number
 

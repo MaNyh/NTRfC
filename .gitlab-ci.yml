@@ -99,4 +99,14 @@ build-singularity:
     - singularity build --remote library://nyhuma/ntrflows/ntr.sif:latest singularitybuild/ntrfc_container.def
   interruptible: true
 
-
+publish:
+  stage: deploy
+  <<: *build_test
+  script:
+    - pip install twine
+    - python setup.py sdist bdist_wheel
+    - twine upload --username $PYPI_USERNAME --password $PYPI_PASSWORD --verbose dist/*
+  only:
+      - tags
+      - master
+  interruptible: true

@@ -24,7 +24,7 @@ def test_p_is_from_mach():
     kappa = 1.4
     mach_number = 0.8
     total_pressure = 101325.0  # Pa
-    expected_static_pressure = 66471.39048022314 # Pa
+    expected_static_pressure = 66471.39048022314  # Pa
     calculated_static_pressure = p_is_from_mach(kappa, mach_number, total_pressure)
     assert np.isclose(calculated_static_pressure, expected_static_pressure)
 
@@ -56,14 +56,15 @@ def test_mach_is_x():
 def test_isentropic_mach_number():
     from ntrfc.fluid.isentropic import isentropic_mach_number
     # Standard conditions
-    isentropic_pressure = 101325 # Pa
+    isentropic_pressure = 101325  # Pa
     kappa = 1.4
-    static_pressure = 101325 # Pa
+    static_pressure = 101325  # Pa
     mach_number = 0.5
-    gas_constant = 287.058 # J/(kg*K)
-    static_temperature = 288.15 # K
+    gas_constant = 287.058  # J/(kg*K)
+    static_temperature = 288.15  # K
 
     expected_output = 0.0014693046301270448
 
     # Call function and check output
-    assert np.isclose(isentropic_mach_number(isentropic_pressure, kappa, static_pressure, mach_number, gas_constant, static_temperature), expected_output)
+    assert np.isclose(isentropic_mach_number(isentropic_pressure, kappa, static_pressure, mach_number, gas_constant,
+                                             static_temperature), expected_output)

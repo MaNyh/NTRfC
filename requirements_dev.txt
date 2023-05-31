@@ -2,3 +2,4 @@ pipreqs==0.4.11
 pytest-cov
 coverage
 profilehooks
+twine

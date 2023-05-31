@@ -39,7 +39,7 @@ def test_calc_cf():
     rho_inf = 1.225
     expected_cf = 0.0008163265306122448
     actual_cf = calc_cf(tau_w, u_inf, rho_inf)
-    assert np.isclose(actual_cf,expected_cf)
+    assert np.isclose(actual_cf, expected_cf)
 
     # Test case 2
     tau_w = 0.1
@@ -47,4 +47,4 @@ def test_calc_cf():
     rho_inf = 1.5
     expected_cf = 0.0003333333333333334
     actual_cf = calc_cf(tau_w, u_inf, rho_inf)
-    assert np.isclose(actual_cf,expected_cf)
+    assert np.isclose(actual_cf, expected_cf)

@@ -15,11 +15,11 @@ def calcTkeByTu(Tu, Uabs):
     return Tke
 
 
-def calcTke(u_2,v_2,w_2):
-    #u_2: u-fluktuationen quadriert und gemittelt
-    #v_2: v-fluktuationen quadriert und gemittelt
-    #w_2: w-fluktuationen quadriert und gemittelt
-    tke=( 0.5 * (u_2 + v_2 + w_2) )
+def calcTke(u_2, v_2, w_2):
+    # u_2: u-fluktuationen quadriert und gemittelt
+    # v_2: v-fluktuationen quadriert und gemittelt
+    # w_2: w-fluktuationen quadriert und gemittelt
+    tke = (0.5 * (u_2 + v_2 + w_2))
     return tke
 
 
@@ -51,5 +51,3 @@ def calcRey(u, v, w):
     mean_v_w_ = np.mean(v_w_)
 
     return [mean_u_u_, mean_v_v_, mean_w_w_, mean_u_v_, mean_u_w_, mean_v_w_]
-
-

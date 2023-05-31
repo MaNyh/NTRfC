@@ -1,13 +1,10 @@
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
 from scipy import signal
 from sklearn.decomposition import PCA
-from statsmodels.tsa.arima.model import ARIMA
-import pandas as pd
 
 from ntrfc.math.methods import minmax_normalize
-
-
 
 
 def optimal_bin_width(sample1, sample2):
@@ -44,8 +41,6 @@ def optimal_bin_width(sample1, sample2):
         h *= 0.8  # decrease bin width for better accuracy
     bins = np.arange(min(np.min(sample1), np.min(sample2)), max(np.max(sample1), np.max(sample2)), h_opt)
     return bins
-
-
 
 
 def smd_probability_compare(sample1, sample2, verbose=False):
@@ -114,17 +109,15 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
 
     # Get the length of the time series and define a range of allowed window sizes
     series_length = len(normalized_series)
-    allowed_window_sizes = np.array(range(int(series_length*min_interval), int(series_length *max_interval)+1))
-
+    allowed_window_sizes = np.array(range(int(series_length * min_interval), int(series_length * max_interval) + 1))
 
     # Iterate through the allowed window sizes and perform the Kolmogorov-Smirnov test and correlation coefficient calculation
     mean_scores = []
     var_scores = []
     for window_size in allowed_window_sizes:
-
         check_window = normalized_series[-window_size * 2:]
         check_window_df = pd.DataFrame(check_window)
-        rolling_check =  check_window_df.rolling(window_size)
+        rolling_check = check_window_df.rolling(window_size)
         mean_scores.append(np.std(rolling_check.mean()).values[0])
         var_scores.append(np.std(rolling_check.var()).values[0])
         # Compute the correlation coefficient
@@ -139,8 +132,8 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
     assert len(opt_window) == opt_window_size * 2
     probability_similiarity = smd_probability_compare(opt_window[:opt_window_size], opt_window[opt_window_size:])
 
-    if probability_similiarity< 0.99:
-        return False,False,False
+    if probability_similiarity < 0.99:
+        return False, False, False
 
     # Compute the period of the time series
     freqs, psd = signal.welch(time_series, fs=1, nperseg=series_length // 4)
@@ -148,7 +141,7 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
 
     if maxpsdid != 0:
         tperiod = freqs[np.argmax(psd)] ** -1
-        nperiods = (opt_window_size+(-opt_window_size%tperiod))//tperiod
+        nperiods = (opt_window_size + (-opt_window_size % tperiod)) // tperiod
     else:
         tperiod = np.inf
         nperiods = 0
@@ -163,10 +156,9 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
     return opt_window, opt_window_size, nperiods
 
 
-
-def estimate_stationarity(timeseries,  verbose=False):
+def estimate_stationarity(timeseries, verbose=False):
     sigma_threshold = 3
-    normalized_series = minmax_normalize(timeseries)#minmax_normalize(timeseries)
+    normalized_series = minmax_normalize(timeseries)  # minmax_normalize(timeseries)
     datalength = len(normalized_series)
     opt_window, opt_window_size, nperiods = optimal_window_size(normalized_series)
     if not opt_window_size:
@@ -187,7 +179,6 @@ def estimate_stationarity(timeseries,  verbose=False):
     mean_uncertainty = np.std(rolling_means)
     var_uncertainty = np.std(rolling_vars)
 
-
     checkseries = normalized_series[:-opt_window_size * 2]
 
     checkseries_reversed = pd.DataFrame(checkseries[::-1])
@@ -197,13 +188,13 @@ def estimate_stationarity(timeseries,  verbose=False):
     rolling_vars_reversed = rolling_win_reversed.var().values
 
     outer_mean_uncertainty = 0.0015
-    outer_var_uncertainty = outer_mean_uncertainty *0.25# variance can only be 25% of minmax normed series
+    outer_var_uncertainty = outer_mean_uncertainty * 0.25  # variance can only be 25% of minmax normed series
 
     rolling_means_errors_reversed = np.abs(rolling_means_reversed - reference_mean)
     rolling_vars_errors_reversed = np.abs(rolling_vars_reversed - reference_variance)
 
-    mean_limits = sigma_threshold * (mean_uncertainty)+outer_mean_uncertainty
-    var_limits = sigma_threshold * (var_uncertainty)+outer_var_uncertainty
+    mean_limits = sigma_threshold * (mean_uncertainty) + outer_mean_uncertainty
+    var_limits = sigma_threshold * (var_uncertainty) + outer_var_uncertainty
 
     rolling_means_errors_inliers_reversed = rolling_means_errors_reversed[opt_window_size:] <= mean_limits
     rolling_vars_errors_inliers_reversed = rolling_vars_errors_reversed[opt_window_size:] <= var_limits
@@ -217,34 +208,37 @@ def estimate_stationarity(timeseries,  verbose=False):
         answer_index = np.where(success_rate >= threshold)[0][0]
         return len(arr) - answer_index
 
-    mean_index = datalength - last_coherent_interval(rolling_means_errors_inliers_reversed)-3*opt_window_size
+    mean_index = datalength - last_coherent_interval(rolling_means_errors_inliers_reversed) - 3 * opt_window_size
 
-    variance_index = datalength - last_coherent_interval(rolling_vars_errors_inliers_reversed)-3*opt_window_size
+    variance_index = datalength - last_coherent_interval(rolling_vars_errors_inliers_reversed) - 3 * opt_window_size
 
     stationary_start_index = max(mean_index, variance_index)
 
     if verbose:
-
-        fig ,axs = plt.subplots(3,1,figsize=(24,20))
+        fig, axs = plt.subplots(3, 1, figsize=(24, 20))
         axs[0].plot(normalized_series, label="normalized series", color="blue")
-        axs[0].vlines(x=stationary_start_index, ymin=0, ymax=np.nanmax(normalized_series), label="stationary_start",color="k")
+        axs[0].vlines(x=stationary_start_index, ymin=0, ymax=np.nanmax(normalized_series), label="stationary_start",
+                      color="k")
 
         axs[1].plot(np.nan_to_num(rolling_means_errors_reversed[::-1], 0), label="mean error", color="red")
-        axs[1].hlines(y=(mean_limits), xmin=0, xmax=len(normalized_series), label="mean_limits",color="k")
-        axs[1].vlines(x=stationary_start_index, ymin=0, ymax=max(mean_limits, np.nanmax(rolling_means_errors_reversed)), label="stationary_start", color="k")
-        axs[1].vlines(x=mean_index, ymin=0, ymax=max(mean_limits, np.nanmax(rolling_means_errors_reversed)), label="mean_index", color="green")
+        axs[1].hlines(y=(mean_limits), xmin=0, xmax=len(normalized_series), label="mean_limits", color="k")
+        axs[1].vlines(x=stationary_start_index, ymin=0, ymax=max(mean_limits, np.nanmax(rolling_means_errors_reversed)),
+                      label="stationary_start", color="k")
+        axs[1].vlines(x=mean_index, ymin=0, ymax=max(mean_limits, np.nanmax(rolling_means_errors_reversed)),
+                      label="mean_index", color="green")
         axs[1].legend()
 
         axs[2].plot(np.nan_to_num(rolling_vars_errors_reversed[::-1], 0), label="variance error", color="red")
         axs[2].hlines(y=(var_limits), xmin=0, xmax=len(normalized_series), label="var_limits", color="k")
-        axs[2].vlines(x=stationary_start_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)), label="stationary_start", color="k")
-        axs[2].vlines(x=variance_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)), label="variance_index", color="k")
+        axs[2].vlines(x=stationary_start_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)),
+                      label="stationary_start", color="k")
+        axs[2].vlines(x=variance_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)),
+                      label="variance_index", color="k")
         axs[2].legend()
 
         plt.show()
 
     return stationary_start_index
-
 
 
 def estimate_error_jacknife(timeseries, block_size=20, n_samples=4000):

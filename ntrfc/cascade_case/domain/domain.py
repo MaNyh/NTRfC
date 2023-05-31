@@ -77,6 +77,6 @@ class CascadeDomain2D:
 
         plotter.add_axes()
         camera = plotter.camera
-        camera.roll+=90
+        camera.roll += 90
         plotter.show(cpos=(0, 0, 1))
         plotter.update()
