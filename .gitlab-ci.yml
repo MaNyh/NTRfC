@@ -91,7 +91,6 @@ build-singularity:
     entrypoint: [""]
   stage: deploy
   only:
-    - master
     - tags
   script:
     - echo $sylabstoken  > SYLABS_TOKEN_FILE
@@ -107,6 +106,5 @@ publish:
     - python setup.py sdist bdist_wheel
     - twine upload --username $PYPI_USERNAME --password $PYPI_PASSWORD --verbose dist/*
   only:
-      - tags
-      - master
+    - tags
   interruptible: true
