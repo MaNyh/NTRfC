@@ -5,4 +5,5 @@ sphinx:
   configuration: docs/conf.py  # Path to your Sphinx configuration file
 
 python:
-  version: 3.10  # Specify the desired Python version here
+    tools:
+        python: 3.10  # Specify the desired Python version here
