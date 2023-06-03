@@ -1,1 +1,7 @@
-.. include:: ../MODULES.rst
+ntrfc
+=====
+
+.. toctree::
+   :maxdepth: 4
+
+   ntrfc

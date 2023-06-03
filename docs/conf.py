@@ -47,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'NTRfC'
-copyright = "2021, Malte Nyhuis"
+copyright = "2023, Malte Nyhuis"
 author = "Malte Nyhuis"
 
 # The version info for the project you're documenting, acts as replacement
