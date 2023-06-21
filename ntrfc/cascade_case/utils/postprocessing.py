@@ -1,5 +1,4 @@
 import numpy as np
-from matplotlib import pyplot as plt
 
 from ntrfc.geometry.plane import massflowave_plane
 from ntrfc.math.vectorcalc import vecAngle, vecAbs
@@ -10,24 +9,28 @@ from ntrfc.turbo.integrals import avdr
 class PostProcessing:
     def compute_avdr_inout_massave(self):
 
-        self.inlet["u"] = self.inlet["U"][::, 0]
-        self.inlet["v"] = self.inlet["U"][::, 1]
-        self.inlet["w"] = self.inlet["U"][::, 2]
+        self.mesh_dict["inlet"]["u"] = self.mesh_dict["inlet"]["U"][::, 0]
+        self.mesh_dict["inlet"]["v"] = self.mesh_dict["inlet"]["U"][::, 1]
+        self.mesh_dict["inlet"]["w"] = self.mesh_dict["inlet"]["U"][::, 2]
 
-        self.outlet["u"] = self.outlet["U"][::, 0]
-        self.outlet["v"] = self.outlet["U"][::, 1]
-        self.outlet["w"] = self.outlet["U"][::, 2]
-        rho_1 = massflowave_plane(self.inlet, "rho")
-        mag_u_1 = vecAbs(np.array([massflowave_plane(self.inlet, "u"), massflowave_plane(self.inlet, "v"),
-                                   massflowave_plane(self.inlet, "w")]))
-        U_1 = np.stack([massflowave_plane(self.inlet, "u"), massflowave_plane(self.inlet, "v"),
-                        massflowave_plane(self.inlet, "w")])
+        self.mesh_dict["outlet"]["u"] = self.mesh_dict["outlet"]["U"][::, 0]
+        self.mesh_dict["outlet"]["v"] = self.mesh_dict["outlet"]["U"][::, 1]
+        self.mesh_dict["outlet"]["w"] = self.mesh_dict["outlet"]["U"][::, 2]
+        rho_1 = massflowave_plane(self.mesh_dict["inlet"], "rho")
+        mag_u_1 = vecAbs(
+            np.array([massflowave_plane(self.mesh_dict["inlet"], "u"), massflowave_plane(self.mesh_dict["inlet"], "v"),
+                      massflowave_plane(self.mesh_dict["inlet"], "w")]))
+        U_1 = np.stack(
+            [massflowave_plane(self.mesh_dict["inlet"], "u"), massflowave_plane(self.mesh_dict["inlet"], "v"),
+             massflowave_plane(self.mesh_dict["inlet"], "w")])
         beta_1 = vecAngle(U_1, np.array([1, 0, 0]))
-        rho_2 = massflowave_plane(self.outlet, "rho")
-        U_2 = np.stack([massflowave_plane(self.outlet, "u"), massflowave_plane(self.outlet, "v"),
-                        massflowave_plane(self.outlet, "w")])
-        mag_u_2 = vecAbs(np.array([massflowave_plane(self.outlet, "u"), massflowave_plane(self.outlet, "v"),
-                                   massflowave_plane(self.outlet, "w")]))
+        rho_2 = massflowave_plane(self.mesh_dict["outlet"], "rho")
+        U_2 = np.stack(
+            [massflowave_plane(self.mesh_dict["outlet"], "u"), massflowave_plane(self.mesh_dict["outlet"], "v"),
+             massflowave_plane(self.mesh_dict["outlet"], "w")])
+        mag_u_2 = vecAbs(np.array(
+            [massflowave_plane(self.mesh_dict["outlet"], "u"), massflowave_plane(self.mesh_dict["outlet"], "v"),
+             massflowave_plane(self.mesh_dict["outlet"], "w")]))
         beta_2 = vecAngle(U_2, np.array([1, 0, 0]))
         self.avdr = avdr(rho_1, mag_u_1, beta_1, rho_2, mag_u_2, beta_2)
 
@@ -35,7 +38,7 @@ class PostProcessing:
         sspoints = self.domainparams.sspoly.points
         pspoints = self.domainparams.pspoly.points
 
-        inlet = self.inlet
+        inlet = self.mesh_dict["inlet"]
         inlet["u"] = inlet["U"][::, 0]
         inlet["v"] = inlet["U"][::, 1]
         inlet["w"] = inlet["U"][::, 2]
@@ -81,14 +84,15 @@ class PostProcessing:
             ss_xc[idx] = pts1[0] / camber_length
             ss_cp[idx] = calc_inflow_cp(ssmeshpoints.point_data["p"][idx], pt1, p1)
 
-        plt.figure()
-        plt.title("blade loading")
-        plt.scatter(ss_xc, ss_cp, label="suction side")
-        plt.scatter(ps_xc, ps_cp, label="pressure side")
-        plt.xlabel("$x/c_{ax}$")
-        plt.ylabel("$c_{p}$")
-        plt.grid()
-        plt.legend()
-        plt.show()
+        # todo: add plotting to file
+        # plt.figure()
+        # plt.title("blade loading")
+        # plt.scatter(ss_xc, ss_cp, label="suction side")
+        # plt.scatter(ps_xc, ps_cp, label="pressure side")
+        # plt.xlabel("$x/c_{ax}$")
+        # plt.ylabel("$c_{p}$")
+        # plt.grid()
+        # plt.legend()
+        # plt.show()
 
         return 0

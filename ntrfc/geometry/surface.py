@@ -1,5 +1,5 @@
 import numpy as np
-import pyvista as pv
+# import pyvista as pv
 
 
 def calc_dist_from_surface(surface_primary, surface_secondary, verbose=False):
@@ -47,11 +47,11 @@ def calc_dist_from_surface(surface_primary, surface_secondary, verbose=False):
         h0n["distances"][mask] = np.nan
         np.nanmean(h0n["distances"])
 
-    if verbose:
-        ###############################################################################
-        p = pv.Plotter()
-        p.add_mesh(h0n, scalars="distances", smooth_shading=True)
-        p.add_mesh(surface_secondary, color=True, opacity=0.75, smooth_shading=True)
-        p.show()
+    # if verbose:
+    #     ###############################################################################
+    #     p = pv.Plotter()
+    #     p.add_mesh(h0n, scalars="distances", smooth_shading=True)
+    #     p.add_mesh(surface_secondary, color=True, opacity=0.75, smooth_shading=True)
+    #     p.show()
 
     return h0n

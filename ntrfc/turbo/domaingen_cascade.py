@@ -1,14 +1,18 @@
 import numpy as np
 import pyvista as pv
+import tempfile
 
 from ntrfc.turbo.pointcloud_methods import extract_geo_paras, calcMidPassageStreamLine
 
 
-def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shift, alpha, verbose=False):
+def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shift, alpha, path=False):
     """
     profilepoints2d = 2d numpy array
     """
 
+    if path is None:
+        tmpdir = tempfile.mkdtemp()
+        path = tmpdir + "/plot.png"
     # =============================================================================
     # Daten Einlesen
     # =============================================================================
@@ -25,7 +29,8 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
     sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle, alpha = extract_geo_paras(
         profilepoints2d,
         alpha,
-        verbose)
+        path)
+
     ##############################################################
     x_mids = midsPoly.points[::, 0]
     y_mids = midsPoly.points[::, 1]
@@ -55,20 +60,24 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
 
     outletPoly = pv.Line(*outlet_pts)
 
-    if verbose:
-        p = pv.Plotter()
-        p.add_mesh(outletPoly, color="r")
-        p.add_mesh(inletPoly, color="r")
-        p.add_mesh(per_y_lower, color="r")
-        p.add_mesh(per_y_upper, color="r")
-        p.add_mesh(profilepoints2d, color="k")
-        p.show()
+
+    p = pv.Plotter(off_screen=True)
+    p.add_mesh(outletPoly, color="r")
+    p.add_mesh(inletPoly, color="r")
+    p.add_mesh(per_y_lower, color="r")
+    p.add_mesh(per_y_upper, color="r")
+    p.add_mesh(profilepoints2d, color="k")
+    p.screenshot(path)
 
     return sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly
 
 
 def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan, avdr=1,
-                      verbose=False):
+                      path=None):
+    if path is None:
+        tmpdir = tempfile.mkdtemp()
+        path = tmpdir + "/plot.png"
+
     x_lower = inletPoly.bounds[0]
     x_upper = outletPoly.bounds[0]
 
@@ -104,21 +113,21 @@ def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inle
     outletPoly_lowz = transform(avdr, outletPoly, x_lower, x_upper, zspan, -1)
     outletPoly_highz = transform(avdr, outletPoly, x_lower, x_upper, zspan, 1)
 
-    if verbose:
-        p = pv.Plotter()
-        p.add_mesh(psPoly_lowz, color="r")
-        p.add_mesh(psPoly_highz, opacity=0.9)
-        p.add_mesh(ssPoly_lowz, opacity=0.9)
-        p.add_mesh(ssPoly_highz, opacity=0.9, color="white")
-        p.add_mesh(per_y_upper_lowz, opacity=0.9, color="white")
-        p.add_mesh(per_y_upper_highz, opacity=0.9, color="white")
-        p.add_mesh(per_y_lower_lowz, opacity=0.9, color="white")
-        p.add_mesh(per_y_lower_highz, opacity=0.9, color="white")
-        p.add_mesh(inletPoly_lowz, opacity=0.9, color="white")
-        p.add_mesh(inletPoly_highz, opacity=0.9, color="white")
-        p.add_mesh(outletPoly_lowz, opacity=0.9, color="white")
-        p.add_mesh(outletPoly_highz, opacity=0.9, color="white")
-        p.show()
+
+    p = pv.Plotter(off_screen=True)
+    p.add_mesh(psPoly_lowz, color="r")
+    p.add_mesh(psPoly_highz, opacity=0.9)
+    p.add_mesh(ssPoly_lowz, opacity=0.9)
+    p.add_mesh(ssPoly_highz, opacity=0.9, color="white")
+    p.add_mesh(per_y_upper_lowz, opacity=0.9, color="white")
+    p.add_mesh(per_y_upper_highz, opacity=0.9, color="white")
+    p.add_mesh(per_y_lower_lowz, opacity=0.9, color="white")
+    p.add_mesh(per_y_lower_highz, opacity=0.9, color="white")
+    p.add_mesh(inletPoly_lowz, opacity=0.9, color="white")
+    p.add_mesh(inletPoly_highz, opacity=0.9, color="white")
+    p.add_mesh(outletPoly_lowz, opacity=0.9, color="white")
+    p.add_mesh(outletPoly_highz, opacity=0.9, color="white")
+    p.screenshot(path)
 
     return sortedPoly_lowz, sortedPoly_high, per_y_upper_lowz, per_y_upper_highz, \
            per_y_lower_lowz, per_y_lower_highz, \

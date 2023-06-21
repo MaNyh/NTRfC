@@ -1,13 +1,20 @@
 import numpy as np
 import pyvista as pv
+import os
 
 from ntrfc.turbo.domaingen_cascade import cascade_2d_domain
+
+ON_CI = 'CI' in os.environ
 
 
 def test_cascade_3d_domain():
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
     from ntrfc.turbo.domaingen_cascade import cascade_3d_domain
     from ntrfc.turbo.domaingen_cascade import cascade_2d_domain
+
+    if ON_CI:
+        pv.start_xvfb()
+
     naca_code = "6509"
     angle = 30  # deg
     res = 420
@@ -18,14 +25,17 @@ def test_cascade_3d_domain():
     sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly = cascade_2d_domain(sorted_poly, -1, 2,
                                                                                                     1,
                                                                                                     "m", 0.1, 1,
-                                                                                                    verbose=False)
+                                                                                                    path=False)
 
     cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan=0.2, avdr=1,
-                      verbose=False)
+                      path=False)
 
 
 def test_cascade_2d_domain():
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
+
+    if ON_CI:
+        pv.start_xvfb()
 
     naca_code = "6509"
     angle = 30  # deg

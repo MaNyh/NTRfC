@@ -48,7 +48,7 @@ def get_wall_shear_stress_velocity(mesh, dynamic_viscosity, density_fieldname, v
     Calculate the wall shear stress velocity at various points on a surface in a CFD simulation.
 
     Parameters:
-    mesh (pv.PolyData): A mesh that represents the solution of the CFD simulation.
+    mesh (pv.PolyData): A mesh that represents the solution_utils of the CFD simulation.
     dynamic_viscosity (float): The dynamic viscosity of the fluid.
     density_fieldname (str): The name of the field that contains the density of the fluid.
     velocity_fieldname (str): The name of the field that contains the velocity of the fluid.
