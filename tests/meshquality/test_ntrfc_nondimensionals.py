@@ -16,7 +16,7 @@ def test_cellspans():
     rho = 1
     velocity = 2
     gradient = velocity / height
-    # analytical solution
+    # analytical solution_utils
     span_x = width / (nodes - 1)
     span_y = height / (nodes - 1)
     span_z = length / (nodes - 1)
@@ -84,7 +84,7 @@ def test_calc_dimensionless_gridspacing():
         rho = 1
         velocity = 2
         gradient = velocity / height
-        # analytical solution
+        # analytical solution_utils
         span_x = width / (nodes - 1)
         span_y = height / (nodes - 1)
         span_z = length / (nodes - 1)
@@ -167,7 +167,7 @@ def test_calc_dimensionless_gridspacing():
         rho = 1
         velocity = 2
         gradient = velocity / height
-        # analytical solution
+        # analytical solution_utils
         span_x = width / (nodes - 1)
         span_y = height / (nodes - 1)
         span_z = length / (nodes - 1)
@@ -224,7 +224,7 @@ def test_compute_wallshearstress():
     length = 1
     width = 1
     gradient = velocity / height
-    # analytical solution
+    # analytical solution_utils
     wallshearstress = mu_0 * gradient
     wallshearvelocity = np.sqrt(wallshearstress / rho)
 

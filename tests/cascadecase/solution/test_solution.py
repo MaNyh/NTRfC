@@ -3,13 +3,11 @@ import os
 import numpy as np
 import pyvista as pv
 
-from ntrfc.cascade_case.solution.case_modules.postprocessing import PostProcessing
-
 ON_CI = 'CI' in os.environ
 
 
 def test_solution(tmpdir):
-    from ntrfc.cascade_case.solution.generic import GenericCascadeCase
+    from ntrfc.cascade_case.solution import GenericCascadeCase
 
     inletname = tmpdir / "fake_inlet.vtk"
     outletname = tmpdir / "fake_outlet.vtk"
@@ -32,14 +30,14 @@ def test_solution(tmpdir):
 
     fake_outlet.save(outletname)
     case = GenericCascadeCase()
-    case.read_inlet(inletname)
-    case.read_outlet(outletname)
+    case.read_meshes(inletname, "inlet")
+    case.read_meshes(outletname, "outlet")
     case.compute_avdr_inout_massave()
     assert case.avdr == 1, "should be avdr==1"
 
 
 def test_animations(tmpdir):
-    from ntrfc.cascade_case.solution.generic import GenericCascadeCase
+    from ntrfc.cascade_case.solution import GenericCascadeCase
     import pyvista as pv
 
     if ON_CI:
@@ -65,7 +63,8 @@ def test_animations(tmpdir):
 
 def test_postprocessing():
     import pyvista as pv
-    from ntrfc.cascade_case.domain.geoparas import DomainParameters
+    from ntrfc.cascade_case.solution import GenericCascadeCase
+    from ntrfc.cascade_case.utils.domain_utils import DomainParameters
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
 
     xs, ys = naca("6510", 256)
@@ -92,9 +91,9 @@ def test_postprocessing():
     outlet.ctp()
 
     # Initialize PostProcessing object
-    postprocessing = PostProcessing()
-    postprocessing.inlet = inlet
-    postprocessing.outlet = outlet
+    postprocessing = GenericCascadeCase()
+    postprocessing.mesh_dict["inlet"] = inlet
+    postprocessing.mesh_dict["outlet"] = outlet
     postprocessing.domainparams = domainparas
 
     # Test compute_avdr method

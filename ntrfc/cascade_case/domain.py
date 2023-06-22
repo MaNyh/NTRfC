@@ -1,14 +1,18 @@
+import os
+import tempfile
 from dataclasses import dataclass
 
 import numpy as np
 import pyvista as pv
 
-from ntrfc.cascade_case.domain.geoparas import DomainParameters
+from ntrfc.cascade_case.casemeta.casemeta import CaseMeta
+from ntrfc.cascade_case.utils.domain_utils import DomainParameters
 from ntrfc.turbo.pointcloud_methods import calcMidPassageStreamLine
 
 
 @dataclass
 class CascadeDomain2D:
+    casemeta: CaseMeta = CaseMeta(tempfile.mkdtemp())
     pressureside: pv.PolyData = None
     suctionside: pv.PolyData = None
     yperiodic_low: pv.PolyData = None
@@ -56,7 +60,7 @@ class CascadeDomain2D:
         self.inlet = inletPoly
         self.outlet = outletPoly
 
-    def plot(self):
+    def plot_domain(self):
         """
         Plot the domain parameters using PyVista.
 
@@ -64,7 +68,9 @@ class CascadeDomain2D:
         Returns:
             pv.Plotter: The PyVista plotter object used for plotting.
         """
-        plotter = pv.Plotter()
+        if os.getenv('DISPLAY') is None:
+            pv.start_xvfb()  # Start X virtual framebuffer (Xvfb)
+        plotter = pv.Plotter(off_screen=True)
 
         plotter.window_size = 2400, 2400
         # Plot the suction side and pressure side polys
@@ -78,5 +84,4 @@ class CascadeDomain2D:
         plotter.add_axes()
         camera = plotter.camera
         camera.roll += 90
-        plotter.show(cpos=(0, 0, 1))
-        plotter.update()
+        plotter.screenshot(os.path.join(self.casemeta.case_root_directory, "domain.png"))

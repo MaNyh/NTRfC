@@ -41,7 +41,7 @@ class DomainParameters:
     leading_edge_index: int = None
     trailing_edge_index: int = None
 
-    def plot(self):
+    def plot_domainparas(self):
         """
         Plot the domain parameters using PyVista.
 
