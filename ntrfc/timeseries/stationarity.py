@@ -132,11 +132,11 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
     assert len(opt_window) == opt_window_size * 2
     probability_similiarity = smd_probability_compare(opt_window[:opt_window_size], opt_window[opt_window_size:])
 
-    if probability_similiarity < 0.99:
+    if probability_similiarity < 0.96:
         return False, False, False
 
     # Compute the period of the time series
-    freqs, psd = signal.welch(time_series, fs=1, nperseg=series_length // 4)
+    freqs, psd = signal.welch(opt_window.T, fs=1, nperseg=opt_window_size  // 2)
     maxpsdid = np.argmax(psd)
 
     if maxpsdid != 0:
