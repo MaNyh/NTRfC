@@ -71,11 +71,11 @@ def smd_probability_compare(sample1, sample2, verbose=False):
     mse = np.sum((pdf1 - pdf2) ** 2)
     # Convert the mse to a similarity score between 0 and 1.
     similarity = 1 - mse
-    if verbose:
-        # Plot the histogram
-        plt.hist(sample1, bins=bins)
-        plt.hist(sample2, bins=bins)
-        plt.show()
+    # if verbose:
+    #     # Plot the histogram
+    #     plt.hist(sample1, bins=bins)
+    #     plt.hist(sample2, bins=bins)
+    #     plt.show()
     return similarity
 
 
@@ -147,11 +147,11 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
         nperiods = 0
 
     # If verbose mode is enabled, display a plot of the correlation coefficient and KS test results for each window size
-    if verbose:
-        plt.plot(cumulated_scores)
-        plt.axvline(optimal_window_size_index)
-        plt.legend()
-        plt.show()
+    # if verbose:
+    #     plt.plot(cumulated_scores)
+    #     plt.axvline(optimal_window_size_index)
+    #     plt.legend()
+    #     plt.show()
 
     return opt_window, opt_window_size, nperiods
 
@@ -214,29 +214,29 @@ def estimate_stationarity(timeseries, verbose=False):
 
     stationary_start_index = max(mean_index, variance_index)
 
-    if verbose:
-        fig, axs = plt.subplots(3, 1, figsize=(24, 20))
-        axs[0].plot(normalized_series, label="normalized series", color="blue")
-        axs[0].vlines(x=stationary_start_index, ymin=0, ymax=np.nanmax(normalized_series), label="stationary_start",
-                      color="k")
-
-        axs[1].plot(np.nan_to_num(rolling_means_errors_reversed[::-1], 0), label="mean error", color="red")
-        axs[1].hlines(y=(mean_limits), xmin=0, xmax=len(normalized_series), label="mean_limits", color="k")
-        axs[1].vlines(x=stationary_start_index, ymin=0, ymax=max(mean_limits, np.nanmax(rolling_means_errors_reversed)),
-                      label="stationary_start", color="k")
-        axs[1].vlines(x=mean_index, ymin=0, ymax=max(mean_limits, np.nanmax(rolling_means_errors_reversed)),
-                      label="mean_index", color="green")
-        axs[1].legend()
-
-        axs[2].plot(np.nan_to_num(rolling_vars_errors_reversed[::-1], 0), label="variance error", color="red")
-        axs[2].hlines(y=(var_limits), xmin=0, xmax=len(normalized_series), label="var_limits", color="k")
-        axs[2].vlines(x=stationary_start_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)),
-                      label="stationary_start", color="k")
-        axs[2].vlines(x=variance_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)),
-                      label="variance_index", color="k")
-        axs[2].legend()
-
-        plt.show()
+    # if verbose:
+    #     fig, axs = plt.subplots(3, 1, figsize=(24, 20))
+    #     axs[0].plot(normalized_series, label="normalized series", color="blue")
+    #     axs[0].vlines(x=stationary_start_index, ymin=0, ymax=np.nanmax(normalized_series), label="stationary_start",
+    #                   color="k")
+    #
+    #     axs[1].plot(np.nan_to_num(rolling_means_errors_reversed[::-1], 0), label="mean error", color="red")
+    #     axs[1].hlines(y=(mean_limits), xmin=0, xmax=len(normalized_series), label="mean_limits", color="k")
+    #     axs[1].vlines(x=stationary_start_index, ymin=0, ymax=max(mean_limits, np.nanmax(rolling_means_errors_reversed)),
+    #                   label="stationary_start", color="k")
+    #     axs[1].vlines(x=mean_index, ymin=0, ymax=max(mean_limits, np.nanmax(rolling_means_errors_reversed)),
+    #                   label="mean_index", color="green")
+    #     axs[1].legend()
+    #
+    #     axs[2].plot(np.nan_to_num(rolling_vars_errors_reversed[::-1], 0), label="variance error", color="red")
+    #     axs[2].hlines(y=(var_limits), xmin=0, xmax=len(normalized_series), label="var_limits", color="k")
+    #     axs[2].vlines(x=stationary_start_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)),
+    #                   label="stationary_start", color="k")
+    #     axs[2].vlines(x=variance_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)),
+    #                   label="variance_index", color="k")
+    #     axs[2].legend()
+    #
+    #     plt.show()
 
     return stationary_start_index
 
@@ -323,8 +323,8 @@ def snr_pod(x, window_size, verbose=False):
     reconstructed_mean = reconstructed.mean(axis=1)
     fluct = x[window_size // 2:-window_size // 2] - reconstructed_mean
     snr = np.trapz(reconstructed_mean ** 2) / np.trapz(fluct ** 2)
-    if verbose:
-        plt.plot(fluct)
-        plt.plot(reconstructed_mean)
-        plt.show()
+    # if verbose:
+    #     plt.plot(fluct)
+    #     plt.plot(reconstructed_mean)
+    #     plt.show()
     return reconstructed_mean, fluct, snr
