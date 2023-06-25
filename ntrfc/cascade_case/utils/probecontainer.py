@@ -43,7 +43,7 @@ class ProbeContainer:
         plt.figure(figsize=(32, 24), dpi=200)
         for probe in plotprobelist:
             if probe.values[value][0].shape == (1,):
-                plt.plot(probe.timesteps, probe.values[value], label=f"{probe.position}")
+                plt.plot(probe.timesteps, probe.values[value].T[0], label=f"{probe.position}")
             elif probe.values[value][0].shape == (3,):
                 color = tuple(np.random.rand(3))
                 plt.plot(probe.timesteps, probe.values[value][:, 0], label=f"{probe.position}", color=color)

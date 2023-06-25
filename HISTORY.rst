@@ -2,6 +2,13 @@
 History
 =======
 
+0.1.3 (2023-06-25)
+------------------
+- cleaner structure, more reliability
+- pypi deployment
+- sphynx docs
+- removed bugs
+
 0.1.3 (2023-03-11)
 ------------------
 
