@@ -49,7 +49,7 @@ def test_calc_optimize_alphashape():
     boxedges = square.extract_feature_edges()
 
     boxedges.rotate_z(np.random.randint(0, 360), inplace=True)
-    boxpoints = boxedges.points
+    boxpoints = boxedges.points*np.random.randn()*1000
 
     np.random.shuffle(boxpoints)
 
@@ -65,7 +65,7 @@ def test_calc_optimize_alphashape():
 
     res = 240
     X, Y = naca(digit_string, res, half_cosine_spacing=True)
-    points = np.stack((X[:], Y[:], np.zeros(res * 2))).T
+    points = np.stack((X[:], Y[:], np.zeros(res * 2))).T*np.random.randn()*1000
 
     xs, ys, alpha = auto_concaveHull(points[::, 0], points[::, 1])
 

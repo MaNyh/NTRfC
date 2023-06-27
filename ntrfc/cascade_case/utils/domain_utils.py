@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import tempfile
 
 import pyvista as pv
 
@@ -41,7 +42,8 @@ class DomainParameters:
     leading_edge_index: int = None
     trailing_edge_index: int = None
 
-    def plot_domainparas(self):
+
+    def plot_domainparas(self,figurepath=tempfile.mkdtemp() + "/plot.png"):
         """
         Plot the domain parameters using PyVista.
 
@@ -49,8 +51,9 @@ class DomainParameters:
         Returns:
             pv.Plotter: The PyVista plotter object used for plotting.
         """
-        plotter = pv.Plotter()
-        plotter.window_size = 6400, 6400
+        pv.set_plot_theme('document')
+        plotter = pv.Plotter(off_screen=True)
+        plotter.window_size = 1600, 1600
         # Plot the suction side and pressure side polys
         plotter.add_mesh(self.sspoly, color='b', show_edges=True, label="suction-side")
         plotter.add_mesh(self.pspoly, color='r', show_edges=True, label="pressure-side")
@@ -60,7 +63,8 @@ class DomainParameters:
         plotter.add_points(self.profile_points, point_size=1, color='w', opacity=0.8)
         plotter.add_legend()
         plotter.add_axes()
-        plotter.show(cpos=(0, 0, 1))
+        plotter.screenshot(figurepath)
+        return figurepath
 
     def generate_params_by_pointcloud(self, points, alpha=None):
         sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle, alpha = extract_geo_paras(

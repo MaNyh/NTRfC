@@ -1,3 +1,7 @@
+import os
+
+ON_CI = 'CI' in os.environ
+
 def test_cascade_2d_domain():
     import pyvista as pv
     import numpy as np
@@ -13,6 +17,7 @@ def test_cascade_2d_domain():
     domainparas.xoutlet = 4
     domainparas.pitch = 2
     domainparas.blade_yshift = 0.1
+    domainparas.plot_domainparas()
     domain2d = CascadeDomain2D()
     domain2d.generate_from_cascade_parameters(domainparas)
     domain2d.plot_domain()

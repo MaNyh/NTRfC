@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.optimize import minimize
+from scipy import optimize
 from scipy.spatial import Delaunay
 
 
@@ -123,6 +123,6 @@ def auto_concaveHull(xs, ys):
 
     dist = np.max(np.sqrt(np.sum((points[:, None, :] - points) ** 2, axis=-1))) / 2
 
-    result = minimize(loss, dist, args=(xs, ys,), method='nelder-mead').x[0]
+    result = optimize.basinhopping(loss, dist, minimizer_kwargs={'args': (xs, ys,), 'method': 'nelder-mead'}).x[0]
     xans, yans = calc_concavehull(xs, ys, result)
     return xans, yans, result
