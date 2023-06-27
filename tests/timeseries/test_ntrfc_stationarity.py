@@ -1,7 +1,10 @@
 import os
+import pyvista as pv
 
 ON_CI = 'CI' in os.environ
 
+if ON_CI:
+    pv.start_xvfb()
 
 def test_optimal_timewindow(verbose=False):
     from ntrfc.timeseries.stationarity import optimal_window_size
