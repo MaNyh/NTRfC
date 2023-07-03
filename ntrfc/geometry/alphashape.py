@@ -111,6 +111,7 @@ def calc_concavehull(x, y, alpha):
 
     return x_new, y_new
 
+from scipy.spatial.distance import cdist
 
 def auto_concaveHull(xs, ys):
     # Define the loss function
@@ -119,10 +120,16 @@ def auto_concaveHull(xs, ys):
         loss = abs(len(xs) - len(xd))
         return loss
 
-    points = np.stack([xs, ys, np.zeros(len(xs))]).T
+    points = np.column_stack((xs, ys))
+    # Compute the pairwise distances between all points
+    distances = cdist(points, points)
 
-    dist = np.max(np.sqrt(np.sum((points[:, None, :] - points) ** 2, axis=-1))) / 2
+    # Get the smallest and largest distances
+    smallest_distance = np.min(distances[np.nonzero(distances)])  # Ignore zero distances
+    largest_distance = np.max(distances)
 
-    result = optimize.basinhopping(loss, dist, minimizer_kwargs={'args': (xs, ys,), 'method': 'nelder-mead'}).x[0]
+    bounds = [(smallest_distance, largest_distance*4)]
+    x0 = largest_distance
+    result = optimize.basinhopping(func=loss, x0=x0, minimizer_kwargs={'args': (xs, ys,), 'method': 'L-BFGS-B', "bounds":bounds},niter_success=20).x[0]
     xans, yans = calc_concavehull(xs, ys, result)
     return xans, yans, result
