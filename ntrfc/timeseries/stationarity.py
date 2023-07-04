@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 from scipy import signal
 from sklearn.decomposition import PCA
 
@@ -136,7 +135,7 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
         return False, False, False
 
     # Compute the period of the time series
-    freqs, psd = signal.welch(opt_window.T, fs=1, nperseg=opt_window_size  // 2)
+    freqs, psd = signal.welch(opt_window.T, fs=1, nperseg=opt_window_size // 2)
     maxpsdid = np.argmax(psd)
 
     if maxpsdid != 0:

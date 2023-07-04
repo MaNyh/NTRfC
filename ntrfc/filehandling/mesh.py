@@ -91,7 +91,7 @@ def load_mesh(path_to_mesh):
     mesh : pyvista.UnstructuredGrid or pyvista.StructuredGrid
         The mesh object constructed from the input file.
     """
-    assert os.path.isfile(path_to_mesh), path_to_mesh + " is not a valid file"
+    assert os.path.isfile(path_to_mesh), f"{path_to_mesh} is not a valid file"
     extension = os.path.splitext(path_to_mesh)[1]
     if extension == ".vtk" or extension == ".vtp" or extension == ".vtu":
         mesh = read_vtk(path_to_mesh)

@@ -38,6 +38,9 @@ setup(
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
+    package_data={
+        'ntrfc': ['data/*'],
+    },
     keywords='ntrfc',
     packages=find_packages(include=['ntrfc', 'ntrfc.*']),
     test_suite='tests',

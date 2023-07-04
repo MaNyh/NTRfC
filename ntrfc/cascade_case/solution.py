@@ -1,9 +1,8 @@
 import tempfile
 
-import pyvista as pv
-import numpy as np
-import tempfile
 import matplotlib.pyplot as plt
+import numpy as np
+import pyvista as pv
 
 from ntrfc.cascade_case.casemeta.casemeta import CaseMeta
 from ntrfc.cascade_case.utils.domain_utils import DomainParameters
@@ -14,6 +13,7 @@ from ntrfc.geometry.plane import massflowave_plane
 from ntrfc.math.vectorcalc import vecAngle, vecAbs
 from ntrfc.turbo.bladeloading import calc_inflow_cp
 from ntrfc.turbo.integrals import avdr
+
 
 class GenericCascadeCase():
     """A container for data related to a cascade case, including geometry data and fluid flow data.
@@ -105,7 +105,7 @@ class GenericCascadeCase():
         self.avdr = avdr(rho_1, mag_u_1, beta_1, rho_2, mag_u_2, beta_2)
         return self.avdr
 
-    def blade_loading(self,figpath=tempfile.mkdtemp()+"/blade_loading.png"):
+    def blade_loading(self, figpath=tempfile.mkdtemp() + "/blade_loading.png"):
         sspoints = self.domainparams.sspoly.points
         pspoints = self.domainparams.pspoly.points
 
