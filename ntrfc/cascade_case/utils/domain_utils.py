@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import tempfile
+from dataclasses import dataclass
 
 import pyvista as pv
 
@@ -42,8 +42,7 @@ class DomainParameters:
     leading_edge_index: int = None
     trailing_edge_index: int = None
 
-
-    def plot_domainparas(self,figurepath=tempfile.mkdtemp() + "/plot.png"):
+    def plot_domainparas(self, figurepath=tempfile.mkdtemp() + "/plot.png"):
         """
         Plot the domain parameters using PyVista.
 

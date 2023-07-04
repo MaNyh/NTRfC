@@ -18,6 +18,7 @@ cache:
         - .cache/pip
         - venv/
 
+
 .before_script_template: &build_test
  before_script:
     - apt-get update -y && apt-get install libgl1-mesa-glx xvfb -y
@@ -49,7 +50,7 @@ test: # This job runs in the build stage, which runs first.
         - pip install -r requirements_dev.txt
         - pytest tests/.
 
-lint-test-job: # This job also runs in the test stage.
+lint_test: # This job also runs in the test stage.
     stage: quality
     <<: *build_test    # It can run at the same time as unit-test-job (in parallel).
     script:
@@ -57,7 +58,18 @@ lint-test-job: # This job also runs in the test stage.
         - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude='venv/'
         - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics   --exclude='venv/'
 
-coverage:
+jupyter_test:
+  stage: quality
+  <<: *build_test
+  script:
+    - apt-get install pandoc -y
+    - apt-get install texlive-xetex texlive-fonts-recommended texlive-plain-generic -y
+    - pip install nbconvert
+    - cd examples
+    # Loop through .ipynb files in the examples directory
+    - for file in *.ipynb; do echo "Converting $file to PDF..."; jupyter nbconvert --execute "$file" --to pdf; done
+
+coverage_test:
   stage: quality
   <<: *build_test
   script:

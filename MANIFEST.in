@@ -3,7 +3,8 @@ include CONTRIBUTING.rst
 include HISTORY.rst
 include LICENSE
 include README.rst
-include data/*
+
+recursive-include ntrfc/data *
 
 recursive-include tests *
 recursive-exclude * __pycache__

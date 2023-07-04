@@ -10,6 +10,7 @@ fluidfoam==0.2.4
 tqdm==4.65.0
 statsmodels>=0.13.5
 imageio==2.30.0
+trame==2.5.0
 scikit-learn
 jupyter
 sphinx

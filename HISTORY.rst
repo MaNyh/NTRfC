@@ -2,7 +2,7 @@
 History
 =======
 
-0.1.3 (2023-06-25)
+0.1.4 (2023-06-25)
 ------------------
 - cleaner structure, more reliability
 - pypi deployment

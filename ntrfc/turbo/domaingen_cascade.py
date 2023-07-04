@@ -1,6 +1,7 @@
+import tempfile
+
 import numpy as np
 import pyvista as pv
-import tempfile
 
 from ntrfc.turbo.pointcloud_methods import extract_geo_paras, calcMidPassageStreamLine
 
@@ -60,7 +61,6 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
 
     outletPoly = pv.Line(*outlet_pts)
 
-
     p = pv.Plotter(off_screen=True)
     p.add_mesh(outletPoly, color="r")
     p.add_mesh(inletPoly, color="r")
@@ -112,7 +112,6 @@ def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inle
 
     outletPoly_lowz = transform(avdr, outletPoly, x_lower, x_upper, zspan, -1)
     outletPoly_highz = transform(avdr, outletPoly, x_lower, x_upper, zspan, 1)
-
 
     p = pv.Plotter(off_screen=True)
     p.add_mesh(psPoly_lowz, color="r")
