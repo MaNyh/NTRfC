@@ -1,6 +1,6 @@
 import tempfile
 from dataclasses import dataclass
-
+import os
 import pyvista as pv
 
 from ntrfc.turbo.pointcloud_methods import extract_geo_paras
@@ -50,6 +50,8 @@ class DomainParameters:
         Returns:
             pv.Plotter: The PyVista plotter object used for plotting.
         """
+        if os.getenv('DISPLAY') is None:
+            pv.start_xvfb()  # Start X virtual framebuffer (Xvfb)
         pv.set_plot_theme('document')
         plotter = pv.Plotter(off_screen=True)
         plotter.window_size = 1600, 1600

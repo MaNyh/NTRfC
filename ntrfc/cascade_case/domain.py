@@ -15,14 +15,20 @@ class CascadeDomain2D:
     casemeta: CaseMeta = CaseMeta(tempfile.mkdtemp())
     pressureside: pv.PolyData = None
     suctionside: pv.PolyData = None
+    profilepoints: pv.PolyData = None
+    le_index: int = None
+    te_index: int = None
     yperiodic_low: pv.PolyData = None
     yperiodic_high: pv.PolyData = None
     inlet: pv.PolyData = None
     outlet: pv.PolyData = None
 
+
     def generate_from_cascade_parameters(self, domainparams: DomainParameters):
         # Use params attributes to generate attributes of CascadeDomain2D
-
+        self.profilepoints = domainparams.profile_points
+        self.le_index = domainparams.leading_edge_index
+        self.te_index = domainparams.trailing_edge_index
         x_mids = domainparams.midspoly.points[::, 0]
         y_mids = domainparams.midspoly.points[::, 1]
         beta_leading = domainparams.beta_in
