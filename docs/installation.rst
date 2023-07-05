@@ -26,19 +26,19 @@ you through the process.
 From sources
 ------------
 
-The sources for NTRfC can be downloaded from the `Github repo`_.
+The sources for NTRfC can be downloaded from the `https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC repo`_.
 
 You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/MaNyh/ntrfc
+    $ git clone https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC.git
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/MaNyh/ntrfc/tarball/master
+    $ curl -OJL https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/MaNyh/ntrfc
-.. _tarball: https://github.com/MaNyh/ntrfc/tarball/master
+.. _Github repo: https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC.git
+.. _tarball: https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC.git/tarball/master

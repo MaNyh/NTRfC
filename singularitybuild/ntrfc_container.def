@@ -2,7 +2,7 @@ Bootstrap: docker
 From: ubuntu:20.04
 
 %labels
-    Version v0.0.2
+    Version v0.0.3
 
 %help
     With the python system-installatioon of this container can access all the ntrfc functionality
@@ -48,18 +48,27 @@ From: ubuntu:20.04
         libhdf5-dev \
         libgl1-mesa-glx xvfb \
         gcc \
+        libglu1-mesa \
+        libxcursor1 \
+        libxinerama1\
 
 
     export PYENV_ROOT=/opt/pyenv
     export PATH="/opt/pyenv/bin:$PATH"
-    curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
+    wget -O- https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
     pyenv install 3.10.8
     echo 'export PATH=/opt/pyenv/versions/3.10.8/bin/:$PATH' >> $SINGULARITY_ENVIRONMENT
     export PATH=/opt/pyenv/versions/3.10.8/bin/:$PATH
 
     apt install python3-wheel -y
-    pip install git+https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC.git#egg=NTRfC
-    pip install pandas tqdm
+
+    git clone https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC.git /opt/ntrfc
+    cd /opt/ntrfc
+    pip install .
+    pip install -r requirements_dev.txt
 
     # clean the build
     apt-get clean
+
+#%test
+#    pytest /opt/ntrfc/tests

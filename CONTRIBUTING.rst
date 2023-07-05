@@ -13,7 +13,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at  https://github.com/MaNyh/ntrfc/issues
+Report bugs at  https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC/-/issues
 
 If you are reporting a bug, please include:
 
@@ -24,7 +24,7 @@ If you are reporting a bug, please include:
 Fix Bugs
 ~~~~~~~~
 
-Look through the GitHub issues for bugs. Anything tagged with "bug" and "help
+Look through the issues for bugs. Anything tagged with "bug" and "help
 wanted" is open to whoever wants to implement it.
 
 Implement Features
@@ -43,7 +43,7 @@ NTRfC could always use more documentation, whether as part of the official NTRfC
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/MaNyh/ntrfc/issues.
+The best way to send feedback is to file an issue at https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC/-/issues .
 
 If you are proposing a feature:
 
@@ -83,13 +83,13 @@ Ready to contribute? Here's how to set up `ntrfc` for local development.
 
    To get flake8 and tox, just pip install them into your virtualenv.
 
-6. Commit your changes and push your branch to GitHub::
+6. Commit your changes and push your branch to GitLab::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-7. Submit a pull request through the GitHub website.
+7. Submit a pull request through the GitLab website.
 
 Pull Request Guidelines
 -----------------------

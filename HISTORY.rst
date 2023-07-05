@@ -2,6 +2,13 @@
 History
 =======
 
+0.1.5 (2023-07-04)
+------------------
+- bugfixes alphashape
+- initial gmsh intigration
+- jupyternotebook testing
+- improved codecov
+
 0.1.4 (2023-06-25)
 ------------------
 - cleaner structure, more reliability
