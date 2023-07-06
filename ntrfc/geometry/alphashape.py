@@ -2,6 +2,7 @@ import numpy as np
 from scipy import optimize
 from scipy.spatial import Delaunay
 from scipy.spatial.distance import cdist
+from scipy.spatial import distance
 
 
 def calc_concavehull(x, y, alpha):
@@ -112,12 +113,17 @@ def calc_concavehull(x, y, alpha):
 
     return x_new, y_new
 
-
 def auto_concaveHull(xs, ys):
     # Define the loss function
     def loss(alpha, xs, ys):
         xd, yd = calc_concavehull(xs, ys, alpha)
-        loss = abs(len(xs) - len(xd))
+        if len(xd)==0:
+            return 1e10
+        closed_points = np.stack([xd+[xd[0]], yd+[yd[0]]]).T
+        points_orig = np.stack([xs , ys ]).T
+        centers = (closed_points[:-1] + closed_points[1:]) / 2
+        distances = distance.cdist(centers,points_orig).min(axis=0)
+        loss = np.max(distances)
         return loss
 
     points = np.column_stack((xs, ys))
@@ -129,10 +135,17 @@ def auto_concaveHull(xs, ys):
     largest_distance = np.max(distances)
 
     bounds = [(smallest_distance, largest_distance * 4)]
-    x0 = largest_distance
-    T = abs(bounds[0][1] - bounds[0][0]) * 0.5
-    result = optimize.basinhopping(func=loss, x0=x0, T=T,niter=200,
-                                   minimizer_kwargs={'args': (xs, ys,), 'method': 'L-BFGS-B', "bounds": bounds},
-                                   niter_success=75).x[0]
+    x0 = np.mean(distances)
+    stepsize = largest_distance*4
+    result_first_stage = optimize.basinhopping(func=loss, x0=x0,niter=2000,interval=25,niter_success=300,stepsize=stepsize,
+                                   minimizer_kwargs={'args': (xs, ys,), 'method': 'SLSQP', "bounds": bounds},
+                                   disp=False).x[0]
+
+    x0= result_first_stage*.8
+    stepsize = result_first_stage*4
+    bounds = [(result_first_stage/4, result_first_stage * 4)]
+    result= optimize.basinhopping(func=loss, x0=x0,niter=10000,interval=120,niter_success=600,stepsize=stepsize,
+                                   minimizer_kwargs={'args': (xs, ys,), 'method': 'SLSQP', "bounds": bounds},
+                                   disp=False).x[0]
     xans, yans = calc_concavehull(xs, ys, result)
     return xans, yans, result

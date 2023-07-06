@@ -67,6 +67,7 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
     p.add_mesh(per_y_lower, color="r")
     p.add_mesh(per_y_upper, color="r")
     p.add_mesh(profilepoints2d, color="k")
+    p.view_xy()
     p.screenshot(path)
 
     return sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly
@@ -126,6 +127,7 @@ def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inle
     p.add_mesh(inletPoly_highz, opacity=0.9, color="white")
     p.add_mesh(outletPoly_lowz, opacity=0.9, color="white")
     p.add_mesh(outletPoly_highz, opacity=0.9, color="white")
+    p.view_xy()
     p.screenshot(path)
 
     return sortedPoly_lowz, sortedPoly_high, per_y_upper_lowz, per_y_upper_highz, \

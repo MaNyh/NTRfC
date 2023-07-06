@@ -88,6 +88,5 @@ class CascadeDomain2D:
         plotter.add_mesh(self.outlet)
 
         plotter.add_axes()
-        camera = plotter.camera
-        camera.roll += 90
+        plotter.view_xy()
         plotter.screenshot(os.path.join(self.casemeta.case_root_directory, "domain.png"))
