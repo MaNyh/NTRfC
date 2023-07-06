@@ -64,6 +64,7 @@ class DomainParameters:
         plotter.add_points(self.profile_points, point_size=1, color='w', opacity=0.8)
         plotter.add_legend()
         plotter.add_axes()
+        plotter.view_xy()
         plotter.screenshot(figurepath)
         return figurepath
 
