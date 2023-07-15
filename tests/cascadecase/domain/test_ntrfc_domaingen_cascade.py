@@ -2,6 +2,7 @@ import os
 
 ON_CI = 'CI' in os.environ
 
+
 def test_cascade_2d_domain():
     import pyvista as pv
     import numpy as np

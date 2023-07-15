@@ -1,8 +1,10 @@
+import os
 import tempfile
 from dataclasses import dataclass
-import os
+
 import pyvista as pv
 
+from ntrfc.math.vectorcalc import vecAbs
 from ntrfc.turbo.pointcloud_methods import extract_geo_paras
 
 
@@ -41,6 +43,9 @@ class DomainParameters:
     profile_points: pv.PolyData = None
     leading_edge_index: int = None
     trailing_edge_index: int = None
+    chordlength: float = None
+    xinlet: int = None
+    xoutlet: int = None
 
     def plot_domainparas(self, figurepath=tempfile.mkdtemp() + "/plot.png"):
         """
@@ -82,3 +87,7 @@ class DomainParameters:
         self.beta_out = beta_trailing
         self.stagger_angle = camber_angle
         self.alpha = alpha
+        self.chordlength = vecAbs(
+            self.profile_points.points[self.leading_edge_index] - self.profile_points.points[self.trailing_edge_index])
+        self.xinlet = -self.chordlength + self.profile_points.points[self.leading_edge_index][0]
+        self.xoutlet = self.profile_points.points[self.trailing_edge_index][0] + self.chordlength
