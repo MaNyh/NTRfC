@@ -7,6 +7,7 @@ import pyvista as pv
 
 from ntrfc.cascade_case.casemeta.casemeta import CaseMeta
 from ntrfc.cascade_case.utils.domain_utils import DomainParameters
+from ntrfc.math.vectorcalc import vecAbs
 from ntrfc.turbo.pointcloud_methods import calcMidPassageStreamLine
 
 
@@ -18,11 +19,14 @@ class CascadeDomain2D:
     profilepoints: pv.PolyData = None
     le_index: int = None
     te_index: int = None
+    beta_leading: float = None
+    beta_trailing: float = None
     yperiodic_low: pv.PolyData = None
     yperiodic_high: pv.PolyData = None
     inlet: pv.PolyData = None
     outlet: pv.PolyData = None
-
+    pitch: float = None
+    chordlength: float = None
 
     def generate_from_cascade_parameters(self, domainparams: DomainParameters):
         # Use params attributes to generate attributes of CascadeDomain2D
@@ -31,21 +35,21 @@ class CascadeDomain2D:
         self.te_index = domainparams.trailing_edge_index
         x_mids = domainparams.midspoly.points[::, 0]
         y_mids = domainparams.midspoly.points[::, 1]
-        beta_leading = domainparams.beta_in
-        beta_trailing = domainparams.beta_out
+        self.beta_leading = domainparams.beta_in
+        self.beta_trailing = domainparams.beta_out
         x_inlet = domainparams.xinlet
         x_outlet = domainparams.xoutlet
-        pitch = domainparams.pitch
+        self.pitch = domainparams.pitch
         blade_shift = domainparams.blade_yshift
 
-        x_mpsl, y_mpsl = calcMidPassageStreamLine(x_mids, y_mids, beta_leading, beta_trailing,
-                                                  x_inlet, x_outlet, pitch)
+        x_mpsl, y_mpsl = calcMidPassageStreamLine(x_mids, y_mids, self.beta_leading, self.beta_trailing,
+                                                  x_inlet, x_outlet, self.pitch)
 
         y_upper = np.array(y_mpsl) + blade_shift
         per_y_upper = pv.lines_from_points(np.stack((np.array(x_mpsl),
                                                      np.array(y_upper),
                                                      np.zeros(len(x_mpsl)))).T)
-        y_lower = y_upper - pitch
+        y_lower = y_upper - self.pitch
         per_y_lower = pv.lines_from_points(np.stack((np.array(x_mpsl),
                                                      np.array(y_lower),
                                                      np.zeros(len(x_mpsl)))).T)
@@ -65,6 +69,7 @@ class CascadeDomain2D:
         self.yperiodic_high = per_y_upper
         self.inlet = inletPoly
         self.outlet = outletPoly
+        self.chordlength = vecAbs(self.profilepoints.points[self.te_index] - self.profilepoints.points[self.le_index])
 
     def plot_domain(self):
         """

@@ -1,8 +1,8 @@
 import numpy as np
 from scipy import optimize
 from scipy.spatial import Delaunay
-from scipy.spatial.distance import cdist
 from scipy.spatial import distance
+from scipy.spatial.distance import cdist
 
 
 def calc_concavehull(x, y, alpha):
@@ -113,18 +113,29 @@ def calc_concavehull(x, y, alpha):
 
     return x_new, y_new
 
+
+def calculate_minimal_distances(points):
+    distances = cdist(points, points)  # Calculate pairwise distances
+    np.fill_diagonal(distances, np.inf)  # Set diagonal elements to infinity
+    minimal_distances = np.min(distances, axis=1)  # Find minimal distance for each point
+    return minimal_distances
+
+
 def auto_concaveHull(xs, ys):
     # Define the loss function
     def loss(alpha, xs, ys):
         xd, yd = calc_concavehull(xs, ys, alpha)
-        if len(xd)==0:
+        if len(xd) == 0:
             return 1e10
-        closed_points = np.stack([xd+[xd[0]], yd+[yd[0]]]).T
-        points_orig = np.stack([xs , ys ]).T
+        closed_points = np.stack([xd + [xd[0]], yd + [yd[0]]]).T
+        points_orig = np.stack([xs, ys]).T
         centers = (closed_points[:-1] + closed_points[1:]) / 2
-        distances = distance.cdist(centers,points_orig).min(axis=0)
-        loss = np.max(distances)
-        return loss
+        distances = distance.cdist(centers, points_orig).min(axis=0)
+
+        loss_distance_shape = np.max(distances)
+        loss_norm_numpts = (len(xs) - len(xd)) / len(xs)
+
+        return loss_distance_shape * 2 + loss_norm_numpts
 
     points = np.column_stack((xs, ys))
     # Compute the pairwise distances between all points
@@ -133,19 +144,20 @@ def auto_concaveHull(xs, ys):
     # Get the smallest and largest distances
     smallest_distance = np.min(distances[np.nonzero(distances)])  # Ignore zero distances
     largest_distance = np.max(distances)
+    bounds_first_stage = [(smallest_distance, largest_distance / 2)]
+    x0_first_stage = np.mean(bounds_first_stage, axis=1)
 
-    bounds = [(smallest_distance, largest_distance * 4)]
-    x0 = np.mean(distances)
-    stepsize = largest_distance*4
-    result_first_stage = optimize.basinhopping(func=loss, x0=x0,niter=2000,interval=25,niter_success=300,stepsize=stepsize,
-                                   minimizer_kwargs={'args': (xs, ys,), 'method': 'SLSQP', "bounds": bounds},
-                                   disp=False).x[0]
+    result_first_stage = optimize.minimize(fun=loss, x0=x0_first_stage, args=(xs, ys,), method='Powell',
+                                           bounds=bounds_first_stage).x[0]
 
-    x0= result_first_stage*.8
-    stepsize = result_first_stage*4
-    bounds = [(result_first_stage/4, result_first_stage * 4)]
-    result= optimize.basinhopping(func=loss, x0=x0,niter=10000,interval=120,niter_success=600,stepsize=stepsize,
-                                   minimizer_kwargs={'args': (xs, ys,), 'method': 'SLSQP', "bounds": bounds},
-                                   disp=False).x[0]
+    bounds_second_stage = [(result_first_stage / 2, result_first_stage)]
+
+    result_second_stage = optimize.minimize(fun=loss, x0=result_first_stage * 0.9, args=(xs, ys,), method='Nelder-mead',
+                                            bounds=bounds_second_stage).x[0]
+
+    bounds_third_stage = [(1e-9, result_second_stage)]
+    result = optimize.minimize(fun=loss, x0=result_second_stage, args=(xs, ys,), method='TNC',
+                               bounds=bounds_third_stage).x[0]
+
     xans, yans = calc_concavehull(xs, ys, result)
     return xans, yans, result

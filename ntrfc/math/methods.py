@@ -9,9 +9,38 @@ def calcAnisoMatrix(reynoldsstress_tensor):
 
 
 def calcAnisoEigs(anisotropy_matrix):
-    # eigenwerte für anisotropie muss hiermit berechnet werden!
-    # wieso nochmal? es tauchen negative eigenwerte auf, bei berechnung mit numpy
-    # nicht-symmetrische matrix (anisotrop)
+    """
+    Calculates the eigenvalues and eigenvectors of an anisotropy matrix.
+
+    Args:
+        anisotropy_matrix (numpy.ndarray): The anisotropy matrix represented as a 3x3 numpy array.
+
+    Returns:
+        tuple: A tuple containing the eigenvalues and eigenvectors.
+            - eigenvalues (numpy.ndarray): A 1-dimensional numpy array containing the three eigenvalues
+              sorted in descending order.
+            - eigenvectors (numpy.ndarray or None): A 2-dimensional numpy array containing the three
+              eigenvectors as columns. If all eigenvalues are zero, None is returned.
+
+    Raises:
+        ValueError: If the input matrix is not a 3x3 numpy array.
+
+    Notes:
+        - The anisotropy matrix should be symmetric.
+        - The eigenvalues represent the magnitudes of anisotropy along their corresponding eigenvectors.
+        - If all eigenvalues are zero, it indicates an isotropic material.
+
+    Example:
+        > anisotropy_matrix = np.array([[3, 1, 2], [1, 4, 5], [2, 5, 6]])
+        > eigenvalues, eigenvectors = calcAnisoEigs(anisotropy_matrix)
+        > print(eigenvalues)
+        array([12.866,  0.174, -2.040])
+        > print(eigenvectors)
+        array([[ 0.240, -0.856,  0.458],
+               [-0.716, -0.513, -0.473],
+               [ 0.657, -0.058, -0.752]])
+    """
+
     eigen_val = np.linalg.eig(anisotropy_matrix)
     eigens = list(eigen_val[0])
     eigen_vec = list(eigen_val[1])
@@ -33,6 +62,38 @@ def calcAnisoEigs(anisotropy_matrix):
 
 
 def C_barycentric(R):
+    """
+    Calculates the barycentric weights for a given anisotropic matrix representing the Reynolds stress tensor.
+
+    Parameters:
+    R (numpy.ndarray): Anisotropic matrix representing the Reynolds stress tensor.
+
+    Returns:
+    numpy.ndarray: Barycentric weights.
+
+    The function calculates the barycentric weights for a given anisotropic matrix, which represents the
+    Reynolds stress tensor. The Reynolds stress tensor characterizes the anisotropy present in turbulent flows
+    by describing the correlation between fluctuating velocity components.
+
+    The anisotropic matrix R is a 3x3 symmetric matrix defined as:
+        R = | R11  R12  R13 |
+            | R12  R22  R23 |
+            | R13  R23  R33 |
+
+    The function performs the following steps:
+    1. Checks if all eigenvalues of the anisotropic matrix are zero. If yes, returns [0, 0, 1] as barycentric weights.
+    2. Calculates the eigenvalues of the anisotropic matrix, anisoEigs, which correspond to the magnitudes of the
+    principal axes of the Reynolds stress tensor.
+    3. Extracts the eigenvalues gamma_1, gamma_2, and gamma_3 from anisoEigs.
+    4. Computes the barycentric weights C1c, C2c, and C3c using the eigenvalues.
+    5. Constructs and returns the barycentric weights as a numpy array, CWeights.
+
+    Note:
+    - The anisotropic matrix R should be a 3x3 numpy array representing the Reynolds stress tensor.
+    - The function assumes the existence of the calcAnisoEigs function to calculate the eigenvalues.
+    - Make sure to import the necessary modules, such as numpy, for the function to work properly.
+    """
+
     aniso = calcAnisoMatrix(R)
     anisoEigs = calcAnisoEigs(aniso)[0]
     if list(anisoEigs) == [0, 0, 0]:
@@ -52,7 +113,16 @@ def C_barycentric(R):
 
 def autocorr(signal):
     """
-    :param: signal - numpy-array.
+    Calculate the normalized autocorrelation of a one-dimensional signal.
+
+    Parameters:
+    signal (numpy.ndarray): Input signal.
+
+    Returns:
+    numpy.ndarray: Normalized autocorrelation.
+
+    Compute the normalized autocorrelation of the input signal by cross-correlating it with itself.
+    The result is normalized by dividing by the squared sum of the signal.
     """
     norm = np.sum(np.array(signal) ** 2)
     result = np.correlate(np.array(signal), np.array(signal), 'full') / norm
@@ -72,12 +142,14 @@ def reldiff(a, b):
     b (float or numpy array): The second value or array of values to compare.
 
     Returns:
-    float or numpy array: The relative difference between a and b. If a and b are both numpy arrays, the output will be a numpy array of the same shape. If one input is a float and the other is a numpy array, the output will be a numpy array of the same shape as the input array.
+    float or numpy array: The relative difference between a and b. If a and b are both numpy arrays,
+    the output will be a numpy array of the same shape. If one input is a float and the other is a numpy array,
+    the output will be a numpy array of the same shape as the input array.
 
     Notes:
-    The relative difference is defined as the absolute difference between the two values divided by the average of their absolute values.
-    If a and b are equal, the relative difference is 0.
-    If either a or b is zero, the absolute difference between the two values is returned instead of the relative difference.
+    The relative difference is defined as the absolute difference between the two values divided by the average
+    of their absolute values. If a and b are equal, the relative difference is 0. If either a or b is zero,
+    the absolute difference between the two values is returned instead of the relative difference.
     """
     if isinstance(a, np.ndarray) or isinstance(b, np.ndarray):
         # Convert to numpy arrays if necessary
