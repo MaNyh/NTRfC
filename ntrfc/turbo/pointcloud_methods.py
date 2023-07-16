@@ -65,14 +65,14 @@ def extractSidePolys(ind_1, ind_2, sortedPoly, verbose=False):
         psPoly = side_one
         ssPoly = side_two
 
-    if verbose:
-        p = pv.Plotter()
-        p.add_mesh(ssPoly, color="g", label="ssPoly")
-        p.add_mesh(psPoly, color="b", label="psPoly")
-        p.add_mesh(sortedPoly.points[ind_1], color="w", label="ind_1")
-        p.add_mesh(sortedPoly.points[ind_2], color="k", label="ind_2")
-        p.add_legend()
-        p.show()
+    # if verbose:
+    #     p = pv.Plotter()
+    #     p.add_mesh(ssPoly, color="g", label="ssPoly")
+    #     p.add_mesh(psPoly, color="b", label="psPoly")
+    #     p.add_mesh(sortedPoly.points[ind_1], color="w", label="ind_1")
+    #     p.add_mesh(sortedPoly.points[ind_2], color="k", label="ind_2")
+    #     p.add_legend()
+    #     p.show()
 
     return ssPoly, psPoly
 
@@ -156,17 +156,17 @@ def extract_geo_paras(polyblade, alpha=None, verbose=False):
     beta_trailing = vecAngle(hk_tangent, -np.array([1, 0, 0])) / np.pi * 180
     camber_angle = vecAngle(chord, -np.array([1, 0, 0])) / np.pi * 180
 
-    if verbose:
-        p = pv.Plotter()
-        p.add_mesh(points, color="orange", label="points")
-        p.add_mesh(psPoly, color="green", label="psPoly")
-        p.add_mesh(ssPoly, color="black", label="ssPoly")
-        p.add_mesh(midsPoly, color="black", label="midsPoly")
-        p.add_mesh(pv.Line((0, 0, 0), (midsPoly.length, 0, 0)))
-        p.add_mesh(sortedPoly.points[ind_hk], color="red", point_size=5)
-        p.add_mesh(sortedPoly.points[ind_vk], color="orange", point_size=5)
-        p.add_legend()
-        p.show()
+    # if verbose:
+    #     p = pv.Plotter()
+    #     p.add_mesh(points, color="orange", label="points")
+    #     p.add_mesh(psPoly, color="green", label="psPoly")
+    #     p.add_mesh(ssPoly, color="black", label="ssPoly")
+    #     p.add_mesh(midsPoly, color="black", label="midsPoly")
+    #     p.add_mesh(pv.Line((0, 0, 0), (midsPoly.length, 0, 0)))
+    #     p.add_mesh(sortedPoly.points[ind_hk], color="red", point_size=5)
+    #     p.add_mesh(sortedPoly.points[ind_vk], color="orange", point_size=5)
+    #     p.add_legend()
+    #     p.show()
 
     return sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle, alpha
 
@@ -222,9 +222,4 @@ def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t, v
 
     x_mpsl_ref, y_mpsl_ref = refine_spline(x_mpsl, y_mpsl, 1000)
 
-    midspoly = pv.PolyData(np.stack([x_mpsl_ref, y_mpsl_ref, np.zeros(len(x_mpsl_ref))]).T)
-    if verbose:
-        p = pv.Plotter()
-        p.add_mesh(midspoly, color="orange", point_size=5)
-        p.show()
     return x_mpsl_ref, y_mpsl_ref

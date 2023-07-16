@@ -1,5 +1,7 @@
 import numpy as np
 
+from ntrfc.math.vectorcalc import compute_minmax_distance_in_pointcloud
+
 
 def test_absVec():
     import numpy as np
@@ -105,3 +107,27 @@ def test_unitvec():
     b = np.array([0, 0, -9])
     bm = unitvec(b)
     assert all(np.equal(bm, np.array([0, 0, -1])))
+
+
+def test_compute_minimal_distance_in_pointcloud():
+
+    # Test case 3: Two points in point cloud
+    pointcloud = [[1, 2, 3], [4, 5, 6]]
+    assert np.isclose(compute_minmax_distance_in_pointcloud(pointcloud,minmax="min"), 5.196152, atol=1e-6)
+
+    # Test case 4: Multiple points in point cloud
+    pointcloud = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    assert np.isclose(compute_minmax_distance_in_pointcloud(pointcloud,minmax="min"), 5.196152, atol=1e-6)
+
+    # Test case 5: Duplicate points in point cloud
+    pointcloud = [[1, 2, 3], [4, 5, 6], [1, 2, 3]]
+    assert np.isclose(compute_minmax_distance_in_pointcloud(pointcloud,minmax="min"), 0, atol=1e-6)
+
+    # Test case 6: Points with negative coordinates in point cloud
+    pointcloud = [[-1, -2, -3], [4, -5, 6], [-7, 8, -9]]
+    assert np.isclose(compute_minmax_distance_in_pointcloud(pointcloud,minmax="min"), 10.723805294763608, atol=1e-6)
+
+
+    # Test case 6: Points with negative coordinates in point cloud
+    pointcloud = [[-1, -2, -3], [4, -5, 6], [-7, 8, -9]]
+    assert np.isclose(compute_minmax_distance_in_pointcloud(pointcloud,minmax="max"), 22.693611435820433, atol=1e-6)
