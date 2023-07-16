@@ -82,6 +82,7 @@ class CascadeDomain2D:
         if os.getenv('DISPLAY') is None:
             pv.start_xvfb()  # Start X virtual framebuffer (Xvfb)
         plotter = pv.Plotter(off_screen=True)
+        path =os.path.join(self.casemeta.case_root_directory, "domain.png")
 
         plotter.window_size = 2400, 2400
         # Plot the suction side and pressure side polys
@@ -94,4 +95,5 @@ class CascadeDomain2D:
 
         plotter.add_axes()
         plotter.view_xy()
-        plotter.screenshot(os.path.join(self.casemeta.case_root_directory, "domain.png"))
+        plotter.screenshot(path)
+        return path

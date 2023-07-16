@@ -17,8 +17,8 @@ def test_extract_vk_hk(verbose=False):
     # todo: currently we cant test half_cosine_spacing profiles, as the resolution is too good for extract_vk_hk
     naca_code = "6509"
     angle = 30  # deg
-    res = 420
-    xs, ys = naca(naca_code, res, half_cosine_spacing=False)
+    res = 400
+    xs, ys = naca(naca_code, res, half_cosine_spacing=False,finite_te=False)
     sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
     sorted_poly.rotate_z(angle, inplace=True)
     X, Y = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
@@ -108,7 +108,7 @@ def test_extract_geo_paras(verbose=False):
     angle = 10  # deg
     alpha = 1
     res = 240
-    xs, ys = naca(naca_code, res, half_cosine_spacing=False)
+    xs, ys = naca(naca_code, res, half_cosine_spacing=True,finite_te=False)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle, inplace=True)
 
