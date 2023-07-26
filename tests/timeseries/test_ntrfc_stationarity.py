@@ -255,39 +255,3 @@ def test_stationarity_uncertainties_abating(verbose=False):
             plt.show()
         assert 0.05 >= reldiff(stationary_time, well_computed_stationary_time), "computation failed"
 
-
-def test_snr_pod():
-    from ntrfc.timeseries.stationarity import snr_pod, optimal_window_size
-    import numpy as np
-    from itertools import product
-
-    def signalgen(noiseamplitude, amplitude, frequency, mean, time):
-        resolution = 48
-        step = (1 / frequency) / resolution
-
-        times = np.arange(0, time, step)
-        noise = np.random.randn(len(times)) * noiseamplitude
-
-        values = np.sin(times) * amplitude + mean
-        return values, noise
-
-    test_noiseamplitude = [0.05, 0.1]
-    test_amplitudes = [1]
-    test_frequencies = [4, 8]
-    test_times = [40]
-    test_mean = [-2]
-
-    test_configs = list(product(test_noiseamplitude, test_amplitudes, test_frequencies, test_times, test_mean))
-
-    for noiseamplitude, amplitude, frequencies, time, mean in test_configs:
-        sine, noise = signalgen(noiseamplitude=noiseamplitude, amplitude=amplitude, frequency=frequencies, mean=mean,
-                                time=time)
-        signal = sine + noise
-        # Compute the SNR using the snr_pod function
-        optimal_window, optimal_window_s, nperiods = optimal_window_size(signal)
-        window = int((optimal_window_s / nperiods) / 16)
-        reconstructed_mean, fluct, snr = snr_pod(signal, window)
-
-        # Check that the SNR is close to the expected value
-        expected_snr = np.trapz(sine ** 2) / np.trapz(noise ** 2)
-        assert np.isclose(snr, expected_snr, rtol=0.05)

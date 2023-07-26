@@ -305,25 +305,3 @@ def estimate_error_jacknife(timeseries, block_size=20, n_samples=4000):
 
     return mean_jk_error, var_jk_error, accr_jk_error
 
-
-def snr_pod(x, window_size, verbose=False):
-    ncomp = 16
-    if ncomp > window_size:
-        # fails otherwise
-        ncomp = window_size
-    X = np.zeros((x.shape[0] - window_size, window_size))
-    for i in range(X.shape[0]):
-        X[i] = x[i:i + window_size]
-    # Apply PCA to the windowed data
-    pca = PCA(n_components=ncomp)
-    pca.fit(X)
-    # Reconstruct the data using the principal components
-    reconstructed = pca.inverse_transform(pca.transform(X))
-    reconstructed_mean = reconstructed.mean(axis=1)
-    fluct = x[window_size // 2:-window_size // 2] - reconstructed_mean
-    snr = np.trapz(reconstructed_mean ** 2) / np.trapz(fluct ** 2)
-    # if verbose:
-    #     plt.plot(fluct)
-    #     plt.plot(reconstructed_mean)
-    #     plt.show()
-    return reconstructed_mean, fluct, snr
