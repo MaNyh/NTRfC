@@ -1,7 +1,7 @@
 import numpy as np
 import pyvista as pv
 from scipy.interpolate import interp1d
-
+import numpy as np
 
 def polyline_from_points(points):
     poly = pv.PolyData()
@@ -23,7 +23,7 @@ def lines_from_points(points):
     return poly
 
 
-def refine_spline(x, y, res):
+def refine_spline(x, y, res, half_cosine_spacing=False):
     """
     https://stackoverflow.com/questions/51512197/python-equidistant-points-along-a-line-joining-set-of-points/51515357
 
@@ -38,6 +38,10 @@ def refine_spline(x, y, res):
 
     fx, fy = interp1d(distance, x), interp1d(distance, y)
 
-    alpha_ = np.linspace(0, 1, res)
+    if half_cosine_spacing:
+        beta = np.linspace(0.0, np.pi, res)
+        alpha_ = [(0.5 * (1.0 - np.cos(xa))) for xa in beta]  # Half cosine based spacing
+    else:
+        alpha_ = np.linspace(0, 1, res)
     x, y = fx(alpha_), fy(alpha_)
     return x, y
