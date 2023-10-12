@@ -102,7 +102,7 @@ def skeletonline_completion(x_center, y_center, points):
 def pointcloud_to_profile(points):
     points_2d_closed = np.vstack((points[:, :2], points[:, :2][0]))
     tck, u = splprep(points_2d_closed.T, u=None, s=0.0, per=1, k=3)
-    res = 30000
+    res = 10000
     u_new = np.linspace(u.min(), u.max(), res)
     x_new, y_new = splev(u_new, tck, der=0)
     points_2d_closed_refined = np.stack([x_new, y_new]).T
