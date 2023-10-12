@@ -5,7 +5,7 @@ from scipy.interpolate import splprep, splev
 from scipy.spatial import KDTree
 from ntrfc.geometry.line import lines_from_points, polyline_from_points
 from ntrfc.geometry.plane import inside_poly
-from ntrfc.math.vectorcalc import findNearest, vecDir, compute_minmax_distance_in_pointcloud
+from ntrfc.math.vectorcalc import findNearest, vecDir, compute_minmax_distance_in_pointcloud, randomUnitVec
 
 
 def clean_sites(sites, boundary, tolerance_factor =3e-2):
@@ -39,8 +39,6 @@ def clean_sites(sites, boundary, tolerance_factor =3e-2):
                 radii.append(r)
     print(f"ratio of cleaned sites: {len(cleaned)/len(sites)}")
 
-    cleaned = np.array(cleaned)
-
     return np.array(cleaned), np.array(radii)
 
 
@@ -50,14 +48,18 @@ def extract_vk_hk(sortedPoly, verbose=False):
 
     points_2d_closed_refined = pointcloud_to_profile(points)
 
-    x_center, y_center = voronoi_skeleton(points_2d_closed_refined)
+    sites_raw_clean, radii= voronoi_skeleton_sites(points_2d_closed_refined)
 
+    tck, u = splprep(sites_raw_clean.T, u=None, s=0.000005, per=0, k=3)
+    res = 10000
+    u_new = np.linspace(u.min(), u.max(), res)
+    x_center, y_center = splev(u_new, tck, der=0)
     le_ind, te_ind = skeletonline_completion(x_center, y_center, points)
 
     return le_ind, te_ind
 
 
-def voronoi_skeleton(points_2d_closed_refined):
+def voronoi_skeleton_sites(points_2d_closed_refined):
     vor = Voronoi(points_2d_closed_refined)
     voronoi_sites_inside = vor.vertices[inside_poly(points_2d_closed_refined, vor.vertices)]
 
@@ -65,12 +67,8 @@ def voronoi_skeleton(points_2d_closed_refined):
     sites_inside_sorted = voronoi_sites_inside[sort_indices]
 
     clean_sites_inside, radii = clean_sites(sites_inside_sorted, points_2d_closed_refined)
-    tck, u = splprep(clean_sites_inside.T, u=None, s=0.000005, per=0, k=3)
-    res = 10000
-    u_new = np.linspace(u.min(), u.max(), res)
-    x_center, y_center = splev(u_new, tck, der=0)
+    return clean_sites_inside, radii
 
-    return x_center, y_center
 
 
 def skeletonline_completion(x_center, y_center, points):
@@ -104,7 +102,7 @@ def skeletonline_completion(x_center, y_center, points):
 def pointcloud_to_profile(points):
     points_2d_closed = np.vstack((points[:, :2], points[:, :2][0]))
     tck, u = splprep(points_2d_closed.T, u=None, s=0.0, per=1, k=3)
-    res = 10000
+    res = 30000
     u_new = np.linspace(u.min(), u.max(), res)
     x_new, y_new = splev(u_new, tck, der=0)
     points_2d_closed_refined = np.stack([x_new, y_new]).T
