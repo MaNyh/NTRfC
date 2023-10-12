@@ -56,21 +56,21 @@ def generate_turbocascade(domain2d,
     surfaces = {}
 
     # Set meshing options:
-    domain2d.profilepoints_rolled_le = pv.PolyData(np.roll(domain2d.profilepoints.points, -domain2d.le_index, axis=0))
-    domain2d.le_index = 0
-    domain2d.te_index = domain2d.te_index - domain2d.le_index
+    profilepoints_rolled_le = pv.PolyData(np.roll(domain2d.profilepoints.points, -domain2d.le_index, axis=0))
+    le_index = 0
+    te_index = (domain2d.te_index - domain2d.le_index)%domain2d.profilepoints.number_of_points
 
-    domain2d.profilepoints_line = lines_from_points(domain2d.profilepoints_rolled_le.points).compute_cell_sizes()
+    domain2d.profilepoints_line = lines_from_points(profilepoints_rolled_le.points).compute_cell_sizes()
 
     lc_blade = np.sum(domain2d.profilepoints_line["Length"]) / meshconfig.bladeres
 
-    sslengths = lines_from_points(domain2d.profilepoints_line.points[:domain2d.te_index]).compute_cell_sizes()
+    sslengths = lines_from_points(domain2d.profilepoints_line.points[:te_index]).compute_cell_sizes()
     sslength = np.sum(sslengths["Length"])
-    pslengths = lines_from_points(domain2d.profilepoints_line.points[domain2d.te_index:]).compute_cell_sizes()
+    pslengths = lines_from_points(domain2d.profilepoints_line.points[te_index:]).compute_cell_sizes()
     pslength = np.sum(pslengths["Length"])
 
     ss_half_idx = np.where(np.cumsum(sslengths["Length"]) >= sslength / 2)[0][0]
-    ps_half_idx = np.where(np.cumsum(pslengths["Length"]) >= pslength / 2)[0][0] + domain2d.te_index
+    ps_half_idx = np.where(np.cumsum(pslengths["Length"]) >= pslength / 2)[0][0] + te_index
 
     # domain2d.profilepoints_spline = lines_from_points(domain2d.profilepoints.points)
     inlet_spline = lines_from_points(domain2d.inlet.points)
@@ -86,7 +86,7 @@ def generate_turbocascade(domain2d,
 
     # Create points and splines:
 
-    points["blade"] = [gmsh.model.occ.add_point(*pt, lc_blade) for pt in domain2d.profilepoints_rolled_le.points]
+    points["blade"] = [gmsh.model.occ.add_point(*pt, lc_blade) for pt in profilepoints_rolled_le.points]
     points["domain2d.yperiodic_high"] = [gmsh.model.occ.add_point(*pt, meshconfig.lc) for pt in
                                          domain2d.yperiodic_high.points]
     points["domain2d.yperiodic_low"] = [gmsh.model.occ.add_point(*pt, meshconfig.lc) for pt in
@@ -97,9 +97,9 @@ def generate_turbocascade(domain2d,
     #    splines["blade"] = gmsh.model.occ.add_spline([*points["blade"], points["blade"][0]])
     splines["le_halfss"] = gmsh.model.occ.add_spline([*points["blade"][:ss_half_idx], points["blade"][ss_half_idx]])
     splines["halfss_te"] = gmsh.model.occ.add_spline(
-        [*points["blade"][ss_half_idx:domain2d.te_index], points["blade"][domain2d.te_index]])
+        [*points["blade"][ss_half_idx:te_index], points["blade"][te_index]])
     splines["te_halfps"] = gmsh.model.occ.add_spline(
-        [*points["blade"][domain2d.te_index:ps_half_idx], points["blade"][ps_half_idx]])
+        [*points["blade"][te_index:ps_half_idx], points["blade"][ps_half_idx]])
     splines["halfps_le"] = gmsh.model.occ.add_spline([*points["blade"][ps_half_idx:], points["blade"][0]])
 
     splines["inlet"] = gmsh.model.occ.add_spline(points["inlet"])
