@@ -51,7 +51,7 @@ def extract_vk_hk(sortedPoly, verbose=False):
     sites_raw_clean, radii= voronoi_skeleton_sites(points_2d_closed_refined)
 
     tck, u = splprep(sites_raw_clean.T, u=None, s=0.000005, per=0, k=3)
-    res = 10000
+    res = 4000
     u_new = np.linspace(u.min(), u.max(), res)
     x_center, y_center = splev(u_new, tck, der=0)
     le_ind, te_ind = skeletonline_completion(x_center, y_center, points)
@@ -83,8 +83,8 @@ def skeletonline_completion(x_center, y_center, points):
     Z = X * 0
     profilepoly = polyline_from_points(np.vstack([np.stack([X, Y, Z]).T, np.stack([X[0], Y[0], Z[0]]).T]))
     chord = compute_minmax_distance_in_pointcloud(points, minmax="max")
-    camber_le_extension = pv.Line(LE_camber.points[0] - LE_dir * chord / 2, camberpoints[0], resolution=1000)
-    camber_te_extension = pv.Line(camberpoints[-1], TE_camber.points[0] - TE_dir * chord / 2, resolution=1000)
+    camber_le_extension = pv.Line(LE_camber.points[0] - LE_dir * chord / 2, camberpoints[0], resolution=400)
+    camber_te_extension = pv.Line(camberpoints[-1], TE_camber.points[0] - TE_dir * chord / 2, resolution=400)
     camberline_extended = lines_from_points(np.vstack([camber_le_extension.points,
                                                        camberpoints[1:-2],
                                                        camber_te_extension.points]))
