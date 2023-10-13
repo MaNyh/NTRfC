@@ -30,6 +30,8 @@ class MeshConfig:
     progression_halfss_te: float = 0.99
     progression_te_halfps: float = 1.1
     progression_halfps_le: float = 0.9
+    spansize: float = 0.1
+    spanres: int = 5
 
 
 def generate_turbocascade(domain2d,
@@ -58,7 +60,7 @@ def generate_turbocascade(domain2d,
     # Set meshing options:
     profilepoints_rolled_le = pv.PolyData(np.roll(domain2d.profilepoints.points, -domain2d.le_index, axis=0))
     le_index = 0
-    te_index = (domain2d.te_index - domain2d.le_index)%domain2d.profilepoints.number_of_points
+    te_index = (domain2d.te_index - domain2d.le_index) % domain2d.profilepoints.number_of_points
 
     domain2d.profilepoints_line = lines_from_points(profilepoints_rolled_le.points).compute_cell_sizes()
 
@@ -130,7 +132,6 @@ def generate_turbocascade(domain2d,
 
     curvelength = sslength + pslength
 
-    charecteristiclength = curvelength / meshconfig.bladeres
     sscells = meshconfig.bladeres * sslength / curvelength
     pscells = meshconfig.bladeres * pslength / curvelength
 
@@ -166,7 +167,8 @@ def generate_turbocascade(domain2d,
     gmsh.model.mesh.field.setAsBackgroundMesh(w)
 
     # Extrude the domain surface in the z-direction
-    volume = gmsh.model.occ.extrude([(2, surfaces["domain"])], 0, 0, 0.6, numElements=[10], recombine=True)
+    volume = gmsh.model.occ.extrude([(2, surfaces["domain"])], 0, 0, meshconfig.spansize,
+                                    numElements=[meshconfig.spanres], recombine=True)
 
     gmsh.model.occ.synchronize()
 
