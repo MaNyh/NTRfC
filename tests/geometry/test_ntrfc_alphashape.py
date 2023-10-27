@@ -42,7 +42,6 @@ def test_calc_optimize_alphashape():
     """
     from ntrfc.geometry.alphashape import auto_concaveHull
     import numpy as np
-    import pyvista as pv
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
 
     for i in range(4):

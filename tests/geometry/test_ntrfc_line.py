@@ -35,7 +35,7 @@ def test_refine_spline():
     coarseres = 2
     line = pv.Line(resolution=coarseres)
     fineres = 100
-    fline_xx, fline_yy = refine_spline(line.points[::, 0], line.points[::, 1], fineres,half_cosine_spacing=True)
+    fline_xx, fline_yy = refine_spline(line.points[::, 0], line.points[::, 1], fineres, half_cosine_spacing=True)
     fline = pv.lines_from_points(np.stack([fline_xx, fline_yy, np.zeros(len(fline_xx))]).T)
     assert line.length == fline.length
     assert fline.number_of_points == fineres

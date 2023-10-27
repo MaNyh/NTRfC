@@ -1,5 +1,4 @@
 import numpy as np
-from matplotlib import pyplot as plt
 
 from ntrfc.turbo.airfoil_generators.parametric_turbine_generator import create_turbine_profile
 
@@ -18,11 +17,10 @@ def test_create_turbine_profile():
     throat = 0.337
     straight_te = False
 
-    xs, ys= create_turbine_profile(radius, axial_chord, tangential_chord,
-                                                                          unguided_turning, inlet_blade,
-                                                                          inlet_half_wedge,
-                                                                          le_r, outlet_blade, te_r, n_blades, throat,
-                                                                          straight_te)
-
+    xs, ys = create_turbine_profile(radius, axial_chord, tangential_chord,
+                                    unguided_turning, inlet_blade,
+                                    inlet_half_wedge,
+                                    le_r, outlet_blade, te_r, n_blades, throat,
+                                    straight_te)
 
     assert len(xs) == len(ys)

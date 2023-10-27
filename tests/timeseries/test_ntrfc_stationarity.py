@@ -254,4 +254,3 @@ def test_stationarity_uncertainties_abating(verbose=False):
             plt.axvline(well_computed_stationarity_limit, color="red")
             plt.show()
         assert 0.05 >= reldiff(stationary_time, well_computed_stationary_time), "computation failed"
-

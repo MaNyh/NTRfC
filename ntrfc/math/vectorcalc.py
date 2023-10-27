@@ -288,24 +288,22 @@ def unitvec_list(vecs):
     return vecs / vecAbs_list(vecs)[:, None]
 
 
-def compute_minmax_distance_in_pointcloud(pointcloud,minmax="min"):
+def compute_minmax_distance_in_pointcloud(pointcloud, minmax="min"):
     # Convert the pointcloud to a NumPy array
     pointcloud = np.array(pointcloud)
 
     # Compute the pairwise distances between points using cdist
     distances = cdist(pointcloud, pointcloud)
 
-    if minmax=="min":
+    if minmax == "min":
         # Exclude the diagonal elements since they represent the distance between each point and itself
         np.fill_diagonal(distances, np.inf)
         # Find the minimum distance
         distance = np.min(distances)
-    elif minmax=="max":
+    elif minmax == "max":
         # Exclude the diagonal elements since they represent the distance between each point and itself
         np.fill_diagonal(distances, -np.inf)
         # Find the maximum distance
         distance = np.max(distances)
 
     return distance
-
-

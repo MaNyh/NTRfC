@@ -73,7 +73,7 @@ def test_postprocessing():
     domainparas.generate_params_by_pointcloud(points)
     domainparas.profile_points["p"] = [1] * domainparas.profile_points.number_of_points
 
-    inlet = pv.Plane()
+    inlet = pv.Plane(direction=(1, 0, 0))
     inlet["u"] = np.ones((inlet.number_of_cells))
     inlet["v"] = np.zeros((inlet.number_of_cells))
     inlet["w"] = np.zeros((inlet.number_of_cells))
@@ -81,7 +81,7 @@ def test_postprocessing():
     inlet["rho"] = np.array([1] * inlet.number_of_cells)
     inlet["p"] = np.array([1] * inlet.number_of_cells)
     inlet.ctp()
-    outlet = pv.Plane()
+    outlet = pv.Plane(direction=(-1, 0, 0))
     outlet["u"] = np.ones((outlet.number_of_cells))
     outlet["v"] = np.zeros((outlet.number_of_cells))
     outlet["w"] = np.zeros((outlet.number_of_cells))

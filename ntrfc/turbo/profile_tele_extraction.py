@@ -1,15 +1,15 @@
 import numpy as np
 import pyvista as pv
-from scipy.spatial import Voronoi
 from scipy.interpolate import splprep, splev
 from scipy.spatial import KDTree
+from scipy.spatial import Voronoi
+
 from ntrfc.geometry.line import lines_from_points, polyline_from_points
 from ntrfc.geometry.plane import inside_poly
-from ntrfc.math.vectorcalc import findNearest, vecDir, compute_minmax_distance_in_pointcloud, randomUnitVec
+from ntrfc.math.vectorcalc import findNearest, vecDir, compute_minmax_distance_in_pointcloud
 
 
-def clean_sites(sites, boundary, tolerance_factor =3e-2):
-
+def clean_sites(sites, boundary, tolerance_factor=3e-2):
     # Build the KDTree from the "boundary" point cloud.
     tree = KDTree(boundary)
 
@@ -18,29 +18,28 @@ def clean_sites(sites, boundary, tolerance_factor =3e-2):
     distances, _ = tree.query(sites)
     deg_res = 2
 
-    theta = np.linspace(0, 2 * np.pi, 360*deg_res)
+    theta = np.linspace(0, 2 * np.pi, 360 * deg_res)
     cleaned = []
     radii = []
     for xc, yc, r in zip(sites[:, 0], sites[:, 1], distances):
 
-        circlepoints = np.stack([ np.cos(theta) * r+xc,  np.sin(theta) * r+yc]).T
+        circlepoints = np.stack([np.cos(theta) * r + xc, np.sin(theta) * r + yc]).T
         circle_dists, _ = tree.query(circlepoints)
 
-        half_circle_idx = 180*deg_res
-        circle_dists_180_deg = circle_dists[:half_circle_idx]+circle_dists[half_circle_idx:]
+        half_circle_idx = 180 * deg_res
+        circle_dists_180_deg = circle_dists[:half_circle_idx] + circle_dists[half_circle_idx:]
         # min_dist = np.argmin(circle_dists)
-        atol = r*tolerance_factor
-        circle_in_skeleton = np.where(np.isclose(circle_dists_180_deg,0,atol=atol))[0]
+        atol = r * tolerance_factor
+        circle_in_skeleton = np.where(np.isclose(circle_dists_180_deg, 0, atol=atol))[0]
 
         if len(circle_in_skeleton) > 0:
             min_dist_at = np.argmin(circle_dists[circle_in_skeleton])
-            if np.isclose(circle_dists[circle_in_skeleton[min_dist_at]],0,atol=atol/2):
+            if np.isclose(circle_dists[circle_in_skeleton[min_dist_at]], 0, atol=atol / 2):
                 cleaned.append([xc, yc])
                 radii.append(r)
-    print(f"ratio of cleaned sites: {len(cleaned)/len(sites)}")
+    print(f"ratio of cleaned sites: {len(cleaned) / len(sites)}")
 
     return np.array(cleaned), np.array(radii)
-
 
 
 def extract_vk_hk(sortedPoly, verbose=False):
@@ -48,7 +47,7 @@ def extract_vk_hk(sortedPoly, verbose=False):
 
     points_2d_closed_refined = pointcloud_to_profile(points)
 
-    sites_raw_clean, radii= voronoi_skeleton_sites(points_2d_closed_refined)
+    sites_raw_clean, radii = voronoi_skeleton_sites(points_2d_closed_refined)
 
     tck, u = splprep(sites_raw_clean.T, u=None, s=0.000005, per=0, k=3)
     res = 4000
@@ -68,7 +67,6 @@ def voronoi_skeleton_sites(points_2d_closed_refined):
 
     clean_sites_inside, radii = clean_sites(sites_inside_sorted, points_2d_closed_refined)
     return clean_sites_inside, radii
-
 
 
 def skeletonline_completion(x_center, y_center, points):
@@ -93,8 +91,6 @@ def skeletonline_completion(x_center, y_center, points):
     camberline_computed = camberline_extended.clip_surface(helpersurface, invert=False)
     le_ind = findNearest(np.stack([X, Y, Z]).T, camberline_computed.points[0])
     te_ind = findNearest(np.stack([X, Y, Z]).T, camberline_computed.points[-1])
-
-
 
     return le_ind, te_ind
 

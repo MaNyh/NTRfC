@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import pyvista as pv
 
 from ntrfc.math.vectorcalc import vecAngle
 
@@ -413,7 +412,7 @@ class TurbineBladeGen(object):
         then pressure side).
         """
         # Define the angle range for the elliptical arc
-        theta_range = np.linspace(0, -np.pi, num=int(self.n_points//2))
+        theta_range = np.linspace(0, -np.pi, num=int(self.n_points // 2))
 
         # Calculate the x-coordinates of the trailing edge
         x_te = self.te_r * np.cos(theta_range)
@@ -426,18 +425,19 @@ class TurbineBladeGen(object):
         y_center = (y_suction[-1] + y_pressure[-1]) / 2
 
         # Rotate the points by outlet_blade angle
-        angle = vecAngle(np.array([x_suction[-1], x_suction[-1]]),np.array([x_suction[-1]-x_pressure[-1], x_suction[-1]-y_pressure[-1]]))
+        angle = vecAngle(np.array([x_suction[-1], x_suction[-1]]),
+                         np.array([x_suction[-1] - x_pressure[-1], x_suction[-1] - y_pressure[-1]]))
         # Shift the rotated coordinates back to the original center
 
         rots = np.sin(angle)
         rotc = np.cos(angle)
         rot = np.array([[rotc, -rots], [rots, rotc]])
 
-        ts_rotated= np.dot(rot,np.stack([x_te,y_te])).T + np.array([x_center, y_center])
+        ts_rotated = np.dot(rot, np.stack([x_te, y_te])).T + np.array([x_center, y_center])
 
         # Shift the rotated coordinates back to the original center
-        x_te_rotated = ts_rotated[::,0]
-        y_te_rotated = ts_rotated[::,1]
+        x_te_rotated = ts_rotated[::, 0]
+        y_te_rotated = ts_rotated[::, 1]
         # Append the rotated trailing edge coordinates to the arrays of points
         x_pressure = np.append(x_pressure, x_te_rotated)
         y_pressure = np.append(y_pressure, y_te_rotated)
