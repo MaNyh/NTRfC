@@ -2,8 +2,16 @@
 History
 =======
 
+0.1.7 (2023-10-26)
+------------------
+
+- turbocascade fixes: usable meshing algorithm
+- dependency updates
+
 0.1.6 (2023-10-13)
 ------------------
+
+WITHDRAWN RELEASE
 
 - productive meshing algorithm
 - minor improvements

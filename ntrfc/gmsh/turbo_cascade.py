@@ -18,7 +18,7 @@ class MeshConfig:
     """
     max_lc: float = 0.1  # Maximum characteristic length
     lc: float = 0.1  # Characteristic length for blade region
-    bladeres: int = 100  # Number of elements in blade region
+    bladeres: int = 300  # Number of elements in blade region
     bl_thickness: float = 0.1  # Thickness of boundary layer
     bl_growratio: float = 1.1  # Growth ratio of boundary layer
     bl_size: float = 0.1  # Size of boundary layer elements
@@ -49,7 +49,7 @@ def generate_turbocascade(domain2d,
 
     # Initialize gmsh:
     gmsh.initialize()
-
+    gmsh.model.add("cascade")
     points = {}
     splines = {}
     lines = {}
@@ -114,7 +114,6 @@ def generate_turbocascade(domain2d,
     curveloops["domain"] = gmsh.model.occ.add_curve_loop(
         [splines["inlet"], splines["domain2d.yperiodic_high"], splines["outlet"], splines["domain2d.yperiodic_low"]])
 
-    # surfaces["blade"] = gmsh.model.occ.add_plane_surface([curveloops["blade"]])
     surfaces["domain"] = gmsh.model.occ.add_plane_surface([curveloops["domain"], curveloops["blade"]])
     gmsh.model.occ.synchronize()
 
@@ -165,26 +164,43 @@ def generate_turbocascade(domain2d,
     gmsh.model.mesh.field.setNumber(w, "YAxis", -0.5 * meshconfig.wake_length * np.tan(wake_angle))
     gmsh.model.mesh.field.setNumber(w, "XAxis", 0.5 * meshconfig.wake_length)
     gmsh.model.mesh.field.setAsBackgroundMesh(w)
+    gmsh.model.occ.synchronize()
+    surfaceTags = gmsh.model.getEntities(2)
 
-    # Extrude the domain surface in the z-direction
-    volume = gmsh.model.occ.extrude([(2, surfaces["domain"])], 0, 0, meshconfig.spansize,
-                                    numElements=[meshconfig.spanres], recombine=True)
+
+    gmsh.option.set_number("Mesh.Algorithm", 6)
+    gmsh.option.setNumber("Mesh.ElementOrder", 1)
+    # mesh options
+    gmsh.option.setNumber("Mesh.RecombineAll", 1)
+    gmsh.option.setNumber("Mesh.RecombinationAlgorithm", 1)
+    # gmsh.option.setNumber("Mesh.SubdivisionAlgorithm", 2)  # all hexahedra
+
+    gmsh.model.mesh.setOrder(1)
+    gmsh.model.occ.synchronize()
+    gmsh.model.occ.extrude(surfaceTags, dx=0, dy=0, dz=meshconfig.spansize,
+                                     numElements=[meshconfig.spanres],
+                                     recombine=True)
+    gmsh.model.occ.synchronize()
+
+
+    gmsh.model.addPhysicalGroup(3,[1], name="fluid")
+    gmsh.model.addPhysicalGroup(2,[2], name="inlet")
+    gmsh.model.addPhysicalGroup(2,[4], name="outlet")
+    gmsh.model.addPhysicalGroup(2,[6,7,8,9], name="blade")
+    gmsh.model.addPhysicalGroup(2,[1], name="z_lower")
+    gmsh.model.addPhysicalGroup(2,[10], name="z_upper")
+    gmsh.model.addPhysicalGroup(2,[3], name="y_upper")
+    gmsh.model.addPhysicalGroup(2,[5], name="y_lower")
 
     gmsh.model.occ.synchronize()
 
-    gmsh.model.addPhysicalGroup(2, [1], 1, "The 1")
-    gmsh.model.addPhysicalGroup(2, [2], 2, "The 2")
-    gmsh.model.addPhysicalGroup(2, [3], 3, "The 3")
-    gmsh.model.addPhysicalGroup(2, [4], 4, "The 4")
-    gmsh.model.addPhysicalGroup(2, [5], 5, "The 5")
-    gmsh.model.addPhysicalGroup(2, [6], 6, "The 6")
-    gmsh.model.addPhysicalGroup(2, [7], 7, "The 7")
-    gmsh.model.addPhysicalGroup(3, [1], 1, "The volume")
 
-    # Generate mesh:
     gmsh.model.mesh.generate(3)
+    gmsh.model.occ.synchronize()
 
-    # Write mesh data:
     gmsh.write(filename)
+    gmsh.model.removePhysicalGroups(gmsh.model.occ.getEntities(0))
+    gmsh.model.removePhysicalGroups(gmsh.model.occ.getEntities(1))
     gmsh.finalize()
-    return 0
+
+

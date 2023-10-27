@@ -84,7 +84,7 @@ def load_mesh(path_to_mesh):
     Parameters
     ----------
     path_to_mesh : str
-        The file path to the mesh file to be loaded. The file extension should be one of ".vtk", ".vtp", ".vtu", ".vtm", or ".cgns".
+        The file path to the mesh file to be loaded. The file extension should be one of ".vtk", ".vtp", ".vtu", ".vtm", ".cgns", ".msh".
 
     Returns
     -------
@@ -99,4 +99,6 @@ def load_mesh(path_to_mesh):
         mesh = read_vtm(path_to_mesh)
     elif extension == ".cgns":
         mesh = read_cgns(path_to_mesh)
+    elif extension == ".msh":
+        mesh = pv.read(path_to_mesh)
     return mesh

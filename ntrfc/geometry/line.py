@@ -1,7 +1,7 @@
 import numpy as np
 import pyvista as pv
 from scipy.interpolate import interp1d
-import numpy as np
+
 
 def polyline_from_points(points):
     poly = pv.PolyData()

@@ -1,7 +1,8 @@
 pip>=23
 matplotlib==3.7.1
 pytest==7.2.2
-pyvista==0.39.1
+trame==2.5.2
+pyvista[all]==0.42.3
 PyYAML==6.0
 scipy==1.10.1
 pandas==2.0.2
@@ -10,7 +11,6 @@ fluidfoam==0.2.4
 tqdm==4.65.0
 statsmodels>=0.13.5
 imageio==2.30.0
-trame==2.5.0
 scikit-learn
 jupyter
 sphinx

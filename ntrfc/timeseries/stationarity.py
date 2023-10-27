@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from scipy import signal
-from sklearn.decomposition import PCA
 
 from ntrfc.math.methods import minmax_normalize
 
@@ -304,4 +303,3 @@ def estimate_error_jacknife(timeseries, block_size=20, n_samples=4000):
     accr_jk_error = np.std(acorr_jk)
 
     return mean_jk_error, var_jk_error, accr_jk_error
-
