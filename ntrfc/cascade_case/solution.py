@@ -123,11 +123,11 @@ class GenericCascadeCase():
 
         bladepoly = self.domainparams.profile_points
 
-        ssmeshpointids = [bladepoly.find_closest_point(pt) for pt in sspoints]
-        psmeshpointids = [bladepoly.find_closest_point(pt) for pt in pspoints]
+        ssmeshpointids = [self.mesh_dict["blade"].find_closest_point(pt) for pt in sspoints]
+        psmeshpointids = [self.mesh_dict["blade"].find_closest_point(pt) for pt in pspoints]
 
-        ssmeshpoints = bladepoly.extract_points(ssmeshpointids)
-        psmeshpoints = bladepoly.extract_points(psmeshpointids)
+        ssmeshpoints = self.mesh_dict["blade"].extract_points(ssmeshpointids)
+        psmeshpoints = self.mesh_dict["blade"].extract_points(psmeshpointids)
 
         ind_le = self.domainparams.leading_edge_index
         ind_te = self.domainparams.trailing_edge_index
