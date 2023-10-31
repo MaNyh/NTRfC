@@ -71,7 +71,7 @@ def test_postprocessing():
     points = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     domainparas = DomainParameters()
     domainparas.generate_params_by_pointcloud(points)
-    domainparas.profile_points["p"] = [1] * domainparas.profile_points.number_of_points
+    domainparas.profile_points["pMean"] = [1] * domainparas.profile_points.number_of_points
 
     inlet = pv.Plane(direction=(1, 0, 0))
     inlet["u"] = np.ones((inlet.number_of_cells))
@@ -85,7 +85,7 @@ def test_postprocessing():
     outlet["u"] = np.ones((outlet.number_of_cells))
     outlet["v"] = np.zeros((outlet.number_of_cells))
     outlet["w"] = np.zeros((outlet.number_of_cells))
-    outlet["U"] = np.stack([inlet["u"], inlet["v"], inlet["w"]]).T
+    outlet["UMean"] = np.stack([inlet["u"], inlet["v"], inlet["w"]]).T
     outlet["rhoMean"] = np.array([1] * outlet.number_of_cells)
     outlet["pMean"] = np.array([1] * outlet.number_of_cells)
     outlet.ctp()
