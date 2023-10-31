@@ -143,8 +143,8 @@ class GenericCascadeCase():
 
         camber_angle = self.domainparams.stagger_angle
 
-        ssmeshpoints.rotate_z(-camber_angle, inplace=True)
-        psmeshpoints.rotate_z(-camber_angle, inplace=True)
+        ssmeshpoints.rotate_z(-(180-camber_angle), inplace=True)
+        psmeshpoints.rotate_z(-(180-camber_angle), inplace=True)
 
         ps_xc = np.zeros(psmeshpoints.number_of_points)
         ps_cp = np.zeros(psmeshpoints.number_of_points)
