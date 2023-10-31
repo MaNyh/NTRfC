@@ -46,6 +46,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC',
-    version='0.1.7',
+    version='0.1.8',
     zip_safe=False,
 )

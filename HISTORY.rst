@@ -2,6 +2,12 @@
 History
 =======
 
+0.1.8 (2023-10-31)
+------------------
+
+- bladeloading fix: reliable variable name usage
+
+
 0.1.7 (2023-10-26)
 ------------------
 
