@@ -77,47 +77,52 @@ class GenericCascadeCase():
     def compute_domainparams_from(self, alpha):
         self.domainparams.generate_params_by_pointcloud(self.active_blade_slice, alpha)
 
-    def compute_avdr_inout_massave(self):
+    def compute_avdr_inout_massave(self, densityvar="rhoMean", velvar="UMean", ):
 
-        self.mesh_dict["inlet"]["u"] = self.mesh_dict["inlet"]["U"][::, 0]
-        self.mesh_dict["inlet"]["v"] = self.mesh_dict["inlet"]["U"][::, 1]
-        self.mesh_dict["inlet"]["w"] = self.mesh_dict["inlet"]["U"][::, 2]
+        self.mesh_dict["inlet"]["u"] = self.mesh_dict["inlet"][velvar][::, 0]
+        self.mesh_dict["inlet"]["v"] = self.mesh_dict["inlet"][velvar][::, 1]
+        self.mesh_dict["inlet"]["w"] = self.mesh_dict["inlet"][velvar][::, 2]
 
-        self.mesh_dict["outlet"]["u"] = self.mesh_dict["outlet"]["U"][::, 0]
-        self.mesh_dict["outlet"]["v"] = self.mesh_dict["outlet"]["U"][::, 1]
-        self.mesh_dict["outlet"]["w"] = self.mesh_dict["outlet"]["U"][::, 2]
-        rho_1 = massflowave_plane(self.mesh_dict["inlet"], "rho")
+        self.mesh_dict["outlet"]["u"] = self.mesh_dict["outlet"][velvar][::, 0]
+        self.mesh_dict["outlet"]["v"] = self.mesh_dict["outlet"][velvar][::, 1]
+        self.mesh_dict["outlet"]["w"] = self.mesh_dict["outlet"][velvar][::, 2]
+        rho_1 = massflowave_plane(self.mesh_dict["inlet"], valname=densityvar, rhoname=densityvar, velocityname=velvar)
         mag_u_1 = vecAbs(
-            np.array([massflowave_plane(self.mesh_dict["inlet"], "u"), massflowave_plane(self.mesh_dict["inlet"], "v"),
-                      massflowave_plane(self.mesh_dict["inlet"], "w")]))
+            np.array([massflowave_plane(self.mesh_dict["inlet"], "u", rhoname=densityvar, velocityname=velvar),
+                      massflowave_plane(self.mesh_dict["inlet"], "v", rhoname=densityvar, velocityname=velvar),
+                      massflowave_plane(self.mesh_dict["inlet"], "w", rhoname=densityvar, velocityname=velvar)]))
         U_1 = np.stack(
-            [massflowave_plane(self.mesh_dict["inlet"], "u"), massflowave_plane(self.mesh_dict["inlet"], "v"),
-             massflowave_plane(self.mesh_dict["inlet"], "w")])
+            [massflowave_plane(self.mesh_dict["inlet"], "u", rhoname=densityvar, velocityname=velvar),
+             massflowave_plane(self.mesh_dict["inlet"], "v", rhoname=densityvar, velocityname=velvar),
+             massflowave_plane(self.mesh_dict["inlet"], "w", rhoname=densityvar, velocityname=velvar)])
         beta_1 = vecAngle(U_1, np.array([1, 0, 0]))
-        rho_2 = massflowave_plane(self.mesh_dict["outlet"], "rho")
+        rho_2 = massflowave_plane(self.mesh_dict["outlet"], densityvar, rhoname=densityvar, velocityname=velvar)
         U_2 = np.stack(
-            [massflowave_plane(self.mesh_dict["outlet"], "u"), massflowave_plane(self.mesh_dict["outlet"], "v"),
-             massflowave_plane(self.mesh_dict["outlet"], "w")])
+            [massflowave_plane(self.mesh_dict["outlet"], "u", rhoname=densityvar, velocityname=velvar),
+             massflowave_plane(self.mesh_dict["outlet"], "v", rhoname=densityvar, velocityname=velvar),
+             massflowave_plane(self.mesh_dict["outlet"], "w", rhoname=densityvar, velocityname=velvar)])
         mag_u_2 = vecAbs(np.array(
-            [massflowave_plane(self.mesh_dict["outlet"], "u"), massflowave_plane(self.mesh_dict["outlet"], "v"),
-             massflowave_plane(self.mesh_dict["outlet"], "w")]))
+            [massflowave_plane(self.mesh_dict["outlet"], "u", rhoname=densityvar, velocityname=velvar),
+             massflowave_plane(self.mesh_dict["outlet"], "v", rhoname=densityvar, velocityname=velvar),
+             massflowave_plane(self.mesh_dict["outlet"], "w", rhoname=densityvar, velocityname=velvar)]))
         beta_2 = vecAngle(U_2, np.array([1, 0, 0]))
         self.avdr = avdr(rho_1, mag_u_1, beta_1, rho_2, mag_u_2, beta_2)
         return self.avdr
 
-    def blade_loading(self, figpath=tempfile.mkdtemp() + "/blade_loading.png"):
+    def blade_loading(self, pressurevar="pMean", densityvar="rhoMean", velvar="UMean",
+                      figpath=tempfile.mkdtemp() + "/blade_loading.png"):
         sspoints = self.domainparams.sspoly.points
         pspoints = self.domainparams.pspoly.points
 
         inlet = self.mesh_dict["inlet"]
-        inlet["u"] = inlet["U"][::, 0]
-        inlet["v"] = inlet["U"][::, 1]
-        inlet["w"] = inlet["U"][::, 2]
-        p1 = massflowave_plane(inlet, valname="p", rhoname="rho", velocityname="U")
-        rho = massflowave_plane(inlet, valname="rho", rhoname="rho", velocityname="U")
-        u = massflowave_plane(inlet, valname="u", rhoname="rho", velocityname="U")
-        v = massflowave_plane(inlet, valname="v", rhoname="rho", velocityname="U")
-        w = massflowave_plane(inlet, valname="w", rhoname="rho", velocityname="U")
+        inlet["u"] = inlet[velvar][::, 0]
+        inlet["v"] = inlet[velvar][::, 1]
+        inlet["w"] = inlet[velvar][::, 2]
+        p1 = massflowave_plane(inlet, valname=pressurevar, rhoname=densityvar, velocityname=velvar)
+        rho = massflowave_plane(inlet, valname=densityvar, rhoname=densityvar, velocityname=velvar)
+        u = massflowave_plane(inlet, valname="u", rhoname=densityvar, velocityname=velvar)
+        v = massflowave_plane(inlet, valname="v", rhoname=densityvar, velocityname=velvar)
+        w = massflowave_plane(inlet, valname="w", rhoname=densityvar, velocityname=velvar)
         U = vecAbs([u, v, w])
         pt1 = p1 + 1 / 2 * rho * U ** 2
 
@@ -138,8 +143,8 @@ class GenericCascadeCase():
 
         camber_angle = self.domainparams.stagger_angle
 
-        ssmeshpoints.rotate_z(camber_angle, inplace=True)
-        psmeshpoints.rotate_z(camber_angle, inplace=True)
+        ssmeshpoints.rotate_z(-camber_angle, inplace=True)
+        psmeshpoints.rotate_z(-camber_angle, inplace=True)
 
         ps_xc = np.zeros(psmeshpoints.number_of_points)
         ps_cp = np.zeros(psmeshpoints.number_of_points)

@@ -17,16 +17,16 @@ def test_solution(tmpdir):
     fake_inlet["u"] = np.array([1] * fake_inlet.number_of_cells)
     fake_inlet["v"] = np.array([0] * fake_inlet.number_of_cells)
     fake_inlet["w"] = np.array([0] * fake_inlet.number_of_cells)
-    fake_inlet["rho"] = np.array([1] * fake_inlet.number_of_cells)
-    fake_inlet["U"] = np.stack([fake_inlet["u"], fake_inlet["v"], fake_inlet["w"]]).T
+    fake_inlet["rhoMean"] = np.array([1] * fake_inlet.number_of_cells)
+    fake_inlet["UMean"] = np.stack([fake_inlet["u"], fake_inlet["v"], fake_inlet["w"]]).T
     fake_inlet.save(inletname)
     fake_outlet = pv.Plane(direction=(-1, 0, 0))
 
     fake_outlet["u"] = np.array([1] * fake_outlet.number_of_cells)
     fake_outlet["v"] = np.array([0] * fake_outlet.number_of_cells)
     fake_outlet["w"] = np.array([0] * fake_outlet.number_of_cells)
-    fake_outlet["rho"] = np.array([1] * fake_outlet.number_of_cells)
-    fake_outlet["U"] = np.stack([fake_outlet["u"], fake_outlet["v"], fake_outlet["w"]]).T
+    fake_outlet["rhoMean"] = np.array([1] * fake_outlet.number_of_cells)
+    fake_outlet["UMean"] = np.stack([fake_outlet["u"], fake_outlet["v"], fake_outlet["w"]]).T
 
     fake_outlet.save(outletname)
     case = GenericCascadeCase()
@@ -77,17 +77,17 @@ def test_postprocessing():
     inlet["u"] = np.ones((inlet.number_of_cells))
     inlet["v"] = np.zeros((inlet.number_of_cells))
     inlet["w"] = np.zeros((inlet.number_of_cells))
-    inlet["U"] = np.stack([inlet["u"], inlet["v"], inlet["w"]]).T
-    inlet["rho"] = np.array([1] * inlet.number_of_cells)
-    inlet["p"] = np.array([1] * inlet.number_of_cells)
+    inlet["UMean"] = np.stack([inlet["u"], inlet["v"], inlet["w"]]).T
+    inlet["rhoMean"] = np.array([1] * inlet.number_of_cells)
+    inlet["pMean"] = np.array([1] * inlet.number_of_cells)
     inlet.ctp()
     outlet = pv.Plane(direction=(-1, 0, 0))
     outlet["u"] = np.ones((outlet.number_of_cells))
     outlet["v"] = np.zeros((outlet.number_of_cells))
     outlet["w"] = np.zeros((outlet.number_of_cells))
     outlet["U"] = np.stack([inlet["u"], inlet["v"], inlet["w"]]).T
-    outlet["rho"] = np.array([1] * outlet.number_of_cells)
-    outlet["p"] = np.array([1] * outlet.number_of_cells)
+    outlet["rhoMean"] = np.array([1] * outlet.number_of_cells)
+    outlet["pMean"] = np.array([1] * outlet.number_of_cells)
     outlet.ctp()
 
     # Initialize PostProcessing object
