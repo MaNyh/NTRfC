@@ -3,9 +3,9 @@ from dataclasses import dataclass
 
 import gmsh
 import numpy as np
-import pyvista as pv
 
 from ntrfc.geometry.line import lines_from_points
+from ntrfc.turbo.cascade_case.domain import CascadeDomain2D
 
 
 # Initialize gmsh:
@@ -34,10 +34,9 @@ class MeshConfig:
     spanres: int = 5
 
 
-def generate_turbocascade(domain2d,
+def generate_turbocascade(domain2d: CascadeDomain2D,
                           meshconfig: MeshConfig,
-                          filename: str,
-                          verbose=False):
+                          filename: str):
     """
     Generate a mesh for a turbocascade
     :param domain2d: Domain2D object
@@ -52,23 +51,21 @@ def generate_turbocascade(domain2d,
     gmsh.model.add("cascade")
     points = {}
     splines = {}
-    lines = {}
     curveloops = {}
-    surfaceloops = {}
     surfaces = {}
 
     # Set meshing options:
-    profilepoints_rolled_le = pv.PolyData(np.roll(domain2d.profilepoints.points, -domain2d.le_index, axis=0))
-    le_index = 0
-    te_index = (domain2d.te_index - domain2d.le_index) % domain2d.profilepoints.number_of_points
+    profilepoints_rolled_le = domain2d.blade.sortedpointsrolled_pv
 
-    domain2d.profilepoints_line = lines_from_points(profilepoints_rolled_le.points).compute_cell_sizes()
+    te_index = domain2d.blade.ite
 
-    lc_blade = np.sum(domain2d.profilepoints_line["Length"]) / meshconfig.bladeres
+    profilepoints_line = lines_from_points(profilepoints_rolled_le.points).compute_cell_sizes()
 
-    sslengths = lines_from_points(domain2d.profilepoints_line.points[:te_index]).compute_cell_sizes()
+    lc_blade = np.sum(profilepoints_line["Length"]) / meshconfig.bladeres
+
+    sslengths = lines_from_points(profilepoints_line.points[:te_index]).compute_cell_sizes()
     sslength = np.sum(sslengths["Length"])
-    pslengths = lines_from_points(domain2d.profilepoints_line.points[te_index:]).compute_cell_sizes()
+    pslengths = lines_from_points(profilepoints_line.points[te_index:]).compute_cell_sizes()
     pslength = np.sum(pslengths["Length"])
 
     ss_half_idx = np.where(np.cumsum(sslengths["Length"]) >= sslength / 2)[0][0]
@@ -150,12 +147,12 @@ def generate_turbocascade(domain2d,
     gmsh.model.mesh.field.setNumber(w, "Radius", meshconfig.wake_width)
     gmsh.model.mesh.field.setNumber(w, "XAxis", 0.5 * meshconfig.wake_length)
 
-    minx = np.min(domain2d.profilepoints.points[::, 0])
-    maxx = np.max(domain2d.profilepoints.points[::, 0])
-    miny = np.min(domain2d.profilepoints.points[::, 1])
-    maxy = np.max(domain2d.profilepoints.points[::, 1])
+    minx = np.min(profilepoints_rolled_le.points[::, 0])
+    maxx = np.max(profilepoints_rolled_le.points[::, 0])
+    miny = np.min(profilepoints_rolled_le.points[::, 1])
+    # maxy = np.max(profilepoints_rolled_le.points[::, 1])
 
-    wake_angle = np.deg2rad(domain2d.beta_trailing)
+    wake_angle = np.deg2rad(te_index)
     gmsh.model.mesh.field.setNumber(w, "XCenter", minx + (maxx - minx) + 0.5 * meshconfig.wake_length)
     gmsh.model.mesh.field.setNumber(w, "YCenter",
                                     meshconfig.fake_yShiftCylinder + miny - 0.5 * meshconfig.wake_length * np.tan(
@@ -167,7 +164,6 @@ def generate_turbocascade(domain2d,
     gmsh.model.occ.synchronize()
     surfaceTags = gmsh.model.getEntities(2)
 
-
     gmsh.option.set_number("Mesh.Algorithm", 6)
     gmsh.option.setNumber("Mesh.ElementOrder", 1)
     # mesh options
@@ -178,22 +174,20 @@ def generate_turbocascade(domain2d,
     gmsh.model.mesh.setOrder(1)
     gmsh.model.occ.synchronize()
     gmsh.model.occ.extrude(surfaceTags, dx=0, dy=0, dz=meshconfig.spansize,
-                                     numElements=[meshconfig.spanres],
-                                     recombine=True)
+                           numElements=[meshconfig.spanres],
+                           recombine=True)
     gmsh.model.occ.synchronize()
 
-
-    gmsh.model.addPhysicalGroup(3,[1], name="fluid")
-    gmsh.model.addPhysicalGroup(2,[2], name="inlet")
-    gmsh.model.addPhysicalGroup(2,[4], name="outlet")
-    gmsh.model.addPhysicalGroup(2,[6,7,8,9], name="blade")
-    gmsh.model.addPhysicalGroup(2,[1], name="z_lower")
-    gmsh.model.addPhysicalGroup(2,[10], name="z_upper")
-    gmsh.model.addPhysicalGroup(2,[3], name="y_upper")
-    gmsh.model.addPhysicalGroup(2,[5], name="y_lower")
+    gmsh.model.addPhysicalGroup(3, [1], name="fluid")
+    gmsh.model.addPhysicalGroup(2, [2], name="inlet")
+    gmsh.model.addPhysicalGroup(2, [4], name="outlet")
+    gmsh.model.addPhysicalGroup(2, [6, 7, 8, 9], name="blade")
+    gmsh.model.addPhysicalGroup(2, [1], name="z_lower")
+    gmsh.model.addPhysicalGroup(2, [10], name="z_upper")
+    gmsh.model.addPhysicalGroup(2, [3], name="y_upper")
+    gmsh.model.addPhysicalGroup(2, [5], name="y_lower")
 
     gmsh.model.occ.synchronize()
-
 
     gmsh.model.mesh.generate(3)
     gmsh.model.occ.synchronize()
@@ -202,5 +196,3 @@ def generate_turbocascade(domain2d,
     gmsh.model.removePhysicalGroups(gmsh.model.occ.getEntities(0))
     gmsh.model.removePhysicalGroups(gmsh.model.occ.getEntities(1))
     gmsh.finalize()
-
-

@@ -62,7 +62,7 @@ From: ubuntu:20.04
 
     apt install python3-wheel -y
 
-    git clone https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC.git /opt/ntrfc
+    git clone https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC.git -b mach_isen_bladeloading /opt/ntrfc
     cd /opt/ntrfc
     pip install .
     pip install -r requirements_dev.txt

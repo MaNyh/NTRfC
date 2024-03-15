@@ -1,22 +1,22 @@
 import numpy as np
-import pyvista as pv
 from scipy.interpolate import splprep, splev
 from scipy.spatial import KDTree
 from scipy.spatial import Voronoi
+from shapely.geometry import Polygon, LineString
 
-from ntrfc.geometry.line import lines_from_points, polyline_from_points
+from ntrfc.geometry.line import refine_spline
 from ntrfc.geometry.plane import inside_poly
-from ntrfc.math.vectorcalc import findNearest, vecDir, compute_minmax_distance_in_pointcloud
+from ntrfc.math.vectorcalc import findNearest, vecDir
 
 
-def clean_sites(sites, boundary, tolerance_factor=3e-2):
+def clean_sites(sites, boundary, tolerance_factor=5e-2):
     # Build the KDTree from the "boundary" point cloud.
     tree = KDTree(boundary)
 
     # Query the KDTree to find the nearest neighbors for each point in "point_cloud_a."
 
     distances, _ = tree.query(sites)
-    deg_res = 2
+    deg_res = 4
 
     theta = np.linspace(0, 2 * np.pi, 360 * deg_res)
     cleaned = []
@@ -42,19 +42,43 @@ def clean_sites(sites, boundary, tolerance_factor=3e-2):
     return np.array(cleaned), np.array(radii)
 
 
-def extract_vk_hk(sortedPoly, verbose=False):
+def extract_vk_hk(sortedPoly):
     points = sortedPoly.points
 
+    diag_dist = np.sqrt((sortedPoly.bounds[1] - sortedPoly.bounds[0]) ** 2 + (
+        sortedPoly.bounds[3] - sortedPoly.bounds[2]) ** 2)
     points_2d_closed_refined = pointcloud_to_profile(points)
 
     sites_raw_clean, radii = voronoi_skeleton_sites(points_2d_closed_refined)
 
-    tck, u = splprep(sites_raw_clean.T, u=None, s=0.000005, per=0, k=3)
-    res = 4000
-    u_new = np.linspace(u.min(), u.max(), res)
-    x_center, y_center = splev(u_new, tck, der=0)
-    le_ind, te_ind = skeletonline_completion(x_center, y_center, points)
+    le_ind, te_ind = skeletonline_completion(diag_dist, points, points_2d_closed_refined, sites_raw_clean)
 
+    return le_ind, te_ind
+
+
+def skeletonline_completion(diag_dist, points, points_2d_closed_refined, sites_raw_clean):
+    sites_refined_clean_tuple = refine_spline(sites_raw_clean[:, 0], sites_raw_clean[:, 1], 100)
+    sites_refined_clean = np.stack([sites_refined_clean_tuple[0], sites_refined_clean_tuple[1]]).T
+    shapelypoly = Polygon(points_2d_closed_refined)
+    shapelymidline = LineString(sites_refined_clean)
+    # i need to extend thhe shapelymidline to the boundary of the polygon
+    # Get the coordinates of the start and end points
+    start_coords = np.array(shapelymidline.coords[0])
+    end_coords = np.array(shapelymidline.coords[-1])
+    # Compute the direction vector
+    direction_start = diag_dist * vecDir(-(shapelymidline.coords[1] - start_coords))
+    direction_end = diag_dist * vecDir(-(shapelymidline.coords[-2] - end_coords))
+    # Extend the line by 1 unit in both directions
+    extended_start = LineString([start_coords, start_coords + direction_start])
+    extended_end = LineString([end_coords, end_coords + direction_end])
+    # Compute the intersection with the polygon
+    intersection_start = extended_start.intersection(shapelypoly)
+    intersection_end = extended_end.intersection(shapelypoly)
+    intersection_point_start = np.array(intersection_start.coords)[1]
+    intersection_point_end = np.array(intersection_end.coords)[1]
+    # find closest point index of points and intersections
+    le_ind = findNearest(points[:, :2], intersection_point_start)
+    te_ind = findNearest(points[:, :2], intersection_point_end)
     return le_ind, te_ind
 
 
@@ -69,32 +93,6 @@ def voronoi_skeleton_sites(points_2d_closed_refined):
     return clean_sites_inside, radii
 
 
-def skeletonline_completion(x_center, y_center, points):
-    camberpoints = np.stack([x_center, y_center, np.zeros(len(y_center))]).T
-    camberline = lines_from_points(camberpoints)
-    LE_camber = camberline.extract_cells(0)
-    LE_dir = vecDir(LE_camber.points[-1] - LE_camber.points[0])
-    TE_camber = camberline.extract_cells(camberline.number_of_cells - 1)
-    TE_dir = vecDir(TE_camber.points[0] - TE_camber.points[-1])
-    X = points[::, 0]
-    Y = points[::, 1]
-    Z = X * 0
-    profilepoly = polyline_from_points(np.vstack([np.stack([X, Y, Z]).T, np.stack([X[0], Y[0], Z[0]]).T]))
-    chord = compute_minmax_distance_in_pointcloud(points, minmax="max")
-    camber_le_extension = pv.Line(LE_camber.points[0] - LE_dir * chord / 2, camberpoints[0], resolution=400)
-    camber_te_extension = pv.Line(camberpoints[-1], TE_camber.points[0] - TE_dir * chord / 2, resolution=400)
-    camberline_extended = lines_from_points(np.vstack([camber_le_extension.points,
-                                                       camberpoints[1:-2],
-                                                       camber_te_extension.points]))
-    helpersurface = profilepoly.copy().extrude([0, 0, -1], inplace=True)
-    helpersurface = helpersurface.translate([0, 0, .5], inplace=True)
-    camberline_computed = camberline_extended.clip_surface(helpersurface, invert=False)
-    le_ind = findNearest(np.stack([X, Y, Z]).T, camberline_computed.points[0])
-    te_ind = findNearest(np.stack([X, Y, Z]).T, camberline_computed.points[-1])
-
-    return le_ind, te_ind
-
-
 def pointcloud_to_profile(points):
     points_2d_closed = np.vstack((points[:, :2], points[:, :2][0]))
     tck, u = splprep(points_2d_closed.T, u=None, s=0.0, per=1, k=3)
@@ -102,4 +100,5 @@ def pointcloud_to_profile(points):
     u_new = np.linspace(u.min(), u.max(), res)
     x_new, y_new = splev(u_new, tck, der=0)
     points_2d_closed_refined = np.stack([x_new, y_new]).T
+
     return points_2d_closed_refined

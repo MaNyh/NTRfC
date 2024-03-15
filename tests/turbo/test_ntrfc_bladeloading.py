@@ -7,21 +7,21 @@ def test_calc_inflow_cp():
     px = 101325  # Pa
     pt1 = 110000  # Pa
     p1 = 100000  # Pa
-    expected_cp = 0.8675
+    expected_cp = 0.1325
     assert calc_inflow_cp(px, pt1, p1) == expected_cp
 
     # Test case with negative pressure difference
     px = 90000  # Pa
     pt1 = 110000  # Pa
     p1 = 100000  # Pa
-    expected_cp = 2
+    expected_cp = -1.0
     assert calc_inflow_cp(px, pt1, p1) == expected_cp
 
     # Test case with zero pressure difference
     px = 100000  # Pa
     pt1 = 100000  # Pa
     p1 = 110000  # Pa
-    expected_cp = 0
+    expected_cp = 1.0
     assert calc_inflow_cp(px, pt1, p1) == expected_cp
 
 

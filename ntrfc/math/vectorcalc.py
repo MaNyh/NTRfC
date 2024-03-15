@@ -24,21 +24,20 @@ def distant_node_index(node, nodes):
     return closest_index
 
 
-def calc_largedistant_idx(x_koords, y_koords):
+def calc_largedistant_idx(x_coords, y_coords):
     """
     tested method to find indices of coordinates of a 2d-pointcloud with the biggest distance
-    :param x_koords: array of xcords
-    :param y_koords: array of ycords
-    :return: index_1,index_2 (int)
+    :param x_coords: array of x coordinates
+    :param y_coords: array of y coordinates
+    :return: index_1, index_2 (int)
     """
-    A = np.dstack((x_koords, y_koords))[0]
-    D = squareform(pdist(A))
-    #    N = np.max(D)
-    I = np.argmax(D)
-    I_row, I_col = np.unravel_index(I, D.shape)
+    coordinates = np.dstack((x_coords, y_coords))[0]
+    distances = squareform(pdist(coordinates))
+    max_distance_index = np.argmax(distances)
+    max_distance_index_row, max_distance_index_col = np.unravel_index(max_distance_index, distances.shape)
 
-    index_1 = I_row
-    index_2 = I_col
+    index_1 = max_distance_index_row
+    index_2 = max_distance_index_col
 
     return index_1, index_2
 

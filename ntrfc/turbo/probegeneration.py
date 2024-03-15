@@ -38,8 +38,8 @@ def create_profileprobes(ssPoly, psPoly, midspan_z, pden_ps, pden_ss, tolerance=
     ref_ps_poly = polyline_from_points(ref_psPoly.points)
 
     # Extrude the polylines along the z-axis to create 3D face models
-    ref_ss_face = ref_ss_poly.extrude((0, 0, midspan_z * 2)).compute_normals()
-    ref_ps_face = ref_ps_poly.extrude((0, 0, midspan_z * 2)).compute_normals()
+    ref_ss_face = ref_ss_poly.extrude((0, 0, midspan_z * 2), capping=False).compute_normals()
+    ref_ps_face = ref_ps_poly.extrude((0, 0, midspan_z * 2), capping=False).compute_normals()
 
     # Shift the 3D faces slightly along their normals
     ref_ss_face_shift = ref_ss_face.copy()

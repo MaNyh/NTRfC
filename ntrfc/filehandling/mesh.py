@@ -61,9 +61,9 @@ def read_cgns(path_to_mesh):
         domains = [base[i] for i in domainnames]
         if all(isinstance(grid, pv.UnstructuredGrid) for grid in domains):
             for domain in domains:
-                if type(domain) == pv.UnstructuredGrid:
+                if isinstance(domain, pv.UnstructuredGrid):
                     mesh = mesh.merge(domain)
-                if type(domain) == pv.StructuredGrid:
+                if isinstance(domain, pv.StructuredGrid):
                     mesh = mesh.merge(domain)
         else:
             # not all elements are UnstructuredGrid objects
@@ -71,9 +71,9 @@ def read_cgns(path_to_mesh):
                 nblocks = domain.n_blocks
                 blocks = [domain[b] for b in range(nblocks)]
                 for block in blocks:
-                    if type(block) == pv.UnstructuredGrid:
+                    if isinstance(block, pv.UnstructuredGrid):
                         mesh = mesh.merge(block)
-                    if type(block) == pv.StructuredGrid:
+                    if isinstance(block, pv.StructuredGrid):
                         mesh = mesh.merge(block)
     return mesh
 
@@ -84,7 +84,10 @@ def load_mesh(path_to_mesh):
     Parameters
     ----------
     path_to_mesh : str
-        The file path to the mesh file to be loaded. The file extension should be one of ".vtk", ".vtp", ".vtu", ".vtm", ".cgns", ".msh".
+        The file path to the mesh file to be loaded.
+        The file extension should be one of:
+
+        ".vtk", ".vtp", ".vtu", ".vtm", ".cgns", ".msh".
 
     Returns
     -------

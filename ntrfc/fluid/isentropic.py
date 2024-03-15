@@ -31,12 +31,10 @@ def temp_is(kappa, ma, Tt):
     return T
 
 
-def mach_is_x(kappa, p, pt):
+def mach_is_x(kappa, p_blade, p_frestream):
     # Calculates local isentropic Mach number
-    if p > 0 and pt > 0 and pt >= p:
-        y = np.sqrt(2 / (kappa - 1) * ((pt / p) ** ((kappa - 1) / kappa) - 1))
-    else:
-        y = 0.0
+    y = np.sqrt(2 / (kappa - 1) * ((p_frestream / p_blade) ** ((kappa - 1) / kappa) - 1))
+
     return y
 
 

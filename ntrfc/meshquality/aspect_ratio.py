@@ -1,6 +1,10 @@
+import warnings
+
 import numpy as np
 import pyvista as pv
 import vtk
+
+from ntrfc.meshquality.standards import classify_mesh_quality
 
 
 def compute_cell_aspect_ratios(grid: pv.UnstructuredGrid) -> np.ndarray:
@@ -15,6 +19,8 @@ def compute_cell_aspect_ratios(grid: pv.UnstructuredGrid) -> np.ndarray:
     Returns:
         np.ndarray: An array of aspect ratios, one for each cell in the grid.
     """
+    qualityname = "AspectRatio"
+
     cellids = range(0, grid.number_of_cells)
     # Compute the edge lengths for each cell
     aspect_ratios = []
@@ -27,4 +33,11 @@ def compute_cell_aspect_ratios(grid: pv.UnstructuredGrid) -> np.ndarray:
 
         aspect_ratios.append(max(edges["Length"]) / min(edges["Length"]))
 
-    return np.array(aspect_ratios)
+    aspect_ratios = np.array(aspect_ratios)
+
+    meshok = classify_mesh_quality(qualityname, aspect_ratios)
+
+    if not meshok:
+        warnings.warn(f"Mesh quality ({qualityname}) is bad, consider refining the mesh.")
+
+    return aspect_ratios

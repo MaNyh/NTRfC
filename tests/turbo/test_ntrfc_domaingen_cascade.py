@@ -3,8 +3,6 @@ import os
 import numpy as np
 import pyvista as pv
 
-from ntrfc.turbo.domaingen_cascade import cascade_2d_domain
-
 ON_CI = 'CI' in os.environ
 
 
@@ -34,7 +32,7 @@ def test_cascade_3d_domain():
 
 def test_cascade_2d_domain():
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
-
+    from ntrfc.turbo.domaingen_cascade import cascade_2d_domain
     if ON_CI:
         pv.start_xvfb()
 

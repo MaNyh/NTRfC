@@ -5,14 +5,9 @@ from ntrfc.math.vectorcalc import vecAbs, vecProjection
 
 
 def massflow_plane(mesh, rhoname="rho", velocityname="U"):
-    if not "Normals" in mesh.array_names:
-        mesh = mesh.compute_normals()
-    if not "Area" in mesh.array_names:
-        mesh = mesh.compute_cell_sizes()
-    mesh = mesh.point_data_to_cell_data()
-    normals = mesh.cell_normals
+    normals = mesh.compute_normals(point_normals=False, cell_normals=True)["Normals"]
     rhos = mesh[rhoname]
-    areas = mesh["Area"]
+    areas = mesh.compute_cell_sizes()["Area"]
     velocities = mesh[velocityname]
 
     massflow = np.array(
@@ -31,7 +26,7 @@ def massflowave_plane(mesh, valname, rhoname="rho", velocityname="U"):
 
 def areaave_plane(mesh, valname):
     array = mesh[valname]
-    if not "Area" in mesh.array_names:
+    if "Area" not in mesh.array_names:
         mesh = mesh.compute_cell_sizes()
     areas = mesh["Area"]
     area_ave = np.sum((array.T * areas).T) / np.sum(areas)
