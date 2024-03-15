@@ -34,7 +34,8 @@ def get_self_correlating_frequencies(timesteps, signal):
     Parameters
     ----------
     timesteps : ndarray
-        An array of uniformly spaced timesteps, corresponding to the time intervals between samples in the signal.
+        An array of uniformly spaced timesteps, corresponding to the time intervals
+        between samples in the signal.
     signal : ndarray
         The input signal to analyze.
 
@@ -45,7 +46,9 @@ def get_self_correlating_frequencies(timesteps, signal):
 
     Notes
     -----
-    This function calculates the autocorrelation of the input signal, and finds the local maxima in the autocorrelation signal. These local maxima correspond to the self-correlating frequencies in the signal.
+    This function calculates the autocorrelation of the input signal,
+    and finds the local maxima in the autocorrelation signal.
+    These local maxima correspond to the self-correlating frequencies in the signal.
     """
     # Calculate the autocorrelation of the signal
     autocorr_signal = autocorr(signal)

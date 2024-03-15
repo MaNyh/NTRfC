@@ -1,10 +1,8 @@
-import numpy as np
-import pyvista as pv
+import warnings
 
-from ntrfc.geometry.alphashape import calc_concavehull, auto_concaveHull
+import numpy as np
+
 from ntrfc.geometry.line import polyline_from_points, refine_spline
-from ntrfc.math.vectorcalc import vecAngle
-from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
 
 
 def mid_length(ind_1, ind_2, sorted_poly):
@@ -41,137 +39,34 @@ def midline_from_sides(ps_poly, ss_poly):
     return midsPoly
 
 
-def extractSidePolys(ind_1, ind_2, sortedPoly, verbose=False):
+def extractSidePolys(ind_1, ind_2, sortedPoly):
     # xs, ys = list(sortedPoly.points[::, 0]), list(sortedPoly.points[::, 1])
     indices = np.arange(0, sortedPoly.number_of_points)
 
-    if ind_2 > ind_1:
-        side_one_idx = indices[ind_1:ind_2 + 1]
-        side_two_idx = np.concatenate((indices[:ind_1 + 1][::-1], indices[ind_2:][::-1]))
-    elif ind_1 > ind_2:
-        side_one_idx = indices[ind_2:ind_1 + 1]
-        side_two_idx = np.concatenate((indices[:ind_2 + 1][::-1], indices[ind_1:][::-1]))
+    side_one_idx = indices[ind_1:ind_2]
+    side_two_idx = indices[ind_2:][::-1]
 
-    side_one = extract_points_fromsortedpoly(side_one_idx, sortedPoly)
-    side_two = extract_points_fromsortedpoly(side_two_idx, sortedPoly)
+    side_one = sortedPoly.extract_points(side_one_idx)
+    side_two = sortedPoly.extract_points(side_two_idx)
 
-    side_one_spline = polyline_from_points(side_one.points)
-    side_two_spline = polyline_from_points(side_two.points)
-
-    if side_one_spline.length > side_two_spline.length:
-        psPoly = side_two
-        ssPoly = side_one
-    else:
-        psPoly = side_one
-        ssPoly = side_two
-
-    # if verbose:
-    #     p = pv.Plotter()
-    #     p.add_mesh(ssPoly, color="g", label="ssPoly")
-    #     p.add_mesh(psPoly, color="b", label="psPoly")
-    #     p.add_mesh(sortedPoly.points[ind_1], color="w", label="ind_1")
-    #     p.add_mesh(sortedPoly.points[ind_2], color="k", label="ind_2")
-    #     p.add_legend()
-    #     p.show()
-
-    return ssPoly, psPoly
+    warnings.warn(
+        'Warning: the position of ssPoly and psPoly in the return of extractSidePolys changed. In case of unexpected results of your application, check the usage of ssPoly and psPoly')
+    return side_one, side_two
 
 
-def extract_points_fromsortedpoly(sorted_indices, sorted_poly):
-    """
-    Extract a subset of points and associated data from a sorted polygon.
+def is_counterclockwise(xs, ys):
+    n = len(xs)
+    signed_area = 0
 
-    Parameters
-    ----------
-    sorted_indices : numpy.ndarray
-        1D array of shape `(n_points,)` containing the indices of the points
-        in `sorted_poly.points` that should be extracted and used to create a
-        new polygon. The indices should be sorted in the order that they
-        should appear in the new polygon.
-    sorted_poly : pyvista.PolyData
-        Polygon represented as a `PolyData` object from the `pyvista`
-        library. The `sorted_poly.points` attribute should be a NumPy array
-        of shape `(n_points, 3)` containing the 3D coordinates of the polygon
-        vertices, and the `sorted_poly.point_data` attribute should be a
-        dictionary of NumPy arrays containing additional per-vertex data.
+    for i in range(n):
+        x1, y1 = xs[i], ys[i]
+        x2, y2 = xs[(i + 1) % n], ys[(i + 1) % n]  # Wrap around to the first point for the last segment
+        signed_area += (x1 * y2 - x2 * y1)
 
-    Returns
-    -------
-    pyvista.PolyData
-        A new `PolyData` object representing the subset of the original polygon
-        specified by `sorted_indices`, with all per-vertex data preserved.
-
-    Notes
-    -----
-    This function assumes that the input polygon is sorted in a specific way.
-    Specifically, the `sorted_indices` parameter should contain the indices of
-    the points in the order that they should appear in the new polygon. If the
-    input polygon is not sorted in this way, the resulting polygon may not be
-    valid.
-    """
-
-    side_two = pv.PolyData(sorted_poly.points[sorted_indices])
-    for arr in sorted_poly.array_names:
-        side_two[arr] = sorted_poly.point_data[arr][sorted_indices]
-    return side_two
+    return signed_area > 0
 
 
-def extract_geo_paras(polyblade, alpha=None, verbose=False):
-    """
-    This function is extracting profile-data as stagger-angle, midline, psPoly, ssPoly and more from a set of points
-    Be careful, you need a suitable alpha-parameter in order to get the right geometry
-    The calculation of the leading-edge and trailing-edge index needs time and its not 100% reliable (yet)
-    Keep in mind, to check the results!
-    :param polyblade: pyvista polymesh of the blade
-    :param alpha: nondimensional alpha-coefficient (calcConcaveHull)
-    :param verbose: bool for plots
-    :return: points, psPoly, ssPoly, ind_vk_, ind_vk, midsPoly, beta_leading, beta_trailing, alpha
-    """
-    points = polyblade.points
-
-    if alpha:
-        xs, ys = calc_concavehull(points[:, 0], points[:, 1], alpha)
-    else:
-        xs, ys, alpha = auto_concaveHull(points[:, 0], points[:, 1])
-
-    index_sort = [np.where(points[:, 0] == xs[i])[0][0] for i in range(len(xs)) if
-                  len(np.where(points[:, 0] == xs[i])) == 1 and np.where(points[:, 0] == xs[i])[0][0] == np.where(
-                      points[:, 1] == ys[i])[0][0]]
-
-    sortedPoly = pv.PolyData(polyblade.points[index_sort])  # polyblade.extract_cells(index_sort)
-    for arr in polyblade.array_names:
-        if sortedPoly.number_of_points == len(polyblade[arr]):
-            sortedPoly[arr] = polyblade.point_data[arr][index_sort]
-
-    ind_vk, ind_hk = extract_vk_hk(sortedPoly)
-    psPoly, ssPoly = extractSidePolys(ind_hk, ind_vk, sortedPoly)
-    midsPoly = midline_from_sides(psPoly, ssPoly)
-
-    # compute angles from 2d-midline
-    xmids, ymids = midsPoly.points[::, 0], midsPoly.points[::, 1]
-    vk_tangent = np.stack((xmids[0] - xmids[1], ymids[0] - ymids[1], 0)).T
-    hk_tangent = np.stack((xmids[-2] - xmids[-1], ymids[-2] - ymids[-1], 0)).T
-    chord = psPoly.points[0] - psPoly.points[-1]
-    beta_leading = vecAngle(vk_tangent, -np.array([1, 0, 0])) / np.pi * 180
-    beta_trailing = vecAngle(hk_tangent, -np.array([1, 0, 0])) / np.pi * 180
-    camber_angle = vecAngle(chord, -np.array([1, 0, 0])) / np.pi * 180
-
-    # if verbose:
-    #     p = pv.Plotter()
-    #     p.add_mesh(points, color="orange", label="points")
-    #     p.add_mesh(psPoly, color="green", label="psPoly")
-    #     p.add_mesh(ssPoly, color="black", label="ssPoly")
-    #     p.add_mesh(midsPoly, color="black", label="midsPoly")
-    #     p.add_mesh(pv.Line((0, 0, 0), (midsPoly.length, 0, 0)))
-    #     p.add_mesh(sortedPoly.points[ind_hk], color="red", point_size=5)
-    #     p.add_mesh(sortedPoly.points[ind_vk], color="orange", point_size=5)
-    #     p.add_legend()
-    #     p.show()
-
-    return sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle, alpha
-
-
-def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t, verbose=False):
+def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t):
     """
     Calculate the midpoint stream line curve through a passage.
 
@@ -209,7 +104,7 @@ def calcMidPassageStreamLine(x_mcl, y_mcl, beta1, beta2, x_inlet, x_outlet, t, v
     p_inlet_y = y_mcl[0] - delta_y_vk
 
     delta_x_hk = x_outlet - x_mcl[-1]
-    delta_y_hk = delta_x_hk * np.tan(np.deg2rad(-beta2))
+    delta_y_hk = delta_x_hk * np.tan(np.deg2rad(beta2))
 
     p_outlet_x = x_mcl[-1] + delta_x_hk
     p_outlet_y = y_mcl[-1] + delta_y_hk

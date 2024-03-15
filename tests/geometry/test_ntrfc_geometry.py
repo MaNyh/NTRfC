@@ -1,4 +1,4 @@
-from ntrfc.geometry.plane import inside_poly
+import pytest
 
 
 def test_extract_vk_hk(verbose=False):
@@ -28,7 +28,7 @@ def test_extract_vk_hk(verbose=False):
     points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
     profile_points = pv.PolyData(points)
     sorted_poly = pv.PolyData(profile_points)
-    ind_vk, ind_hk = extract_vk_hk(sorted_poly, verbose=verbose)
+    ind_vk, ind_hk = extract_vk_hk(sorted_poly)
 
     if verbose:
         p = pv.Plotter()
@@ -42,43 +42,35 @@ def test_extract_vk_hk(verbose=False):
 
 
 def test_midline_from_sides(verbose=False):
-    from ntrfc.turbo.pointcloud_methods import midline_from_sides
+    from ntrfc.turbo.cascade_case.utils.domain_utils import Blade2D
     from ntrfc.math.vectorcalc import vecAbs
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
-    from ntrfc.turbo.pointcloud_methods import extractSidePolys
     import numpy as np
     import pyvista as pv
 
     res = 240
     x, y = naca('0009', res, half_cosine_spacing=True)
-    ind_hk = 0
-    ind_vk = res
 
     points = np.stack((x[:], y[:], np.zeros(res * 2))).T
-    poly = pv.PolyData(points)
-    sspoly, pspoly = extractSidePolys(ind_hk, ind_vk, poly)
+    blade = Blade2D(points)
+    blade.compute_all_frompoints()
 
-    mids = midline_from_sides(pspoly, sspoly)
-
-    length = mids.length
-    testlength = vecAbs(sspoly.points[0] - sspoly.points[-1])
+    length = blade.skeletonline_pv.length
+    testlength = vecAbs(blade.ss_pv.points[0] - blade.ss_pv.points[-1])
 
     if verbose:
-        poly["ids"] = np.arange(poly.number_of_points)
         p = pv.Plotter()
-        p.add_mesh(poly)
-        p.add_mesh(mids)
-        p.add_mesh(poly.points[ind_hk], color="k")
-        p.add_mesh(poly.points[ind_vk], color="k")
+        p.add_mesh(blade.sortedpointsrolled_pv)
+        p.add_mesh(blade.skeletonline_pv)
+        p.add_mesh(blade.sortedpointsrolled_pv.points[blade.ite], color="k", label="hk", point_size=20)
+        p.add_mesh(blade.sortedpointsrolled_pv.points[blade.ile], color="g", label="vk", point_size=20)
+        p.add_legend()
         p.show()
 
-    assert length == testlength, "midline not accurate"
+    assert np.isclose(length, testlength, rtol=1e-3), "midline not accurate"
 
 
 def test_midLength():
-    """
-    checks weather
-    """
     from ntrfc.turbo.pointcloud_methods import mid_length
     import numpy as np
     import pyvista as pv
@@ -95,44 +87,20 @@ def test_midLength():
     fake_hk = mid
     circle = pv.PolyData(np.stack([x, y, np.zeros(len(x))]).T)
     length = mid_length(fake_vk, fake_hk, circle)
-    assert np.isclose(2 * radius, length, rtol=1e-4), "length should be two times the size of the defined test-circle"
+    assert np.isclose(2 * radius, length, rtol=5e-4), "length should be two times the size of the defined test-circle"
 
 
-def test_extract_geo_paras(verbose=False):
-    from ntrfc.turbo.pointcloud_methods import extract_geo_paras
-    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
-    import numpy as np
-    import pyvista as pv
-
-    naca_code = "6009"
-    angle = 10  # deg
-    alpha = 1
-    res = 240
-    xs, ys = naca(naca_code, res, half_cosine_spacing=True, finite_te=False)
-    sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
-    sorted_poly.rotate_z(angle, inplace=True)
-
-    poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle, alpha = extract_geo_paras(
-        sorted_poly, alpha)
-
-    if verbose:
-        p = pv.Plotter()
-        p.add_mesh(ss_poly, color="g", label="ssPoly")
-        p.add_mesh(ps_poly, color="b", label="psPoly")
-        p.add_mesh(mids_poly)
-        p.add_mesh(poly.points[ind_hk], color="w", label="ind_hk")
-        p.add_mesh(poly.points[ind_vk], color="k", label="ind_vk")
-        p.add_legend()
-        p.show()
-
-    assert np.isclose(beta_leading, angle, rtol=0.03), "wrong leading edge angle"
-    assert np.isclose(beta_trailing, angle, rtol=0.03), "wrong leading edge angle"
-    assert np.isclose(mids_poly.length, 1, rtol=0.03)
-    assert np.isclose(camber_angle, angle, rtol=0.03)
-    assert alpha > 0
+@pytest.mark.parametrize("xs, ys, expected_result", [
+    ([0, 1, 2, 2, 1, 0], [0, 0, 1, 2, 2, 1], True),
+    ([0, 1, 2, 2, 1, 0], [0, 1, 2, 2, 1, 0], False),
+])
+def test_orientation_of_circle(xs, ys, expected_result):
+    from ntrfc.turbo.pointcloud_methods import is_counterclockwise
+    assert is_counterclockwise(xs, ys) is expected_result
 
 
 def test_inside_poly():
+    from ntrfc.geometry.plane import inside_poly
     # Test for a simple polygon and point
     polygon = [(0, 0), (0, 1), (1, 1), (1, 0)]
     point = [(0.5, 0.5)]

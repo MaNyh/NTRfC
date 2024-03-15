@@ -3,7 +3,8 @@ import tempfile
 import numpy as np
 import pyvista as pv
 
-from ntrfc.turbo.pointcloud_methods import extract_geo_paras, calcMidPassageStreamLine
+from ntrfc.turbo.cascade_case.utils.domain_utils import Blade2D
+from ntrfc.turbo.pointcloud_methods import calcMidPassageStreamLine
 
 
 def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shift, alpha, path=False):
@@ -24,25 +25,12 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
         unitcoeff = 1 / 1000
     profilepoints2d.points *= unitcoeff
 
-    # =============================================================================
-    # Bestimmung Profilparameter
-    # =============================================================================
-    sortedPoly, psPoly, ssPoly, ind_vk, ind_hk, midsPoly, beta_leading, beta_trailing, camber_angle, alpha = extract_geo_paras(
-        profilepoints2d,
-        alpha,
-        path)
+    blade = Blade2D(profilepoints2d.points)
+    blade.compute_all_frompoints()
 
-    ##############################################################
-    x_mids = midsPoly.points[::, 0]
-    y_mids = midsPoly.points[::, 1]
-    # x_ss = ssPoly.points[::, 0]
-    # y_ss = ssPoly.points[::, 1]
-    # x_ps = psPoly.points[::, 0]
-    # y_ps = psPoly.points[::, 1]
-
-    x_mpsl, y_mpsl = calcMidPassageStreamLine(x_mids, y_mids, beta_leading, beta_trailing,
+    x_mpsl, y_mpsl = calcMidPassageStreamLine(blade.skeletonline_pv.points[::, 0], blade.skeletonline_pv.points[::, 1],
+                                              blade.beta_le, blade.beta_te,
                                               x_inlet, x_outlet, pitch)
-
     y_upper = np.array(y_mpsl) + blade_shift
     per_y_upper = pv.lines_from_points(np.stack((np.array(x_mpsl),
                                                  np.array(y_upper),
@@ -70,7 +58,7 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
     p.view_xy()
     p.screenshot(path)
 
-    return sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly
+    return blade.sortedpointsrolled_pv, blade.ps_pv, blade.ss_pv, per_y_upper, per_y_lower, inletPoly, outletPoly
 
 
 def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan, avdr=1,

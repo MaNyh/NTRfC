@@ -1,5 +1,5 @@
 def test_calcmidpassagestreamline():
-    from ntrfc.turbo.pointcloud_methods import extract_geo_paras
+    from ntrfc.turbo.cascade_case.utils.domain_utils import Blade2D
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
     from ntrfc.turbo.cascade_geometry import calcmidpassagestreamline
 
@@ -11,10 +11,10 @@ def test_calcmidpassagestreamline():
     alpha = 1
     res = 240
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
-    sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
-    sorted_poly.rotate_z(angle, inplace=True)
-
-    poly, ps_poly, ss_poly, ind_hk, ind_vk, mids_poly, beta_leading, beta_trailing, camber_angle, alpha = extract_geo_paras(
-        sorted_poly, alpha)
-
-    calcmidpassagestreamline(mids_poly.points[::, 0], mids_poly.points[::, 1], beta_leading, beta_trailing, -1, 2, 1)
+    points = np.stack([xs, ys, np.zeros(len(xs))]).T
+    bladeraw = pv.PolyData(points)
+    bladeraw.rotate_z(angle, inplace=True)
+    blade = Blade2D(points)
+    blade.compute_all_frompoints(alpha=alpha)
+    calcmidpassagestreamline(blade.skeletonline_pv.points[::, 0], blade.skeletonline_pv.points[::, 1],
+                             blade.beta_le, blade.beta_te, -1, 2, 1)

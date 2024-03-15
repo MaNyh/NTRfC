@@ -1,4 +1,8 @@
+import warnings
+
 import numpy as np
+
+from ntrfc.meshquality.standards import classify_mesh_quality
 
 
 def compute_cell_skewness(grid):
@@ -15,13 +19,19 @@ def compute_cell_skewness(grid):
     skewness : list
         A list of the skewness of each cell in the grid.
     """
-    # Get the centroids of each cell
+    qualityname = "Skewness"
 
     # Compute the skewness of each cell
     skewnesses = []
     for i in range(grid.n_cells):
         cell = grid.extract_cells(i)
         skewnesses.append(skewness(cell.points))
+    skewnesses = np.array(skewnesses)
+
+    meshok = classify_mesh_quality(qualityname, skewnesses)
+
+    if not meshok:
+        warnings.warn(f"Mesh quality ({qualityname}) is bad, consider refining the mesh.")
 
     return skewnesses
 

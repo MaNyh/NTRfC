@@ -15,3 +15,4 @@ scikit-learn
 jupyter
 sphinx
 gmsh==4.11.1
+shapely==2.0.1

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from ntrfc.cascade_case.utils.probecontainer import ProbeContainer
+from ntrfc.turbo.cascade_case.utils.probecontainer import ProbeContainer
 
 
 @pytest.fixture
