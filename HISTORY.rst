@@ -8,6 +8,7 @@ History
 - cascade_case refactoring
 - cleanup
 - le-te-extraction fix
+- cascadebox meshing (gmsh)
 
 0.1.8 (2023-10-31)
 ------------------
