@@ -47,8 +47,8 @@ def inplace_change(filename, old_string, new_string):
     with open(filename) as f:
         s = f.read()
         if old_string not in s:
-            # print('"{old_string}" not found in {filename}.'.format(**locals()))
-            return
+            print('"{old_string}" not found in {filename}.'.format(**locals()))
+            return -1
 
     # Safely write the changed content, if found in the file
     with open(filename, 'w') as f:

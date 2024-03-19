@@ -18,3 +18,4 @@ def test_calcmidpassagestreamline():
     blade.compute_all_frompoints(alpha=alpha)
     calcmidpassagestreamline(blade.skeletonline_pv.points[::, 0], blade.skeletonline_pv.points[::, 1],
                              blade.beta_le, blade.beta_te, -1, 2, 1)
+    blade.plot()
