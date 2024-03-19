@@ -1,5 +1,3 @@
-import warnings
-
 import numpy as np
 
 from ntrfc.geometry.line import polyline_from_points, refine_spline
@@ -49,8 +47,6 @@ def extractSidePolys(ind_1, ind_2, sortedPoly):
     side_one = sortedPoly.extract_points(side_one_idx)
     side_two = sortedPoly.extract_points(side_two_idx)
 
-    warnings.warn(
-        'Warning: the position of ssPoly and psPoly in the return of extractSidePolys changed. In case of unexpected results of your application, check the usage of ssPoly and psPoly')
     return side_one, side_two
 
 
