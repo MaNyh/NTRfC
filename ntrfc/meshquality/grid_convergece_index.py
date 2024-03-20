@@ -77,5 +77,4 @@ def getGCI(N1, N2, N3, fc1, fc2, fc3, D, Fs=1.25):
     text += f'{"EERE_3_p1": <16} {EERE_3_p1}\n'
     print(text)
     return GCI_1, GCI_2, GCI_3
-    # return [GCI_1, GCI_2, GCI_3], [EERE_1, EERE_2, EERE_3], [GCI_1_p1, GCI_2_p1, GCI_3_p1], \
-    #        [EERE_1_p1, EERE_2_p1, EERE_3_p1]
+

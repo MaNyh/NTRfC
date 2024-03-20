@@ -69,6 +69,20 @@ def test_inplace_change(tmpdir):
 
     assert ans == test_newstring, "inplace change not working"
 
+    test_oldstring = "old"
+    test_fakeoldstring = "nold"
+    test_newstring = "new"
+    test_file = tmpdir / "file.txt"
+    with open(test_file, "w") as fobj:
+        fobj.write(test_oldstring)
+
+    inplace_change(test_file, test_fakeoldstring, test_newstring)
+
+    with open(test_file, "r") as fobj:
+        ans = fobj.read()
+
+    assert ans == test_oldstring, "inplace change not working"
+
 
 def test_get_filelist_fromdir(tmpdir):
     os.mkdir(f"{tmpdir}/somedir")

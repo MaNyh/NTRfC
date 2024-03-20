@@ -81,6 +81,7 @@ def test_cascade_meshing_gmshwindtunnel(tmpdir):
 
     domain2d = CascadeWindTunnelDomain2D()
     domain2d.generate_from_cascade_parameters(gwkconfig, blade)
+    domain2d.plot_domain(tmpdir / "test.png")
     meshpath = tmpdir / "test.cgns"
     create_mesh(domain2d, gwkconfig, meshconfig, blade, str(meshpath))
     mesh = load_mesh(meshpath)
