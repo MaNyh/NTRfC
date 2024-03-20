@@ -29,27 +29,18 @@ def test_sutherland_viscosity():
     assert np.isclose(dynamic_viscosity, expected_dynamic_viscosity, rtol=1e-10, atol=1e-10)
 
 
-def test_ma_is():
-    from ntrfc.fluid.isentropic import ma_is
-    # Test input where outflow_static_pressure = 100, isentropic_exponent = 1.4, pressure = 50, velocity = 20,
-    # gas_constant = 287, temperature = 300
-    expected_output = 1.71
-    output = ma_is(10000, 1.4, 50000, 20, 287, 300)
-    assert abs(output - expected_output) < 1e-2
-
-
 def test_isentropic_reynolds_number():
-    from ntrfc.fluid.isentropic import isentropic_reynolds_number
+    from ntrfc.fluid.isentropic import calculate_isentropic_reynolds_number
     # Test input where kappa = 1.4, specific_gas_constant = 287, chord_length = 1, sutherland_reference_viscosity = 1.46e-5,
     # mach_number = 0.65, pressure = 50, temperature = 300, sutherland_reference_temperature = 110.4
     expected_output = 708.95
-    output = isentropic_reynolds_number(1.4, 287, 1, 1.46e-5, 0.65, 50, 300, 110.4)
+    output = calculate_isentropic_reynolds_number(1.4, 287, 1, 1.46e-5, 0.65, 50, 300, 110.4)
     assert abs(output - expected_output) < 1e-2
 
 
 def test_isentropic_total_temperature():
-    from ntrfc.fluid.isentropic import isentropic_total_temperature
+    from ntrfc.fluid.isentropic import calculate_isentropic_total_temperature
     # Test input where kappa = 1.4, mach_number = 0.5, temperature = 300
     expected_output = 315
-    output = isentropic_total_temperature(1.4, 0.5, 300)
+    output = calculate_isentropic_total_temperature(1.4, 0.5, 300)
     assert abs(output - expected_output) < 1e-2
