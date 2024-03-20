@@ -3,7 +3,7 @@ import tempfile
 import numpy as np
 from matplotlib import pyplot as plt
 
-from ntrfc.fluid.isentropic import mach_is_x
+from ntrfc.fluid.isentropic import local_isentropic_mach_number
 from ntrfc.geometry.plane import massflowave_plane
 from ntrfc.math.vectorcalc import vecAbs, vecAngle
 from ntrfc.turbo.bladeloading import calc_inflow_cp
@@ -107,7 +107,7 @@ def blade_loading_mais(case_instance, pressurevar="pMean", densityvar="rhoMean",
     for idx, pts1 in enumerate(psmeshpoints.points):
         ps_xc[idx] = pts1[0] / camber_length
         bladepressure = psmeshpoints.point_data[pressurevar][idx]
-        ps_cp[idx] = mach_is_x(kappa, bladepressure, totalpressure_inlet)
+        ps_cp[idx] = local_isentropic_mach_number(kappa, bladepressure, totalpressure_inlet)
 
     ss_xc = np.zeros(ssmeshpoints.number_of_points)
     ss_cp = np.zeros(ssmeshpoints.number_of_points)
@@ -115,7 +115,7 @@ def blade_loading_mais(case_instance, pressurevar="pMean", densityvar="rhoMean",
     for idx, pts1 in enumerate(ssmeshpoints.points):
         ss_xc[idx] = pts1[0] / camber_length
         bladepressure = ssmeshpoints.point_data[pressurevar][idx]
-        ss_cp[idx] = mach_is_x(kappa, bladepressure, totalpressure_inlet)
+        ss_cp[idx] = local_isentropic_mach_number(kappa, bladepressure, totalpressure_inlet)
 
     plt.figure()
     plt.title("blade loading")
