@@ -41,31 +41,33 @@ For more information, see:
 
 Installation from pypi
 
-```
-pip install ntrfc
-```
+
+    pip install ntrfc
+
+
+
 
 Installation from gitlab with pip
 
-```
-pip install git+https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC.git
-```
+
+    pip install git+https://gitlab.uni-hannover.de/tfd_public/tools/NTRfC.git
+
 
 Installation from source
 
 After cloning the repository, go to the project root dir and type
 
-```
-python setup.py install
-```
+
+    python setup.py install
+
 
 Editable installation from source with pip
 
 After cloning the repository, go to the project root dir and type
 
-```
-pip install -e .
-```
+
+    pip install -e .
+
 
 This way you have NTRfC installed but the code is not installed, but linked to the source-code.
 You don't have to reinstall the package after your edits.
