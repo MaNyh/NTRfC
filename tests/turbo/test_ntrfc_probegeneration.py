@@ -8,7 +8,7 @@ def test_createprofileprobes():
     from ntrfc.turbo.cascade_case.utils.domain_utils import Blade2D
     naca_code = "6009"
     angle = 10  # deg
-    res = 240
+    res = 480
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle, inplace=True)
@@ -27,7 +27,7 @@ def test_create_midpassageprobes():
     from ntrfc.turbo.cascade_case.utils.domain_utils import Blade2D
     naca_code = "6009"
     angle = 10  # deg
-    res = 240
+    res = 480
     xs, ys = naca(naca_code, res, half_cosine_spacing=False)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle, inplace=True)

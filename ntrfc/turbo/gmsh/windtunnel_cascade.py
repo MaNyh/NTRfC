@@ -166,9 +166,9 @@ def create_mesh(domain2d: CascadeWindTunnelDomain2D,
 
     domain_curveloop_lowres_gmsh = gmsh.model.occ.add_curve_loop([l10_gmsh, l6_gmsh, l7_gmsh, l8_gmsh])
 
-    domain_surface_highres_gmsh = gmsh.model.occ.add_plane_surface(
+    gmsh.model.occ.add_plane_surface(
         [domain_curveloop_highres_gmsh, *blade_curvloops_gmsh.values()])
-    domain_surface_lowres_gmsh = gmsh.model.occ.add_plane_surface([domain_curveloop_lowres_gmsh])
+    gmsh.model.occ.add_plane_surface([domain_curveloop_lowres_gmsh])
 
     l0_res = int(vecAbs(p1 - p0) / config.lc_high * 2 / 3)
     l1_res = int(vecAbs(p2 - p1) / config.lc_high * 2 / 3)

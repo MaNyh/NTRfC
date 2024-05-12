@@ -19,7 +19,6 @@ def test_getgci():
     assert np.isclose(GCI_2, 0.0008813583711057829), "GCI_3 computation does not seem to be correct"
     assert np.isclose(GCI_3, 0.0061695085977409286), "GCI_3 computation does not seem to be correct"
 
-
     # test with bad values
 
     fc3 = 270.263
@@ -34,5 +33,3 @@ def test_getgci():
     D = 2
 
     getGCI(N1, N2, N3, fc1, fc2, fc3, D, Fs=Fs)
-
-

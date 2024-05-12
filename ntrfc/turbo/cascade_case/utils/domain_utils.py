@@ -1,15 +1,13 @@
 import tempfile
 from dataclasses import dataclass
-from scipy.interpolate import splprep, splev
 
 import numpy as np
 import pyvista as pv
 
-from ntrfc.math.vectorcalc import findNearest
 from ntrfc.geometry.alphashape import auto_concaveHull, calc_concavehull
 from ntrfc.geometry.line import polyline_from_points
 from ntrfc.math.vectorcalc import vecAbs, vecAngle
-from ntrfc.turbo.pointcloud_methods import is_counterclockwise, midline_from_sides, extractSidePolys
+from ntrfc.turbo.pointcloud_methods import is_counterclockwise, extractSidePolys, midline_from_sides
 from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
 
 
@@ -55,11 +53,12 @@ class Blade2D:
 
         if not orientation:
             index_sort = index_sort[::-1]
+
         self.hullalpha = alpha
         self.__sortedpoints_pv = pv.PolyData()
-        for i in index_sort: self.__sortedpoints_pv = self.__sortedpoints_pv.merge(
-            self.origpoints_pv.extract_points([i]))
 
+        for i in index_sort:
+            self.__sortedpoints_pv = self.__sortedpoints_pv.merge(self.origpoints_pv.extract_points([i]))
 
     def compute_lete(self):
         self.__ile_orig, self.__ite_orig = extract_vk_hk(self.__sortedpoints_pv)
@@ -68,14 +67,15 @@ class Blade2D:
         ids = np.roll(np.arange(self.__sortedpoints_pv.number_of_points), -self.__ile_orig)
 
         newSortedPoly = pv.PolyData()
-        for i in ids: newSortedPoly = newSortedPoly.merge(self.__sortedpoints_pv.extract_points(i))
+        for i in ids:
+            newSortedPoly = newSortedPoly.merge(self.__sortedpoints_pv.extract_points(i))
 
         self.ite = (self.__ile_orig - self.__ite_orig) % newSortedPoly.number_of_points
         self.ile = 0
         self.sortedpointsrolled_pv = newSortedPoly
 
     def extract_sides(self):
-        self.ps_pv, self.ss_pv = extractSidePolys(self.ile, self.ite, self.sortedpointsrolled_pv)
+        self.ps_pv, self.ss_pv = extractSidePolys(self.ite, self.sortedpointsrolled_pv)
 
     def compute_skeleton(self):
         self.skeletonline_pv = midline_from_sides(self.ps_pv, self.ss_pv)
@@ -97,18 +97,20 @@ class Blade2D:
         self.compute_skeleton()
         self.compute_stats()
 
-    def plot(self, figurepath=tempfile.mkdtemp() + "/plot.png"):
+    def plot(self, figurepath=tempfile.mkdtemp() + "/plot.png", window_size=[2400, 2400]):
+        sfactor = window_size[0] / 200
         p = pv.Plotter(off_screen=True)
-        p.add_mesh(self.ps_pv, color="red", label="pressure side")
-        p.add_mesh(self.ss_pv, color="blue", label="suction side")
-        p.add_mesh(self.skeletonline_pv, color="black", label="skeleton line")
+        p.add_mesh(self.ps_pv, color="red", label="pressure side", line_width=1)
+        p.add_mesh(self.ss_pv, color="blue", label="suction side", line_width=1)
+        p.add_mesh(self.skeletonline_pv, color="black", label="skeleton line", line_width=1)
         p.add_mesh(pv.PolyData(self.sortedpointsrolled_pv.points[self.ile]), color="green", label="ile", point_size=16)
         p.add_mesh(pv.PolyData(self.sortedpointsrolled_pv.points[self.ite]), color="yellow", label="ite", point_size=16)
         p.add_text(
-            f"beta_le: {self.beta_le} \nbeta_te: {self.beta_te}\nphi_camber: {self.camber_phi}\nlength_camber: {self.camber_length}")
-        p.add_legend()
+            f"beta_le: {self.beta_le} \nbeta_te: {self.beta_te}\nphi_camber: {self.camber_phi}\nlength_camber: {self.camber_length}",
+            font_size=int(sfactor))
+        p.add_legend(size=(0.2, 0.2))
         p.view_xy()
-        p.show(screenshot=figurepath)
+        p.show(screenshot=figurepath, window_size=window_size)
         p.close()
         return figurepath
 
