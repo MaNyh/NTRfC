@@ -71,8 +71,8 @@ def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inle
     x_upper = outletPoly.bounds[0]
 
     def compute_transform(point, span, avdr, x_lower, x_upper, sign=1):
-        l = abs(x_lower - x_upper)
-        x = abs(point[0] - x_upper) / l
+        lval = abs(x_lower - x_upper)
+        x = abs(point[0] - x_upper) / lval
         return np.array([0, 0, sign * span * (1 + avdr * x)]) + point
 
     def transform(avdr, poly, x_lower, x_upper, zspan, sign):

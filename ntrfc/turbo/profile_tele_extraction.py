@@ -152,7 +152,6 @@ def voronoi_skeleton_sites(points_2d_closed_refined_voronoi):
 
 
 def skeletonize_skeleton_sites(points_2d_closed_refined_skeletonize):
-
     res = len(points_2d_closed_refined_skeletonize)
     dx = np.min(points_2d_closed_refined_skeletonize[:, 0])
     dy = np.min(points_2d_closed_refined_skeletonize[:, 1])
@@ -165,7 +164,6 @@ def skeletonize_skeleton_sites(points_2d_closed_refined_skeletonize):
 
     px = (points_2d_closed_refined_skeletonize[:, 0] - dx) / scale * factor
     py = (points_2d_closed_refined_skeletonize[:, 1] - dy) / scale * factor
-
 
     polygon = np.stack((px, py)).T
     image_size = (res, res)  # Image size
