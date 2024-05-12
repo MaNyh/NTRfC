@@ -16,3 +16,5 @@ jupyter
 sphinx
 gmsh==4.11.1
 shapely==2.0.1
+scikit-image==0.22.0
+opencv-python==4.9.0.80

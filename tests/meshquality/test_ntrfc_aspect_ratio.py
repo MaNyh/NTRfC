@@ -19,7 +19,6 @@ def test_aspect_ratio():
 
     assert np.all(aspect_ratios == max(grid.spacing) / min(grid.spacing))
 
-
     # test bad mesh
     grid = pv.UniformGrid()
     values = np.linspace(0, 10, 1000).reshape((20, 5, 10))

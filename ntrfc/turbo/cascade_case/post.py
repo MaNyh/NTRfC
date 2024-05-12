@@ -74,13 +74,13 @@ def blade_loading_mais(case_instance, pressurevar="pMean", densityvar="rhoMean",
     inlet["u"] = inlet[velvar][::, 0]
     inlet["v"] = inlet[velvar][::, 1]
     inlet["w"] = inlet[velvar][::, 2]
-    p1 = massflowave_plane(inlet, valname=pressurevar, rhoname=densityvar, velocityname=velvar)
-    rho = massflowave_plane(inlet, valname=densityvar, rhoname=densityvar, velocityname=velvar)
-    u = massflowave_plane(inlet, valname="u", rhoname=densityvar, velocityname=velvar)
-    v = massflowave_plane(inlet, valname="v", rhoname=densityvar, velocityname=velvar)
-    w = massflowave_plane(inlet, valname="w", rhoname=densityvar, velocityname=velvar)
-    U = vecAbs([u, v, w])
-    #pt1 = p1 + 1 / 2 * rho * U ** 2
+    #p1 = massflowave_plane(inlet, valname=pressurevar, rhoname=densityvar, velocityname=velvar)
+    #rho = massflowave_plane(inlet, valname=densityvar, rhoname=densityvar, velocityname=velvar)
+    #u = massflowave_plane(inlet, valname="u", rhoname=densityvar, velocityname=velvar)
+    #v = massflowave_plane(inlet, valname="v", rhoname=densityvar, velocityname=velvar)
+    #w = massflowave_plane(inlet, valname="w", rhoname=densityvar, velocityname=velvar)
+    #U = vecAbs([u, v, w])
+    # pt1 = p1 + 1 / 2 * rho * U ** 2
 
     ssmeshpoints = case_instance.blade.ss_pv
     psmeshpoints = case_instance.blade.ps_pv

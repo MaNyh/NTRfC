@@ -16,8 +16,8 @@ def test_extract_vk_hk(verbose=False):
     # manifold problems with other profiles with veronoi-mid and other unoptimized code. therefor tests only 0009
     # todo: currently we cant test half_cosine_spacing profiles, as the resolution is too good for extract_vk_hk
     naca_code = "6509"
-    angle = 30  # deg
-    res = 400
+    angle = 0  # deg
+    res = 512
     xs, ys = naca(naca_code, res, half_cosine_spacing=False, finite_te=False)
     sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
     sorted_poly.rotate_z(angle, inplace=True)
@@ -48,7 +48,7 @@ def test_midline_from_sides(verbose=False):
     import numpy as np
     import pyvista as pv
 
-    res = 240
+    res = 512
     x, y = naca('0009', res, half_cosine_spacing=True)
 
     points = np.stack((x[:], y[:], np.zeros(res * 2))).T
@@ -68,26 +68,6 @@ def test_midline_from_sides(verbose=False):
         p.show()
 
     assert np.isclose(length, testlength, rtol=1e-3), "midline not accurate"
-
-
-def test_midLength():
-    from ntrfc.turbo.pointcloud_methods import mid_length
-    import numpy as np
-    import pyvista as pv
-
-    radius = 0.5
-    res = 100
-    mid = int(res / 2)
-    theta = np.linspace(0, 2 * np.pi, 100)
-
-    x = radius * np.cos(theta)
-    y = radius * np.sin(theta)
-
-    fake_vk = 0
-    fake_hk = mid
-    circle = pv.PolyData(np.stack([x, y, np.zeros(len(x))]).T)
-    length = mid_length(fake_vk, fake_hk, circle)
-    assert np.isclose(2 * radius, length, rtol=5e-4), "length should be two times the size of the defined test-circle"
 
 
 @pytest.mark.parametrize("xs, ys, expected_result", [

@@ -66,5 +66,6 @@ def test_calculate_isentropic_mach_number():
     expected_output = 0.0014693046301270448
 
     # Call function and check output
-    assert np.isclose(calculate_isentropic_mach_number(isentropic_pressure, kappa, static_pressure, mach_number, gas_constant,
-                                                       static_temperature), expected_output)
+    assert np.isclose(
+        calculate_isentropic_mach_number(isentropic_pressure, kappa, static_pressure, mach_number, gas_constant,
+                                         static_temperature), expected_output)

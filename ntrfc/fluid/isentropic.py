@@ -1,6 +1,6 @@
 import numpy as np
 
-from ntrfc.fluid.fluid import mach_number, total_pressure
+from ntrfc.fluid.fluid import mach_number
 
 
 def total_pressure_from_mach_number(kappa, mach_number, static_pressure):
@@ -38,7 +38,8 @@ def local_isentropic_mach_number(kappa, p_blade, p_frestream):
     return y
 
 
-def calculate_isentropic_mach_number(isentropic_pressure, kappa, static_pressure, mach, gas_constant, static_temperature):
+def calculate_isentropic_mach_number(isentropic_pressure, kappa, static_pressure, mach, gas_constant,
+                                     static_temperature):
     """
     Calculates the isentropic Mach number.
 
@@ -66,7 +67,6 @@ def calculate_isentropic_mach_number(isentropic_pressure, kappa, static_pressure
         2.0 / (kappa - 1.0) * (pow(1.0 + (dynamic_pressure / isentropic_pressure), (kappa - 1.0) / kappa) - 1.0))
 
     return isentropic_mach_number
-
 
 
 def calculate_isentropic_reynolds_number(kappa, specific_gas_constant, chord_length, sutherland_reference_viscosity,

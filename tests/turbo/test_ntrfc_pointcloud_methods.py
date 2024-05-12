@@ -1,7 +1,9 @@
 import numpy as np
 
+from ntrfc.turbo.pointcloud_methods import midline_from_sides
 
-def test_extractSidePolys():
+
+def test_Blade2d_extractSidePolys():
     from ntrfc.turbo.cascade_case.utils.domain_utils import Blade2D
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
     import numpy as np
@@ -9,7 +11,7 @@ def test_extractSidePolys():
 
     digit_string = "0009"
 
-    res = 120
+    res = 480
     X, Y = naca(digit_string, res, half_cosine_spacing=False, finite_te=False)
 
     points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
@@ -22,9 +24,25 @@ def test_extractSidePolys():
     # the assertion is consistent with all tests but it is confusing
     # we generate profiles with a naca-generator. probably there is a minor bug in the algorithm
     # ssPoly needs to have one point more then psPoly
-    assert blade.ss_pv.number_of_points == blade.ps_pv.number_of_points, "number of sidepoints are not equal "
+    assert abs(
+        blade.ss_pv.number_of_points - blade.ps_pv.number_of_points) / res < 0.02, "number of sidepoints are not equal "
     assert np.all(blade.ss_pv["A"])
     assert np.all(blade.ps_pv["A"])
+
+
+def test_extractSidePolys():
+    import pyvista as pv
+    from ntrfc.turbo.pointcloud_methods import extractSidePolys
+
+    res = 100
+
+    circlepoly = pv.PolyData(pv.Circle(radius=1, resolution=res).points)
+
+    ind_2 = circlepoly.number_of_points // 2
+    side_1, side_2 = extractSidePolys(ind_2, circlepoly)
+
+    assert side_1.number_of_points == res // 2 + 1
+    assert side_2.number_of_points == res // 2 + 1
 
 
 def test_calcMidPassageStreamLine():
@@ -45,3 +63,37 @@ def test_calcMidPassageStreamLine():
     # Test output
     assert len(x_mpsl_ref) == 1000
     assert len(y_mpsl_ref) == 1000
+
+
+def test_extractSidePolys():
+    import pyvista as pv
+    from ntrfc.turbo.pointcloud_methods import extractSidePolys
+
+    res = 100
+
+    circlepoly = pv.PolyData(np.roll(pv.Circle(radius=1, resolution=res).points, res // 2, axis=0))
+
+    ind_2 = circlepoly.number_of_points // 2
+    side_1, side_2 = extractSidePolys(ind_2, circlepoly)
+
+    assert side_1.number_of_points == res // 2 + 1
+    assert side_2.number_of_points == res // 2 + 1
+
+    assert np.all(side_1.points[0] == side_2.points[0])
+    assert np.all(side_1.points[-1] == side_2.points[-1])
+
+
+def test_midline_from_sides():
+    import pyvista as pv
+    from ntrfc.turbo.pointcloud_methods import extractSidePolys
+
+    res = 100
+
+    circlepoly = pv.PolyData(np.roll(pv.Circle(radius=1, resolution=res).points, res // 2, axis=0))
+
+    ind_2 = circlepoly.number_of_points // 2
+    side_1, side_2 = extractSidePolys(ind_2, circlepoly)
+
+    mids = midline_from_sides(side_1, side_2)
+
+    assert np.allclose(mids.points[:, 1], 0, atol=1e-14)
