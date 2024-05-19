@@ -93,7 +93,7 @@ coverage_test:
       - build
 
 
-pages:
+docs:
   stage: docs
   <<: *environment
   script:
@@ -104,12 +104,23 @@ pages:
   artifacts:
     paths:
       - public
-  rules:
-    - exists:
-        - $CI_COMMIT_TAG
-    - exists:
-        - $CI_COMMIT_BRANCH
-        - $CI_DEFAULT_BRANCH
+#  only:
+#    - tags
+
+pages:
+  stage: deploy
+  <<: *environment
+  script:
+  - mkdir .public
+  - cp -r * .public
+  - mv .public public
+  artifacts:
+    paths:
+    - public
+#  only:
+#    - tags
+  dependencies:
+      - docs
 
 build-singularity:
   image:
