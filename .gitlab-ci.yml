@@ -104,8 +104,8 @@ docs:
   artifacts:
     paths:
       - public
-#  only:
-#    - tags
+  only:
+    - tags
 
 pages:
   stage: deploy
@@ -117,8 +117,8 @@ pages:
   artifacts:
     paths:
     - public
-#  only:
-#    - tags
+  only:
+    - tags
   dependencies:
       - docs
 

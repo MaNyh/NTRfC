@@ -71,4 +71,5 @@ From: ubuntu:20.04
     apt-get clean
 
 #%test
-#    pytest /opt/ntrfc/tests
+    cd /opt/ntrfc
+    pytest .
