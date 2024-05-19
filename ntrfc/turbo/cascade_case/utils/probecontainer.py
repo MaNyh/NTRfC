@@ -1,6 +1,6 @@
 import tempfile
 from dataclasses import dataclass, field
-
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -40,6 +40,7 @@ class ProbeContainer:
             tmpdir = tempfile.mkdtemp()
             path = tmpdir + "/plot.png"
         plotprobelist = self.filter_probes(groupname, positions)
+        matplotlib.use('Agg')
         plt.figure(figsize=(32, 24), dpi=200)
         for probe in plotprobelist:
             if probe.values[value][0].shape == (1,):
