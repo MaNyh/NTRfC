@@ -131,8 +131,8 @@ build-singularity:
     - echo $SYLABSTOKEN
     - singularity remote login --username $SREGISTRY_USERNAME --tokenfile $SYLABSTOKEN
     - singularity build --remote library://nyhuma/ntrflows/ntr.sif:latest singularitybuild/ntrfc_container.def
-  only:
-    - tags
+#  only:
+#    - tags
 
 publish:
   stage: deploy
