@@ -46,26 +46,20 @@ def calc_concavehull(x, y, alpha):
         edges = set()
         # Loop over triangles:
         # ia, ib, ic = indices of corner points of the triangle
-        for ia, ib, ic in tri.vertices:
+        for ia, ib, ic in tri.simplices:
             pa = points[ia]
             pb = points[ib]
             pc = points[ic]
-            # Computing radius of triangle circumcircle
-            # www.mathalino.com/reviewer/derivation-of-formulas/derivation-of-formula-for-radius-of-circumcircle
-            a = np.sqrt((pa[0] - pb[0]) ** 2 + (pa[1] - pb[1]) ** 2)
-            b = np.sqrt((pb[0] - pc[0]) ** 2 + (pb[1] - pc[1]) ** 2)
-            c = np.sqrt((pc[0] - pa[0]) ** 2 + (pc[1] - pa[1]) ** 2)
+            a = np.linalg.norm(pa - pb)
+            b = np.linalg.norm(pb - pc)
+            c = np.linalg.norm(pc - pa)
             s = (a + b + c) / 2.0
-
-            A = (s * (s - a) * (s - b) * (s - c))
-            if A > 0:
-                area = np.sqrt(A)
-
-                circum_r = a * b * c / (4.0 * area)
-                if circum_r < alpha:
-                    add_edge(edges, ia, ib)
-                    add_edge(edges, ib, ic)
-                    add_edge(edges, ic, ia)
+            area = np.sqrt(s * (s - a) * (s - b) * (s - c))
+            circum_r = a * b * c / (4.0 * area)
+            if circum_r < alpha:
+                add_edge(edges, ia, ib)
+                add_edge(edges, ib, ic)
+                add_edge(edges, ic, ia)
         return edges
 
     def find_edges_with(i, edge_set):
