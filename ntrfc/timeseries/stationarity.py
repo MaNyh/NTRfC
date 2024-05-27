@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy import signal
+from scipy.spatial.distance import jensenshannon
 
 from ntrfc.math.methods import minmax_normalize
 
@@ -76,6 +77,31 @@ def smd_probability_compare(sample1, sample2, verbose=False):
     #     plt.show()
     return similarity
 
+def calculate_histogram(signal, bins=30):
+    # Calculate histogram as an approximation of the distribution
+    hist, bin_edges = np.histogram(signal, bins=bins, density=True)
+    hist = hist / hist.sum()  # Normalize to make it a probability distribution
+    return hist
+
+def calculate_stationarity_score(sample_1, sample_2):
+
+    bins = optimal_bin_width(sample_1, sample_2)
+
+    def js_divergence_with_reference(sample1,sample2,bins):
+        hist1 = calculate_histogram(sample1, bins)
+        hist2 = calculate_histogram(sample2, bins)
+        return jensenshannon(hist1, hist2)
+
+    # Apply rol
+    # Calculate JS divergence for each rolling window compared to the reference
+    js_divergences = js_divergence_with_reference(sample_1,sample_2,bins)
+
+    # Calculate average distance
+    avg_distance = js_divergences
+    score = avg_distance  # Lower distance means more staionary
+
+    return score
+
 
 def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbose=False):
     """
@@ -107,30 +133,28 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
 
     # Get the length of the time series and define a range of allowed window sizes
     series_length = len(normalized_series)
-    allowed_window_sizes = np.array(range(int(series_length * min_interval), int(series_length * max_interval) + 1))
+    min_window_size = int(series_length * min_interval)
+    max_window_size = int(series_length * max_interval)
+    allowed_window_sizes = range(min_window_size, max_window_size)
 
-    # Iterate through the allowed window sizes and perform the Kolmogorov-Smirnov test and correlation coefficient calculation
-    mean_scores = []
-    var_scores = []
+
+    scores = []
     for window_size in allowed_window_sizes:
-        check_window = normalized_series[-window_size * 2:]
-        check_window_df = pd.DataFrame(check_window)
-        rolling_check = check_window_df.rolling(window_size)
-        mean_scores.append(np.std(rolling_check.mean()).values[0])
-        var_scores.append(np.std(rolling_check.var()).values[0])
+        window_1 = normalized_series[-window_size:]
+        window_2 = normalized_series[-window_size * 2:-window_size]
         # Compute the correlation coefficient
-    cumulated_scores = minmax_normalize(mean_scores) + minmax_normalize(np.array(var_scores))
+        scores.append(calculate_stationarity_score(window_1, window_2))
 
-    optimal_window_size_index = np.argmin(cumulated_scores)
+
+    optimal_window_size_index = np.argmin(scores)
     opt_window_size = allowed_window_sizes[optimal_window_size_index]
 
     #
     opt_window = time_series[-opt_window_size * 2:]
 
     assert len(opt_window) == opt_window_size * 2
-    probability_similiarity = smd_probability_compare(opt_window[:opt_window_size], opt_window[opt_window_size:])
 
-    if probability_similiarity < 0.96:
+    if scores[optimal_window_size_index] > 0.1:
         return False, False, False
 
     # Compute the period of the time series
