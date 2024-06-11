@@ -152,7 +152,8 @@ def generate_turbocascade(domain2d: CascadeDomain2D,
     miny = np.min(profilepoints_rolled_le.points[::, 1])
     # maxy = np.max(profilepoints_rolled_le.points[::, 1])
 
-    wake_angle = np.deg2rad(te_index)
+    wake_angle = np.deg2rad(-domain2d.blade.beta_te)
+
     gmsh.model.mesh.field.setNumber(w, "XCenter", minx + (maxx - minx) + 0.5 * meshconfig.wake_length)
     gmsh.model.mesh.field.setNumber(w, "YCenter",
                                     meshconfig.fake_yShiftCylinder + miny - 0.5 * meshconfig.wake_length * np.tan(
