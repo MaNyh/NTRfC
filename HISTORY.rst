@@ -1,7 +1,12 @@
 =======
 History
 =======
-=======
+
+0.1.11 (2024-06-11)
+------------------
+
+- wake angle hotfix (gmsh cascadecase)
+
 0.1.10 (2024-05-08)
 ------------------
 
@@ -9,7 +14,7 @@ History
 - test improvements
 - code cleanups and readme update
 
-=======
+
 0.1.9 (2024-03-15)
 ------------------
 
