@@ -8,9 +8,10 @@ from scipy.spatial import Voronoi
 from scipy.spatial.distance import cdist
 from shapely.geometry import Polygon, LineString
 from skimage.morphology import skeletonize
-
+from ntrfc.geometry.line import lines_from_points
+from ntrfc.turbo.pointcloud_methods import extractSidePolys, midline_from_sides
 from ntrfc.math.vectorcalc import findNearest, vecDir
-
+from tqdm import tqdm
 
 def detect_inliers_tukey(data):
     """
@@ -74,6 +75,10 @@ def clean_sites(voronoi_sites, skeletonize_sites):
     inliers_turkey = detect_inliers_tukey(min_distances)
     inliers_mad = detect_inliers_mad(min_distances)
     inliers_zscore = detect_inliers_zscore(min_distances)
+        # Compute the intersection with the polygon of all rays
+        intersections_positive = [LineString([centers[i], ray_positive[i]]).intersection(shapelypoly) for i in range(len(centers))]
+        intersections_negative = [LineString([centers[i], ray_negative[i]]).intersection(shapelypoly) for i in range(len(centers))]
+
 
     inlier_indices = np.where(inliers_turkey * inliers_zscore * inliers_mad)[0]
 
@@ -82,29 +87,90 @@ def clean_sites(voronoi_sites, skeletonize_sites):
 
 
 def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
-    voronoires = 16000
-    skeletonres = 6000
+    voronoires = 64000
 
     points_orig = sortedPoly.points
+    npts = len(points_orig)
     points_2d_closed_refined_voronoi = pointcloud_to_profile(points_orig, voronoires)
-    points_2d_closed_refined_skeletonize = pointcloud_to_profile(points_orig, skeletonres)
 
-    voronoi_sites = voronoi_skeleton_sites(points_2d_closed_refined_voronoi)
-    skeletonize_sites = skeletonize_skeleton_sites(points_2d_closed_refined_skeletonize)
+    #create sheply polygon from refined pointset
+    shapelypoly = Polygon(points_2d_closed_refined_voronoi)
+    raylength = 1000
+    # todo; estimate le and te regions, only check combinations of these
 
-    valid_midline = clean_sites(voronoi_sites, skeletonize_sites)
-    sort_indices = np.argsort(valid_midline[:, 0])
-    valid_midline_sorted = valid_midline[sort_indices]
+    min_x = np.min(points_orig[:, 0])
+    max_x = np.max(points_orig[:, 0])
 
-    smoothing = 0
+    le_est_xmax = min_x + 0.01 * (max_x - min_x)
+    te_est_xmin = max_x - 0.01 * (max_x - min_x)
 
-    u_new = np.arange(0, 1, 1 / 1024)
-    (tck, u), fp, ier, msg = splprep((valid_midline_sorted[::, 0], valid_midline_sorted[::, 1]), u=None, per=0, k=3,
-                                     s=smoothing,
-                                     full_output=True)  # s = optional parameter (default used here)
-    x_new, y_new = splev(u_new, tck, der=0)
-    le_ind, te_ind, skeletonline_complete = skeletonline_completion(2, points_orig, points_2d_closed_refined_voronoi,
-                                                                    np.stack([x_new[1:-1], y_new[1:-1]]).T)
+    le_indices = np.where(points_orig[:, 0] < le_est_xmax)[0]
+    te_indices = np.where(points_orig[:, 0] > te_est_xmin)[0]
+
+
+    combinations = [(i, j) for i in le_indices for j in te_indices]
+
+
+
+    rms_errors = []
+    #max_errors = []
+
+    midsp = []
+    for i, j in tqdm(combinations):
+        ind_1_start = i
+        ind_2_start = j
+
+        ps_pv, ss_pv = extractSidePolys(ind_1_start,ind_2_start, sortedPoly)
+
+        mid = lines_from_points(midline_from_sides(ps_pv, ss_pv,res=200).points)
+
+        mid_normals = mid.extrude([0,0,1]).compute_normals().slice("z").compute_cell_sizes()
+
+        normals = mid_normals["Normals"]
+        lengths = mid_normals["Length"]
+        centers = mid_normals.cell_centers().points
+
+        ray_positive = centers + raylength * normals
+        ray_negative = centers - raylength * normals
+
+        # Compute the intersection with the polygon of all rays
+        intersections_positive = [LineString([centers[i], ray_positive[i]]).intersection(shapelypoly) for i in range(len(centers))]
+        intersections_negative = [LineString([centers[i], ray_negative[i]]).intersection(shapelypoly) for i in range(len(centers))]
+
+        # compute length of each intersection
+        lengths_positive = np.array([line.length for line in intersections_positive])
+        lengths_negative = np.array([line.length for line in intersections_negative])
+
+        differences = np.abs(lengths_positive - lengths_negative) /((lengths_positive + lengths_negative)/2)
+
+        rms_error = np.sqrt(np.mean(differences**2))
+
+        rms_errors.append(rms_error)
+       # max_errors.append(np.max(differences))
+
+        # mid_normals["diff"]=differences
+        # midsp.append(mid_normals)
+
+        # verbose = False
+        # if verbose:
+        #     p = pv.Plotter()
+        #     mid_normals = mid_normals.translate([0, 0, -mid_normals.bounds[5]])
+        #     p.add_mesh(mid_normals, scalars="diff")
+        #     p.add_mesh(ps_pv, color="red")
+        #     p.add_mesh(ss_pv, color="green")
+        #     for ineg in intersections_negative:
+        #         p.add_mesh(pv.Line(*np.array(ineg.coords) - ineg.coords[0][2]), color="blue")
+        #     for ipos in intersections_positive:
+        #         p.add_mesh(pv.Line(*np.array(ipos.coords) - ipos.coords[0][2]), color="green")
+        #     p.add_mesh(pv.PolyData(np.zeros(3)), color="black")
+        #     p.view_xy()
+        #     p.show_axes()
+        #     p.show()
+
+
+    inds = combinations[np.argmin(rms_errors)]
+    le_ind = inds[np.argmin(points_orig[inds][:, 0])]
+    te_ind = inds[np.argmax(points_orig[inds][:, 0])]
 
     return le_ind, te_ind
 

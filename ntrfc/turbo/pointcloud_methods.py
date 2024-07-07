@@ -4,11 +4,11 @@ import pyvista as pv
 from ntrfc.geometry.line import refine_spline, polyline_from_points
 
 
-def midline_from_sides(ps_poly, ss_poly):
+def midline_from_sides(ps_poly, ss_poly,res =100):
     x_ps, y_ps = ps_poly.points[::, 0], ps_poly.points[::, 1]
     x_ss, y_ss = ss_poly.points[::, 0], ss_poly.points[::, 1]
     z = ps_poly.points[0][2]
-    midsres = 100
+    midsres = res
     if x_ps[0] > x_ps[-1]:
         ax, ay = refine_spline(x_ps[::-1], y_ps[::-1], midsres)
     else:
@@ -23,12 +23,16 @@ def midline_from_sides(ps_poly, ss_poly):
     return midsPoly
 
 
-def extractSidePolys(ind_2, sortedPoly):
+def extractSidePolys(ind_1, ind_2, sortedPoly):
     # xs, ys = list(sortedPoly.points[::, 0]), list(sortedPoly.points[::, 1])
     indices = np.arange(0, sortedPoly.number_of_points)
 
-    side_one_idx = indices[0:ind_2 + 1]
-    side_two_idx = np.concatenate([[0], indices[ind_2:][::-1]])
+    if ind_2 > ind_1:
+        side_one_idx = indices[ind_1:ind_2 + 1]
+        side_two_idx = np.concatenate((indices[:ind_1 + 1][::-1], indices[ind_2:][::-1]))
+    elif ind_1 > ind_2:
+        side_one_idx = indices[ind_2:ind_1 + 1]
+        side_two_idx = np.concatenate((indices[:ind_2 + 1][::-1], indices[ind_1:][::-1]))
 
     side_one = pv.PolyData()
     for i in side_one_idx:
