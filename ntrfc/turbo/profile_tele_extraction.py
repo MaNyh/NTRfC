@@ -11,7 +11,6 @@ from skimage.morphology import skeletonize
 from ntrfc.geometry.line import lines_from_points
 from ntrfc.turbo.pointcloud_methods import extractSidePolys, midline_from_sides
 from ntrfc.math.vectorcalc import findNearest, vecDir
-from tqdm import tqdm
 
 def detect_inliers_tukey(data):
     """
@@ -75,10 +74,6 @@ def clean_sites(voronoi_sites, skeletonize_sites):
     inliers_turkey = detect_inliers_tukey(min_distances)
     inliers_mad = detect_inliers_mad(min_distances)
     inliers_zscore = detect_inliers_zscore(min_distances)
-        # Compute the intersection with the polygon of all rays
-        intersections_positive = [LineString([centers[i], ray_positive[i]]).intersection(shapelypoly) for i in range(len(centers))]
-        intersections_negative = [LineString([centers[i], ray_negative[i]]).intersection(shapelypoly) for i in range(len(centers))]
-
 
     inlier_indices = np.where(inliers_turkey * inliers_zscore * inliers_mad)[0]
 
@@ -96,7 +91,6 @@ def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
     #create sheply polygon from refined pointset
     shapelypoly = Polygon(points_2d_closed_refined_voronoi)
     raylength = 1000
-    # todo; estimate le and te regions, only check combinations of these
 
     min_x = np.min(points_orig[:, 0])
     max_x = np.max(points_orig[:, 0])
@@ -116,7 +110,7 @@ def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
     #max_errors = []
 
     midsp = []
-    for i, j in tqdm(combinations):
+    for i, j in combinations:
         ind_1_start = i
         ind_2_start = j
 
@@ -169,8 +163,8 @@ def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
 
 
     inds = combinations[np.argmin(rms_errors)]
-    le_ind = inds[np.argmin(points_orig[inds][:, 0])]
-    te_ind = inds[np.argmax(points_orig[inds][:, 0])]
+    le_ind = inds[np.argmin([points_orig[inds[0]][0], points_orig[inds[1]][0]])]
+    te_ind = inds[np.argmax([points_orig[inds[0]][0], points_orig[inds[1]][0]])]
 
     return le_ind, te_ind
 
