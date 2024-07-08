@@ -75,7 +75,7 @@ class Blade2D:
         self.sortedpointsrolled_pv = newSortedPoly
 
     def extract_sides(self):
-        self.ps_pv, self.ss_pv = extractSidePolys(self.ite, self.sortedpointsrolled_pv)
+        self.ps_pv, self.ss_pv = extractSidePolys(self.ite,self.ile, self.sortedpointsrolled_pv)
 
     def compute_skeleton(self):
         self.skeletonline_pv = midline_from_sides(self.ps_pv, self.ss_pv)
