@@ -28,12 +28,12 @@ def test_optimal_timewindow(verbose=False):
     # tanh
     tanh = np.tanh(x * 2)
     opt_window, opt_window_size, nperiods = optimal_window_size(tanh, min_interval, max_interval)
-    assert opt_window_size == res * min_interval
+    assert opt_window_size / 2 == res * min_interval
     assert nperiods == 0
     # euler
     eul = np.e ** (-x * 60)
     opt_window, opt_window_size, nperiods = optimal_window_size(eul, min_interval, max_interval)
-    assert opt_window_size == res * min_interval
+    assert opt_window_size / 2== res * min_interval
     assert nperiods == 0
 
 

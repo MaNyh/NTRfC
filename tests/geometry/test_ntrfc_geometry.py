@@ -19,15 +19,13 @@ def test_extract_vk_hk(verbose=False):
     angle = 0  # deg
     res = 512
     xs, ys = naca(naca_code, res, half_cosine_spacing=False, finite_te=False)
-    sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
+    sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle, inplace=True)
     X, Y = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
     ind_1 = res
     ind_2 = 0
 
-    points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
-    profile_points = pv.PolyData(points)
-    sorted_poly = pv.PolyData(profile_points)
+
     ind_vk, ind_hk = extract_vk_hk(sorted_poly)
 
     if verbose:
@@ -37,8 +35,12 @@ def test_extract_vk_hk(verbose=False):
         p.add_mesh(sorted_poly)
         p.show()
 
-    assert ind_hk == ind_2, "wrong hk-index chosen"
-    assert ind_vk == ind_1, "wrong vk-index chosen"
+    assert all(sorted_poly.points[ind_2] == sorted_poly.points[ind_hk])
+    assert all(sorted_poly.points[ind_1] == sorted_poly.points[ind_vk])
+
+
+
+
 
 
 def test_midline_from_sides(verbose=False):
