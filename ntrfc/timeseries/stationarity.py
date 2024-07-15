@@ -205,36 +205,17 @@ def estimate_stationarity(timeseries, verbose=False):
     reference_mean = np.mean(reference_window)
     reference_variance = np.var(reference_window)
     opt_rolling_window = pd.DataFrame(reference_window).rolling(window=opt_window_size//2)
-    opt_rolling_window_half = pd.DataFrame(normalized_series[-opt_window_size // 2:]).rolling(
-        window=opt_window_size // 4)
-
 
     rolling_means = opt_rolling_window.mean().values
     rolling_vars = opt_rolling_window.var().values
 
-    rolling_means_half = opt_rolling_window_half.mean().values
-    rolling_vars_half = opt_rolling_window_half.var().values
-
     mean_uncertainty = np.nanstd(rolling_means)
     var_uncertainty = np.nanstd(rolling_vars)
 
-    mean_half = np.nanmean(rolling_means_half)
-    var_half = np.nanmean(rolling_vars_half)
 
+    mean_tolerance = (0.005)
+    var_tolerance = 0.15*mean_tolerance
 
-    sterr_mean = np.nanstd(rolling_means)/np.sqrt(len(rolling_means)-np.sum(np.isnan(rolling_means)))
-    sterr_var = np.nanstd(rolling_vars)/np.sqrt(len(rolling_vars)-np.sum(np.isnan(rolling_vars)))
-
-    mean_ratio = abs((reference_mean-mean_half) / reference_mean)
-    var_ratio = abs((reference_variance-var_half) / reference_variance)
-
-    mean_rtolerance = 0.001
-    mean_leftover = mean_rtolerance - mean_ratio
-    mean_tolerance = mean_leftover*reference_mean
-
-    var_rtolerance = 0.002
-    var_leftover = var_rtolerance - var_ratio
-    var_tolerance = var_leftover*reference_variance
 
 
     checkseries = normalized_series[:-opt_window_size]
@@ -267,7 +248,7 @@ def estimate_stationarity(timeseries, verbose=False):
 
     variance_index = datalength - last_coherent_interval(rolling_vars_errors_inliers_reversed) - 3 * opt_window_size//2
 
-    stationary_start_index = max(mean_index, variance_index)
+    stationary_start_index = max(mean_index, variance_index)-opt_window_size//2
 
     # if verbose:
     #     fig, axs = plt.subplots(3, 1, figsize=(24, 20))
