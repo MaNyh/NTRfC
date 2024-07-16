@@ -145,7 +145,7 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
         else:
             return 0
 
-    #scores = []
+    scores = []
     mean_scores = []
     var_scores = []
     for window_size in allowed_window_sizes:
@@ -154,7 +154,7 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
         mean_scores.append(rdiff(window_1.mean(), window_2.mean()))
         var_scores.append(rdiff(window_1.var(), window_2.var()))
         # Compute the correlation coefficient
-        #scores.append(calculate_stationarity_score(window_1, window_2))
+        scores.append(calculate_stationarity_score(window_1, window_2))
 
     mean_scores = np.array(mean_scores)
     var_scores = np.array(var_scores)
@@ -168,7 +168,7 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
 
     assert len(opt_window) == opt_window_size
 
-    if cumulated_scores[optimal_window_size_index] > 0.1:
+    if scores[optimal_window_size_index] > 0.1:
         return False, False, False
 
     # Compute the period of the time series
