@@ -12,6 +12,8 @@ from ntrfc.geometry.line import lines_from_points
 from ntrfc.turbo.pointcloud_methods import extractSidePolys, midline_from_sides
 from ntrfc.math.vectorcalc import findNearest, vecDir
 from scipy.optimize import differential_evolution
+from dataclasses import dataclass
+
 def detect_inliers_tukey(data):
     """
     Detect inliers using Tukey's method.
@@ -133,17 +135,19 @@ def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
     valid_midline = clean_sites(voronoi_sites, skeletonize_sites)
     sort_indices = np.argsort(valid_midline[:, 0])
     valid_midline_sorted = valid_midline[sort_indices]
-    smoothing = 0.01
+    smoothing = 0.00001
 
     u_new = np.arange(0, 1, 1 / 1024)
     (tck, u), fp, ier, msg = splprep((valid_midline_sorted[::, 0], valid_midline_sorted[::, 1]), u=None, per=0, k=3,
                                      s=smoothing,
                                      full_output=True)  # s = optional parameter (default used here)
     x_new, y_new = splev(u_new, tck, der=0)
-    le_ind, te_ind, skeletonline_complete = skeletonline_completion(2, points_orig, points_2d_closed_refined_voronoi,
-                                                                    np.stack([x_new[1:-1], y_new[1:-1]]).T)
 
-    rms_error = compute_midline_error(le_ind, te_ind,sortedPoly,shapelypoly)
+
+    le_ind, te_ind, skeletonline_complete = skeletonline_completion(2, points_orig, points_2d_closed_refined_voronoi,
+                                                                    np.stack([x_new, y_new]).T)
+
+    rms_error_ref = compute_midline_error(le_ind, te_ind,sortedPoly,shapelypoly)
 
     # Define the objective function
     def objective_function(indices, sortedPoly, shapelypoly):
@@ -151,32 +155,95 @@ def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
         rms_error_le_up = compute_midline_error(le_ind, te_ind, sortedPoly, shapelypoly)
         return rms_error_le_up
 
-    le_search_interval = 6
-    te_search_interval = 6
+    @dataclass
+    class SkeletonResult:
+        le_ind: int
+        te_ind: int
+        rms_error: float
 
-    le_min = (le_ind - le_search_interval) % npts
-    te_min = (te_ind - te_search_interval) % npts
 
-#    le_max = (le_ind + 20) % npts
-#    te_max = (te_ind + 20) % npts
+    # optimize te
+    search_te_pos = 3
+    te_pos_ind = te_ind
+    search_te_neg = 3
+    te_neg_ind = te_ind
+    search_le_pos = 3
+    le_pos_ind = le_ind
+    search_le_neg = 3
+    le_neg_ind = le_ind
+    search_le_neg_te_pos = 3
+    le_neg_te_pos_le_ind = le_ind
+    le_neg_te_pos_te_ind = te_ind
+    search_le_pos_te_neg = 3
+    le_pos_te_neg_le_ind = le_ind
+    le_pos_te_neg_te_ind = te_ind
+    search_le_neg_te_neg = 3
+    le_neg_te_neg_le_ind = le_ind
+    le_neg_te_neg_te_ind = te_ind
+    search_le_pos_te_pos = 3
+    le_pos_te_pos_le_ind = le_ind
+    le_pos_te_pos_te_ind = te_ind
 
-    allowed_le = [(i+le_min)% npts for i in range(2*le_search_interval)]
-    allowed_te = [(i+te_min)% npts for i in range(2*te_search_interval)]
+    skeletonresults = []
+    skeletonresults.append(SkeletonResult(le_ind, te_ind, rms_error_ref))
 
-    specific_combinations = np.array(np.meshgrid(allowed_le, allowed_te)).T.reshape(-1, 2)
 
-    # Initialize the best values
-    best_combination = None
-    best_rms_error = float('inf')
+    while search_te_pos > 0:
+        te_pos_ind = (te_pos_ind + 1) % npts
+        rms_error_te_pos = objective_function([le_ind, te_pos_ind], sortedPoly, shapelypoly)
+        skeletonresults.append(SkeletonResult(le_ind, te_pos_ind, rms_error_te_pos))
+        if rms_error_te_pos > rms_error_ref:
+            search_te_pos -= 1
+    while search_te_neg > 0:
+        te_neg_ind = (te_neg_ind - 1) % npts
+        rms_error_te_neg = objective_function([le_ind, te_neg_ind], sortedPoly, shapelypoly)
+        skeletonresults.append(SkeletonResult(le_ind, te_neg_ind, rms_error_te_neg))
+        if rms_error_te_neg > rms_error_ref:
+            search_te_neg -= 1
+    while search_le_pos > 0:
+        le_pos_ind = (le_pos_ind + 1) % npts
+        rms_error_le_pos = objective_function([le_pos_ind, te_ind], sortedPoly, shapelypoly)
+        skeletonresults.append(SkeletonResult(le_pos_ind, te_ind, rms_error_le_pos))
+        if rms_error_le_pos > rms_error_ref:
+            search_le_pos -= 1
+    while search_le_neg > 0:
+        le_neg_ind = (le_neg_ind - 1) % npts
+        rms_error_le_neg = objective_function([le_neg_ind, te_ind], sortedPoly, shapelypoly)
+        skeletonresults.append(SkeletonResult(le_neg_ind, te_ind, rms_error_le_neg))
+        if rms_error_le_neg > rms_error_ref:
+            search_le_neg -= 1
+    while search_le_neg_te_pos > 0:
+        le_neg_te_pos_le_ind = (le_neg_te_pos_le_ind - 1) % npts
+        le_neg_te_pos_te_ind = (le_neg_te_pos_te_ind + 1) % npts
+        rms_error_le_neg_te_pos = objective_function([le_neg_te_pos_le_ind, le_neg_te_pos_te_ind], sortedPoly, shapelypoly)
+        skeletonresults.append(SkeletonResult(le_neg_te_pos_le_ind, le_neg_te_pos_te_ind, rms_error_le_neg_te_pos))
+        if rms_error_le_neg_te_pos > rms_error_ref:
+            search_le_neg_te_pos -= 1
+    while search_le_pos_te_neg > 0:
+        le_pos_te_neg_le_ind = (le_pos_te_neg_le_ind + 1) % npts
+        le_pos_te_neg_te_ind = (le_pos_te_neg_te_ind - 1) % npts
+        rms_error_le_pos_te_neg = objective_function([le_pos_te_neg_le_ind, le_pos_te_neg_te_ind], sortedPoly, shapelypoly)
+        skeletonresults.append(SkeletonResult(le_pos_te_neg_le_ind, le_pos_te_neg_te_ind, rms_error_le_pos_te_neg))
+        if rms_error_le_pos_te_neg > rms_error_ref:
+            search_le_pos_te_neg -= 1
+    while search_le_neg_te_neg > 0:
+        le_neg_te_neg_le_ind = (le_neg_te_neg_le_ind - 1) % npts
+        le_neg_te_neg_te_ind = (le_neg_te_neg_te_ind - 1) % npts
+        rms_error_le_neg_te_neg = objective_function([le_neg_te_neg_le_ind, le_neg_te_neg_te_ind], sortedPoly, shapelypoly)
+        skeletonresults.append(SkeletonResult(le_neg_te_neg_le_ind, le_neg_te_neg_te_ind, rms_error_le_neg_te_neg))
+        if rms_error_le_neg_te_neg > rms_error_ref:
+            search_le_neg_te_neg -= 1
+    while search_le_pos_te_pos > 0:
+        le_pos_te_pos_le_ind = (le_pos_te_pos_le_ind + 1) % npts
+        le_pos_te_pos_te_ind = (le_pos_te_pos_te_ind + 1) % npts
+        rms_error_le_pos_te_pos = objective_function([le_pos_te_pos_le_ind, le_pos_te_pos_te_ind], sortedPoly, shapelypoly)
+        skeletonresults.append(SkeletonResult(le_pos_te_pos_le_ind, le_pos_te_pos_te_ind, rms_error_le_pos_te_pos))
+        if rms_error_le_pos_te_pos > rms_error_ref:
+            search_le_pos_te_pos -= 1
 
-    # Evaluate the objective function for each combination
-    for indices in specific_combinations:
-        rms_error = objective_function(indices, sortedPoly, shapelypoly)
-        if rms_error < best_rms_error:
-            best_rms_error = rms_error
-            best_combination = indices
+    best_combination = min(skeletonresults, key=lambda x: x.rms_error)
 
-    le_ind_best, te_ind_best = best_combination
+    le_ind_best, te_ind_best = best_combination.le_ind, best_combination.te_ind
     return le_ind_best, te_ind_best
 
 
@@ -268,6 +335,8 @@ def polygon_to_binary_image(polygon, image_size):
 def compute_midline(polygon, image_size):
     # Convert polygon to binary image
     binary_img = polygon_to_binary_image(polygon, image_size)
+    # crop all-zero rows of the binary_img
+    binary_img = binary_img[~np.all(binary_img == 0, axis=1)]
 
     # Apply skeletonization
     skeleton = skeletonize(binary_img, method='lee')
