@@ -21,7 +21,6 @@ def test_extract_vk_hk(verbose=False):
     xs, ys = naca(naca_code, res, half_cosine_spacing=False, finite_te=False)
     sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     sorted_poly.rotate_z(angle, inplace=True)
-    X, Y = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
     ind_1 = res
     ind_2 = 0
 
@@ -33,6 +32,7 @@ def test_extract_vk_hk(verbose=False):
         p.add_mesh(sorted_poly.points[ind_hk], color="yellow", point_size=20)
         p.add_mesh(sorted_poly.points[ind_vk], color="red", point_size=20)
         p.add_mesh(sorted_poly)
+        p.view_xy()
         p.show()
 
     assert all(sorted_poly.points[ind_2] == sorted_poly.points[ind_hk])

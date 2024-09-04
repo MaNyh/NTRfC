@@ -102,7 +102,7 @@ def test_t106():
 
     blade = Blade2D(points)
     blade.compute_all_frompoints()
-    blade.plot()
+
     bladepts = blade.sortedpointsrolled_pv.points
 
     xs, ys = bladepts[:, 0], bladepts[:, 1]

@@ -97,9 +97,9 @@ class Blade2D:
         self.compute_skeleton()
         self.compute_stats()
 
-    def plot(self, figurepath=tempfile.mkdtemp() + "/plot.png", window_size=[2400, 2400]):
+    def plot(self, figurepath=tempfile.mkdtemp() + "/plot.png", window_size=[2400, 2400],off_screen=True):
         sfactor = window_size[0] / 200
-        p = pv.Plotter(off_screen=True)
+        p = pv.Plotter(off_screen=off_screen)
         p.add_mesh(self.ps_pv, color="red", label="pressure side", line_width=1)
         p.add_mesh(self.ss_pv, color="blue", label="suction side", line_width=1)
         p.add_mesh(self.skeletonline_pv, color="black", label="skeleton line", line_width=1)
