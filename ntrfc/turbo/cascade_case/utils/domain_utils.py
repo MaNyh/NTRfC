@@ -14,15 +14,15 @@ from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
 class Blade2D:
     def __init__(self, points: np.ndarray or pv.PolyData):
         self.origpoints_pv = None
-        self.__sortedpoints_pv = None
+        self.sortedpoints_pv = None
         self.sortedpointsrolled_pv = None
         self.periodicsplinepoints = None
         self.skeletonline_pv = None
         self.ps_pv = None
         self.ss_pv = None
         self.hullalpha = None
-        self.__ile_orig = None
-        self.__ite_orig = None
+        self.ile_orig = None
+        self.ite_orig = None
         self.ile = None
         self.ite = None
         self.beta_le = None
@@ -55,22 +55,22 @@ class Blade2D:
             index_sort = index_sort[::-1]
 
         self.hullalpha = alpha
-        self.__sortedpoints_pv = pv.PolyData()
+        self.sortedpoints_pv = pv.PolyData()
 
         for i in index_sort:
-            self.__sortedpoints_pv = self.__sortedpoints_pv.merge(self.origpoints_pv.extract_points([i]))
+            self.sortedpoints_pv = self.sortedpoints_pv.merge(self.origpoints_pv.extract_points([i]))
 
     def compute_lete(self):
-        self.__ile_orig, self.__ite_orig = extract_vk_hk(self.__sortedpoints_pv)
+        self.ile_orig, self.ite_orig = extract_vk_hk(self.sortedpoints_pv)
 
     def compute_rolledblade(self):
-        ids = np.roll(np.arange(self.__sortedpoints_pv.number_of_points), -self.__ile_orig)
+        ids = np.roll(np.arange(self.sortedpoints_pv.number_of_points), -self.ile_orig)
 
         newSortedPoly = pv.PolyData()
         for i in ids:
-            newSortedPoly = newSortedPoly.merge(self.__sortedpoints_pv.extract_points(i))
+            newSortedPoly = newSortedPoly.merge(self.sortedpoints_pv.extract_points(i))
 
-        self.ite = (self.__ile_orig - self.__ite_orig) % newSortedPoly.number_of_points
+        self.ite = (self.ite_orig - self.ile_orig) % newSortedPoly.number_of_points
         self.ile = 0
         self.sortedpointsrolled_pv = newSortedPoly
 
