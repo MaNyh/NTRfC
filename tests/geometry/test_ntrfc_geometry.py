@@ -50,7 +50,7 @@ def test_midline_from_sides(verbose=False):
     import numpy as np
     import pyvista as pv
 
-    res = 512
+    res = 256
     x, y = naca('0009', res, half_cosine_spacing=True)
 
     points = np.stack((x[:], y[:], np.zeros(res * 2))).T
