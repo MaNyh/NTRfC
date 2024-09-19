@@ -229,25 +229,25 @@ def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
     error_data=np.array(error_data)
 
     # get best 10% of combinations
-    arr = np.argsort(error_data[:, 2])[:int(len(error_data) * 0.1)]
-    arr.sort()
-    arr_indices = error_data[arr][:, :2].astype(int)
-    front_unique = np.unique(arr_indices[:, 0])
-    back_unique = np.unique(arr_indices[:, 1])
+    percentile_value = np.percentile(error_data[:, 2], 10)
+    lowest10 = error_data[np.where(error_data[:, 2] < percentile_value)]
+
+    front_unique = np.unique(lowest10[:, 0])
+    back_unique = np.unique(lowest10[:, 1])
 
     front_refined = []
     back_refined = []
     for i in front_unique:
-        front_refined.append(i)
+        front_refined.append(int(i))
         for j in range(stepsize):
-            front_refined.append((i + j)%sortedPoly.number_of_points)
-            front_refined.append((i - j)%sortedPoly.number_of_points)
+            front_refined.append(int((i + j)%sortedPoly.number_of_points))
+            front_refined.append(int((i - j)%sortedPoly.number_of_points))
 
     for i in back_unique:
-        back_refined.append(i)
+        back_refined.append(int(i))
         for j in range(stepsize):
-            back_refined.append((i + j)%sortedPoly.number_of_points)
-            back_refined.append((i - j)%sortedPoly.number_of_points)
+            back_refined.append(int((i + j)%sortedPoly.number_of_points))
+            back_refined.append(int((i - j)%sortedPoly.number_of_points))
 
     front_refined = np.unique(np.array(front_refined))
     back_refined = np.unique(np.array(back_refined))
@@ -267,7 +267,7 @@ def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
     best_combination_fine = specific_combinations_fine[np.argmin(error_data_fine, axis=0)[2]]
 
 
-    le_ind_best, te_ind_best = best_combination_fine[0], best_combination_fine[1]
+    le_ind_best, te_ind_best = int(best_combination_fine[0]), int(best_combination_fine[1])
 
     return le_ind_best, te_ind_best
 
