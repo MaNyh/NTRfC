@@ -103,12 +103,9 @@ def test_t106():
     blade = Blade2D(points)
     blade.compute_all_frompoints()
 
-    bladepts = blade.sortedpointsrolled_pv.points
+    ite = blade.ite_orig
 
-    xs, ys = bladepts[:, 0], bladepts[:, 1]
-    ite = blade.ite
-
-    ite_test = len(xs) // 2
-    ite_tol = 2
+    ite_test = 86
+    ite_tol = 1
 
     assert np.abs(ite - ite_test) <= ite_tol

@@ -11,9 +11,7 @@ from skimage.morphology import skeletonize
 from ntrfc.geometry.line import lines_from_points
 from ntrfc.turbo.pointcloud_methods import extractSidePolys, midline_from_sides
 from ntrfc.math.vectorcalc import findNearest, vecDir
-from ntrfc.math.methods import minmax_normalize
-
-
+from ntrfc.geometry.alphashape import auto_concaveHull
 
 def detect_inliers_tukey(data):
     """
@@ -84,10 +82,80 @@ def clean_sites(voronoi_sites, skeletonize_sites):
     return valid_midline
 
 
+
+def periodic_weights(length, ind_1, ind_2):
+    """
+    Generate a periodic signal of given length with maxima at ind_1 and ind_2
+    and minima in between, with all values between 0 and 1.
+
+    Parameters:
+    - length: Total length of the signal.
+    - ind_1: Index of the first maximum (must be less than ind_2).
+    - ind_2: Index of the second maximum (must be greater than ind_1).
+
+    Returns:
+    - A numpy array containing the periodic signal.
+    """
+
+    # Create an array of zeros
+    signal = np.zeros(length)
+
+    # 1. Rise from 0 to maximum at ind_1
+    slope_rise_1 = 1 / ind_1
+    for i in range(ind_1):
+        signal[i] = slope_rise_1 * i  # Linear rise from 0 to 1
+
+    # 2. Fall from maximum at ind_1 to minimum (0) at midpoint between ind_1 and ind_2
+    mid_point = (ind_1 + ind_2) // 2
+    slope_fall = -1 / (mid_point - ind_1)
+    for i in range(ind_1, mid_point):
+        signal[i] = 1 + slope_fall * (i - ind_1)  # Linear fall from 1 to 0
+
+    # 3. Rise again from minimum (0) to maximum at ind_2
+    slope_rise_2 = 1 / (ind_2 - mid_point)
+    for i in range(mid_point, ind_2):
+        signal[i] = slope_rise_2 * (i - mid_point)  # Linear rise from 0 to 1
+
+    # 4. Fall to 0 by the end (to ensure periodicity)
+    slope_fall_2 = -1 / (length - ind_2)
+    for i in range(ind_2, length):
+        signal[i] = 1 + slope_fall_2 * (i - ind_2)  # Linear fall from 1 to 0
+
+    return signal
+
+
+import numpy as np
+from scipy.interpolate import CubicSpline
+
+
+def curvature_spline(points):
+    # Punkte auf x- und y-Koordinaten aufteilen
+    points = np.array(points)
+    x = points[:, 0]
+    y = points[:, 1]
+
+    # Spline-Interpolation mit scipy
+    cs_x = CubicSpline(np.arange(len(x)), x)
+    cs_y = CubicSpline(np.arange(len(y)), y)
+
+    # Erste und zweite Ableitung des Splines berechnen
+    t = np.linspace(0, len(x) - 1, len(points))  # Parameterwerte für den Spline (z.B. 1000 Schritte)
+    dx = cs_x(t, 1)
+    dy = cs_y(t, 1)
+    ddx = cs_x(t, 2)
+    ddy = cs_y(t, 2)
+
+    # Krümmung für jeden Punkt berechnen
+    curvature = np.abs(dx * ddy - dy * ddx) / (dx ** 2 + dy ** 2) ** (3 / 2)
+
+    return curvature
+
+
+
 def compute_midline_error(ind_1_start, ind_2_start, sortedPoly, shapelypoly):
     ps_pv, ss_pv = extractSidePolys(ind_1_start, ind_2_start, sortedPoly)
 
-    mid = lines_from_points(midline_from_sides(ps_pv, ss_pv, res=200).points)
+    mid = lines_from_points(midline_from_sides(ps_pv, ss_pv, res=50).points)
 
     mid_normals = mid.extrude([0, 0, 1]).compute_normals().slice("z").compute_cell_sizes()
 
@@ -110,108 +178,98 @@ def compute_midline_error(ind_1_start, ind_2_start, sortedPoly, shapelypoly):
     lengths_positive = np.array([line.length for line in intersections_positive])
     lengths_negative = np.array([line.length for line in intersections_negative])
 
-    differences = np.abs(lengths_positive - lengths_negative) / ((lengths_positive + lengths_negative) / 2)
-    T=len(differences)
-    t = minmax_normalize(np.arange(T))
-    weights = 3.6*t**2-3.6*t+1
-    rms_error = np.sqrt(np.mean(weights*differences ** 2))
+    thicknesses = np.min(np.stack([lengths_positive, lengths_negative]).T, axis=1)
+    reconstructed_pts_positive = centers + thicknesses[:, np.newaxis] * normals
+    reconstructed_pts_negative = centers - thicknesses[:, np.newaxis] * normals
+    reconstructed_pts = np.concatenate([reconstructed_pts_positive, reconstructed_pts_negative])
 
-    return rms_error
+    rec_xx,rec_yy ,_= auto_concaveHull(reconstructed_pts[:,0],reconstructed_pts[:,1])
 
+    reconstructed_shapepoly = Polygon(np.stack((rec_xx,rec_yy)).T)
+
+    #error_thickness = np.mean(differences/thicknesses)
+    error_area = reconstructed_shapepoly.symmetric_difference(shapelypoly).area/shapelypoly.area
+    error_perimeter = abs(reconstructed_shapepoly.length-shapelypoly.length)/shapelypoly.length
+    error_hausdorf = reconstructed_shapepoly.hausdorff_distance(shapelypoly)
+
+    return error_area * error_perimeter * error_hausdorf
 
 def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
-    voronoires = 16000
-    skeletonres = 6000
+    voronoires = 64000
 
     points_orig = sortedPoly.points
     points_2d_closed_refined_voronoi = pointcloud_to_profile(points_orig, voronoires)
-    points_2d_closed_refined_skeletonize = pointcloud_to_profile(points_orig, skeletonres)
 
-    voronoi_sites = voronoi_skeleton_sites(points_2d_closed_refined_voronoi)
-    skeletonize_sites = skeletonize_skeleton_sites(points_2d_closed_refined_skeletonize)
+    min_x_idx = np.argmin(sortedPoly.points[:, 0])
+    max_x_idx = np.argmax(sortedPoly.points[:, 0])
+    min_x = sortedPoly.points[min_x_idx][0]
+    max_x = sortedPoly.points[max_x_idx][0]
 
-    valid_midline = clean_sites(voronoi_sites, skeletonize_sites)
-    #sort_indices = np.argsort(valid_midline[:, 0])
-    #valid_midline_sorted = valid_midline[sort_indices]
+    delta_x = max_x - min_x
+    test_range = 0.050
 
-    # compute smoothed midline from valid_midline_sorted with scipy spline
-    midline_tck, u = splprep(valid_midline.T, u=None, s=0.0, per=0, k=3)
-    u_new = np.linspace(u.min(), u.max(), 1000)
-    a_new = splev(u_new, midline_tck, der=0)
-    valid_midline_sorted = np.stack([a_new[0], a_new[1],np.zeros(len(a_new[0]))]).T
+    indices_front_all = np.where(sortedPoly.points[:, 0] < min_x + delta_x * (test_range))[0]
+    indices_back_all = np.where(sortedPoly.points[:, 0] > max_x - delta_x * (test_range))[0]
+    stepsize = len(indices_back_all)*len(indices_front_all)//300
+    indices_front_coarse = indices_front_all[::stepsize]
+    indices_back_coarse = indices_back_all[::stepsize]
 
+    shapelypoly = Polygon(points_2d_closed_refined_voronoi)
 
-
-    valid_midline_sorted_poly = lines_from_points(valid_midline_sorted)
-    valid_midline_sorted_poly_normals = valid_midline_sorted_poly.extrude([0, 0, 1]).extract_surface().compute_normals()
-    valid_midline_sorted_poly_normals_slice = valid_midline_sorted_poly_normals.slice("z").translate([0,0,-(valid_midline_sorted_poly_normals.bounds[5])/2])
-    valid_midline_pts = valid_midline_sorted_poly_normals_slice.points
-    valid_midline_normals = valid_midline_sorted_poly_normals_slice.point_data["Normals"]
-    ray_positive = valid_midline_pts +  valid_midline_normals
-    ray_negative = valid_midline_pts - valid_midline_normals
-    shapelypoly = Polygon(points_2d_closed_refined_voronoi).convex_hull
-
-    # Compute the intersection with the polygon of all rays
-    intersections_positive = [LineString([valid_midline_pts[i], ray_positive[i]]).intersection(shapelypoly) for i in
-                              range(len(valid_midline_pts))]
-    intersections_negative = [LineString([valid_midline_pts[i], ray_negative[i]]).intersection(shapelypoly) for i in
-                              range(len(valid_midline_pts))]
-    side_positive_poly = pv.PolyData(np.stack((np.array([p.coords[1] for p in intersections_positive]))))
-    side_negative_poly = pv.PolyData(np.stack((np.array([p.coords[1] for p in intersections_negative]))))
-    side_negative_poly["side_one"] = np.ones(side_negative_poly.n_points)
-    side_positive_poly["side_two"] = np.ones(side_positive_poly.n_points)
-
-    side_negative_poly["stuff"] = np.ones(side_negative_poly.n_points)
-    side_positive_poly["stuff"] = np.ones(side_positive_poly.n_points)
-    # Compute pairwise distances
-    dist_matrix = cdist(valid_midline_pts, valid_midline_pts)
-
-    # Set diagonal elements (self-distances) to infinity
-    np.fill_diagonal(dist_matrix, np.inf)
-
-    # Find the minimum distance for each point (excluding itself)
-    min_distances = np.min(dist_matrix, axis=1)
-    maxmin = np.max(min_distances)
-
-
-    bothsides_1 = sortedPoly.interpolate(side_positive_poly,radius=3*maxmin)
-    bothsides_2 = sortedPoly.interpolate(side_negative_poly,radius=3*maxmin)
-
-    sortedPoly.point_data["stuff"]=bothsides_1.point_data["stuff"]+bothsides_2.point_data["stuff"]
-    stuff_pts = sortedPoly.clip_scalar("stuff", value=1.1, invert=False).merge(
-        sortedPoly.clip_scalar("stuff", value=0.9, invert=True))
-    front = stuff_pts.clip(normal=[1,0,0],origin=stuff_pts.center)
-    back = stuff_pts.clip(normal=[-1, 0, 0], origin=stuff_pts.center)
-
-
-    indices_front = [np.where(np.all(np.isclose(sortedPoly.points, point1), axis=1))[0] for point1 in front.points if
-                     np.any(np.all(np.isclose(sortedPoly.points, point1), axis=1))]
-    indices_back = [np.where(np.all(np.isclose(sortedPoly.points, point2), axis=1))[0] for point2 in back.points if
-                    np.any(np.all(np.isclose(sortedPoly.points, point2), axis=1))]
-
-    shapelypoly = Polygon(points_2d_closed_refined_voronoi).convex_hull
-
-
-    specific_combinations = np.array(np.meshgrid(indices_front, indices_back)).T.reshape(-1, 2)
+    specific_combinations = np.array(np.meshgrid(indices_front_coarse, indices_back_coarse)).T.reshape(-1, 2)
 
     error_data = []
 
-    # Define the objective function
-    def objective_function(indices, sortedPoly, shapelypoly):
-        le_ind, te_ind = int(indices[0]), int(indices[1])
-        rms_error_le_up = compute_midline_error(le_ind, te_ind, sortedPoly, shapelypoly)
-        return rms_error_le_up
-
     # Evaluate the objective function for each combination
     for indices in specific_combinations:
-        rms_error = objective_function(indices, sortedPoly, shapelypoly)
+        le_ind, te_ind = int(indices[0]), int(indices[1])
+        rms_error = compute_midline_error(le_ind, te_ind, sortedPoly, shapelypoly)
         error_data.append((*indices, rms_error))
 
     error_data=np.array(error_data)
-    best_combination = specific_combinations[np.argmin(error_data, axis=0)[2]]
-    le_ind_best, te_ind_best = best_combination[0], best_combination[1]
-    return le_ind_best, te_ind_best
 
+    # get best 10% of combinations
+    arr = np.argsort(error_data[:, 2])[:int(len(error_data) * 0.1)]
+    arr.sort()
+    arr_indices = error_data[arr][:, :2].astype(int)
+    front_unique = np.unique(arr_indices[:, 0])
+    back_unique = np.unique(arr_indices[:, 1])
+
+    front_refined = []
+    back_refined = []
+    for i in front_unique:
+        front_refined.append(i)
+        for j in range(stepsize):
+            front_refined.append((i + j)%sortedPoly.number_of_points)
+            front_refined.append((i - j)%sortedPoly.number_of_points)
+
+    for i in back_unique:
+        back_refined.append(i)
+        for j in range(stepsize):
+            back_refined.append((i + j)%sortedPoly.number_of_points)
+            back_refined.append((i - j)%sortedPoly.number_of_points)
+
+    front_refined = np.unique(np.array(front_refined))
+    back_refined = np.unique(np.array(back_refined))
+
+    specific_combinations_fine = np.array(np.meshgrid(front_refined, back_refined)).T.reshape(-1, 2)
+
+    error_data_fine = []
+
+    # Evaluate the objective function for each combination
+
+    for indices in specific_combinations_fine:
+        le_ind, te_ind = int(indices[0]), int(indices[1])
+        rms_error = compute_midline_error(le_ind, te_ind, sortedPoly, shapelypoly)
+        error_data_fine.append((*indices, rms_error))
+
+    error_data_fine = np.array(error_data_fine)
+    best_combination_fine = specific_combinations_fine[np.argmin(error_data_fine, axis=0)[2]]
+
+
+    le_ind_best, te_ind_best = best_combination_fine[0], best_combination_fine[1]
+
+    return le_ind_best, te_ind_best
 
 def skeletonline_completion(diag_dist, points, points_2d_closed_refined, sites_raw_clean):
     shapelypoly = Polygon(points_2d_closed_refined).convex_hull
