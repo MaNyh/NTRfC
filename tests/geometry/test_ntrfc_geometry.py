@@ -62,10 +62,10 @@ def test_midline_from_sides(verbose=False):
 
     if verbose:
         p = pv.Plotter()
-        p.add_mesh(blade.sortedpointsrolled_pv)
+        p.add_mesh(blade.sortedpoints_pv)
         p.add_mesh(blade.skeletonline_pv)
-        p.add_mesh(blade.sortedpointsrolled_pv.points[blade.ite], color="k", label="hk", point_size=20)
-        p.add_mesh(blade.sortedpointsrolled_pv.points[blade.ile], color="g", label="vk", point_size=20)
+        p.add_mesh(blade.sortedpoints_pv.points[blade.ite], color="k", label="hk", point_size=20)
+        p.add_mesh(blade.sortedpoints_pv.points[blade.ile], color="g", label="vk", point_size=20)
         p.add_legend()
         p.show()
 
