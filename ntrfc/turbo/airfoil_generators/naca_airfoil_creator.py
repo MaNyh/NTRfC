@@ -291,6 +291,6 @@ def naca(number, n, finite_te=False, half_cosine_spacing=True):
         y = radius * np.sin(theta)
         """
     points = np.stack([X, Y, np.zeros(len(X))]).T
-    poly = pv.PolyData(points)
-    poly = poly.clean(tolerance=1e-6)
-    return poly.points[::, 0], poly.points[::, 1]
+    uniquepts = np.unique(points, axis=0)
+
+    return uniquepts[::, 0], uniquepts[::, 1]
