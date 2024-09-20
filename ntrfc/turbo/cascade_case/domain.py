@@ -222,8 +222,8 @@ def bladecascade_rotated(gwkconfig, blade: Blade2D, rotation_point):
     ps_half_idx = np.where(np.cumsum(pslengths["Length"]) >= pslength / 2)[0][0] + blade.ite
 
     bladepoints = [[zulauf + gittervor, i * pitch - width / 2 + pitch, 0] for i in range(nblades)]
-    bladeorigin = blade.sortedpointsrolled_pv.points[blade.ile]
-    blades = [blade.sortedpointsrolled_pv.copy().translate(-bladeorigin + i) for i in bladepoints]
+    bladeorigin = blade.sortedpoints_pv.points[blade.ile]
+    blades = [blade.sortedpoints_pv.copy().translate(-bladeorigin + i) for i in bladepoints]
     blades_rotated = [i.rotate_vector([0, 0, -1], gwkconfig.gamma, rotation_point) for i in blades]
 
     return blades_rotated, ss_half_idx, ps_half_idx
