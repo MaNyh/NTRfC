@@ -15,14 +15,11 @@ class Blade2D:
     def __init__(self, points: np.ndarray or pv.PolyData):
         self.origpoints_pv = None
         self.sortedpoints_pv = None
-        self.sortedpointsrolled_pv = None
         self.periodicsplinepoints = None
         self.skeletonline_pv = None
         self.ps_pv = None
         self.ss_pv = None
         self.hullalpha = None
-        self.ile_orig = None
-        self.ite_orig = None
         self.ile = None
         self.ite = None
         self.beta_le = None
@@ -38,10 +35,11 @@ class Blade2D:
             print("working with np.ndarray pointcloud. No dataarrays cab be used for postprocessing")
 
     def compute_polygon(self, alpha=None):
+        unique_points = np.unique(self.origpoints_pv.points, axis=0)
         if alpha:
-            xs, ys = calc_concavehull(self.origpoints_pv.points[:, 0], self.origpoints_pv.points[:, 1], alpha)
+            xs, ys = calc_concavehull(unique_points[:, 0], unique_points[:, 1], alpha)
         else:
-            xs, ys, alpha = auto_concaveHull(self.origpoints_pv.points[:, 0], self.origpoints_pv.points[:, 1])
+            xs, ys, alpha = auto_concaveHull(unique_points[:, 0], unique_points[:, 1])
 
         line = polyline_from_points(np.stack((xs, ys, np.zeros(len(ys)))).T)
         orientation = is_counterclockwise(xs, ys)
@@ -61,21 +59,10 @@ class Blade2D:
             self.sortedpoints_pv = self.sortedpoints_pv.merge(self.origpoints_pv.extract_points([i]))
 
     def compute_lete(self):
-        self.ile_orig, self.ite_orig = extract_vk_hk(self.sortedpoints_pv)
-
-    def compute_rolledblade(self):
-        ids = np.roll(np.arange(self.sortedpoints_pv.number_of_points), -self.ile_orig)
-
-        newSortedPoly = pv.PolyData()
-        for i in ids:
-            newSortedPoly = newSortedPoly.merge(self.sortedpoints_pv.extract_points(i))
-
-        self.ite = (self.ite_orig - self.ile_orig) % newSortedPoly.number_of_points
-        self.ile = 0
-        self.sortedpointsrolled_pv = newSortedPoly
+        self.ile, self.ite = extract_vk_hk(self.sortedpoints_pv)
 
     def extract_sides(self):
-        self.ps_pv, self.ss_pv = extractSidePolys(self.ite,self.ile, self.sortedpointsrolled_pv)
+        self.ps_pv, self.ss_pv = extractSidePolys(self.ite,self.ile, self.sortedpoints_pv)
 
     def compute_skeleton(self):
         self.skeletonline_pv = midline_from_sides(self.ps_pv, self.ss_pv)
@@ -83,7 +70,7 @@ class Blade2D:
     def compute_stats(self):
         vk_tangent = self.skeletonline_pv.points[0] - self.skeletonline_pv.points[1]
         hk_tangent = self.skeletonline_pv.points[-2] - self.skeletonline_pv.points[-1]
-        chord = -self.sortedpointsrolled_pv.points[self.ile] + self.sortedpointsrolled_pv.points[self.ite]
+        chord = -self.sortedpoints_pv.points[self.ile] + self.sortedpoints_pv.points[self.ite]
         self.beta_le = vecAngle(vk_tangent, -np.array([1, 0, 0])) / np.pi * 180
         self.beta_te = vecAngle(hk_tangent, np.array([1, 0, 0])) / np.pi * 180
         self.camber_phi = vecAngle(chord, np.array([1, 0, 0])) / np.pi * 180
@@ -92,7 +79,6 @@ class Blade2D:
     def compute_all_frompoints(self, alpha=None):
         self.compute_polygon(alpha)
         self.compute_lete()
-        self.compute_rolledblade()
         self.extract_sides()
         self.compute_skeleton()
         self.compute_stats()
@@ -103,8 +89,8 @@ class Blade2D:
         p.add_mesh(self.ps_pv, color="red", label="pressure side", line_width=1)
         p.add_mesh(self.ss_pv, color="blue", label="suction side", line_width=1)
         p.add_mesh(self.skeletonline_pv, color="black", label="skeleton line", line_width=1)
-        p.add_mesh(pv.PolyData(self.sortedpointsrolled_pv.points[self.ile]), color="green", label="ile", point_size=16)
-        p.add_mesh(pv.PolyData(self.sortedpointsrolled_pv.points[self.ite]), color="yellow", label="ite", point_size=16)
+        p.add_mesh(pv.PolyData(self.sortedpoints_pv.points[self.ile]), color="green", label="ile", point_size=16)
+        p.add_mesh(pv.PolyData(self.sortedpoints_pv.points[self.ite]), color="yellow", label="ite", point_size=16)
         p.add_text(
             f"beta_le: {self.beta_le} \nbeta_te: {self.beta_te}\nphi_camber: {self.camber_phi}\nlength_camber: {self.camber_length}",
             font_size=int(sfactor))

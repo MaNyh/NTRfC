@@ -8,7 +8,7 @@ def test_symmetric_airfoil_nostagger():
     points = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     blade = Blade2D(points)
     blade.compute_all_frompoints()
-    bladepts = blade.sortedpointsrolled_pv.points
+    bladepts = blade.sortedpoints_pv.points
 
     xs, ys = bladepts[:, 0], bladepts[:, 1]
     ite = blade.ite
@@ -31,7 +31,7 @@ def test_symmetric_airfoil_stagger():
 
     blade = Blade2D(points)
     blade.compute_all_frompoints()
-    bladepts = blade.sortedpointsrolled_pv.points
+    bladepts = blade.sortedpoints_pv.points
 
     xs, ys = bladepts[:, 0], bladepts[:, 1]
     ite = blade.ite
