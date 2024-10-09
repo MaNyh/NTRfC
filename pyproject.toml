@@ -22,9 +22,6 @@ classifiers = [
 keywords = ["ntrfc"]
 
 dependencies = [
-    # Add your requirements here from `requirements.txt`
-    # For example:
-    # "somepackage>=1.0",
     "pip>=23",
     "numpy==1.26.4",
     "matplotlib==3.9.0",
@@ -34,7 +31,10 @@ dependencies = [
     "PyYAML==6.0.1",
     "scipy==1.13.0",
     "pandas==2.2.2",
-    "setuptools>=61.2.0",
+    "trimesh",
+    "pyembree",
+    "embreex", # t
+    #"setuptools>=61.2.0",
     "fluidfoam==0.2.6",
     "tqdm==4.66.4",
     "statsmodels>=0.13.5",

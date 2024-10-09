@@ -1,59 +1,38 @@
+import cv2
 import numpy as np
 import pyvista as pv
+import shapely
 from scipy.interpolate import splev
 from scipy.interpolate import splprep
+from scipy.spatial import Voronoi
 from shapely.geometry import Polygon, LineString
 from skimage.morphology import skeletonize
-from ntrfc.geometry.line import lines_from_points
-from ntrfc.turbo.pointcloud_methods import extractSidePolys, midline_from_sides
-from ntrfc.geometry.alphashape import auto_concaveHull
+from ntrfc.math.vectorcalc import findNearest, vecDir
+import open3d as o3d
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('TkAgg')
 
+def filter_voronoi_sites(voronoi_sites_3d):
+    points_3d = voronoi_sites_3d
 
+    # Create an Open3D PointCloud object
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points_3d)
 
+    # 2. Voxel downsampling
+    start_size = 0.0005
+    voxelized = False
+    while not voxelized:
+        pcd_new = pcd.voxel_down_sample(voxel_size=start_size)
+        if len(pcd_new.points) <= 95:
+            pcd = pcd_new
+            voxelized = True
+        else:
+            start_size += 0.0005
+    #o3d.visualization.draw_geometries([pcd])   # open3d.visualization.draw_geometries([outlier_cloud])
+    return np.asarray(pcd.points)
 
-def compute_midline_error(ind_1_start, ind_2_start, sortedPoly, shapelypoly):
-    ps_pv, ss_pv = extractSidePolys(ind_1_start, ind_2_start, sortedPoly)
-
-    mid = lines_from_points(midline_from_sides(ps_pv, ss_pv, res=50).points)
-
-    mid_normals = mid.extrude([0, 0, 1]).compute_normals().slice("z").compute_cell_sizes()
-
-
-    normals = mid_normals["Normals"]
-    centers = mid_normals.cell_centers().points
-
-    raylength=np.sum(mid_normals["Length"])
-
-    ray_positive = centers + raylength * normals
-    ray_negative = centers - raylength * normals
-
-    # Compute the intersection with the polygon of all rays
-    intersections_positive = [LineString([centers[i], ray_positive[i]]).intersection(shapelypoly) for i in
-                              range(len(centers))]
-    intersections_negative = [LineString([centers[i], ray_negative[i]]).intersection(shapelypoly) for i in
-                              range(len(centers))]
-
-    # compute length of each intersection
-    lengths_positive = np.array([line.length for line in intersections_positive])
-    lengths_negative = np.array([line.length for line in intersections_negative])
-
-    thicknesses = (lengths_positive+lengths_negative)/2
-    reconstructed_pts_positive = centers + thicknesses[:, np.newaxis] * normals
-    reconstructed_pts_negative = centers - thicknesses[:, np.newaxis] * normals
-    reconstructed_pts = np.concatenate([reconstructed_pts_positive, reconstructed_pts_negative])
-
-    rec_xx,rec_yy ,_= auto_concaveHull(reconstructed_pts[:,0],reconstructed_pts[:,1])
-
-    reconstructed_shapepoly = Polygon(np.stack((rec_xx,rec_yy)).T)
-    #compute difference of lengths
-    differences = np.abs(lengths_positive - lengths_negative)
-
-    error_thickness = np.mean(differences/thicknesses)
-    error_area = reconstructed_shapepoly.symmetric_difference(shapelypoly).area/shapelypoly.area
-    error_perimeter = abs(reconstructed_shapepoly.length-shapelypoly.length)/shapelypoly.length
-    error_hausdorf = reconstructed_shapepoly.hausdorff_distance(shapelypoly)
-
-    return error_area + error_perimeter + error_hausdorf +error_thickness
 
 def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
     voronoires = 32000
@@ -61,77 +40,117 @@ def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
     points_orig = sortedPoly.points
     points_2d_closed_refined_voronoi = pointcloud_to_profile(points_orig, voronoires)
 
-    min_x_idx = np.argmin(sortedPoly.points[:, 0])
-    max_x_idx = np.argmax(sortedPoly.points[:, 0])
-    min_x = sortedPoly.points[min_x_idx][0]
-    max_x = sortedPoly.points[max_x_idx][0]
+    voronoi_sites = voronoi_skeleton_sites(points_2d_closed_refined_voronoi)
+    filtered_sites = filter_voronoi_sites(np.stack([voronoi_sites[:, 0], voronoi_sites[:, 1], np.zeros(len(voronoi_sites))]).T)
 
-    delta_x = max_x - min_x
-    test_range = 0.050
+    vr = pv.PolyData(filtered_sites)
 
-    indices_front_all = np.where(sortedPoly.points[:, 0] < min_x + delta_x * (test_range))[0]
-    indices_back_all = np.where(sortedPoly.points[:, 0] > max_x - delta_x * (test_range))[0]
-    stepsize = len(indices_back_all)*len(indices_front_all)//400
-    indices_front_coarse = indices_front_all[::stepsize]
-    indices_back_coarse = indices_back_all[::stepsize]
+    x_new = vr.points[:, 0]
+    y_new = vr.points[:, 1]
 
-    shapelypoly = Polygon(points_2d_closed_refined_voronoi)
+    # sort x_new and y_new along x
+    sort_indices = np.argsort(x_new)
+    x_new = x_new[sort_indices]
+    y_new = y_new[sort_indices]
+    le_ind, te_ind, skeletonline_complete = skeletonline_completion(2, points_orig, points_2d_closed_refined_voronoi,
+                                                                    np.stack([x_new[1:-1], y_new[1:-1]]).T)
 
-    specific_combinations = np.array(np.meshgrid(indices_front_coarse, indices_back_coarse)).T.reshape(-1, 2)
-
-    error_data = []
-
-    # Evaluate the objective function for each combination
-    for indices in specific_combinations:
-        le_ind, te_ind = int(indices[0]), int(indices[1])
-        rms_error = compute_midline_error(le_ind, te_ind, sortedPoly, shapelypoly)
-        error_data.append((*indices, rms_error))
-
-    error_data=np.array(error_data)
-
-    # get best 10% of combinations
-    percentile_value = np.percentile(error_data[:, 2], 3)
-    lowest10 = error_data[np.where(error_data[:, 2] < percentile_value)]
-
-    front_unique = np.unique(lowest10[:, 0])
-    back_unique = np.unique(lowest10[:, 1])
-
-    front_refined = []
-    back_refined = []
-    for i in front_unique:
-        front_refined.append(int(i))
-        for j in range(stepsize):
-            front_refined.append(int((i + j)%sortedPoly.number_of_points))
-            front_refined.append(int((i - j)%sortedPoly.number_of_points))
-
-    for i in back_unique:
-        back_refined.append(int(i))
-        for j in range(stepsize):
-            back_refined.append(int((i + j)%sortedPoly.number_of_points))
-            back_refined.append(int((i - j)%sortedPoly.number_of_points))
-
-    front_refined = np.unique(np.array(front_refined))
-    back_refined = np.unique(np.array(back_refined))
-
-    specific_combinations_fine = np.array(np.meshgrid(front_refined, back_refined)).T.reshape(-1, 2)
-
-    error_data_fine = []
-
-    # Evaluate the objective function for each combination
-
-    for indices in specific_combinations_fine:
-        le_ind, te_ind = int(indices[0]), int(indices[1])
-        rms_error = compute_midline_error(le_ind, te_ind, sortedPoly, shapelypoly)
-        error_data_fine.append((*indices, rms_error))
-
-    error_data_fine = np.array(error_data_fine)
-    best_combination_fine = specific_combinations_fine[np.argmin(error_data_fine, axis=0)[2]]
-    le_ind_best, te_ind_best = int(best_combination_fine[0]), int(best_combination_fine[1])
-
-    return le_ind_best, te_ind_best
+    return le_ind, te_ind
 
 
+def skeletonline_completion(diag_dist, points, points_2d_closed_refined, sites_raw_clean):
+    shapelypoly = Polygon(points_2d_closed_refined).convex_hull
+    shapelymidline = LineString(sites_raw_clean)
+    # i need to extend thhe shapelymidline to the boundary of the polygon
+    # Get the coordinates of the start and end points
+    start_coords = np.array(shapelymidline.coords[0])
+    end_coords = np.array(shapelymidline.coords[-1])
+    # Compute the direction vector
+    direction_start = diag_dist * vecDir(-(shapelymidline.coords[1] - start_coords))
+    direction_end = diag_dist * vecDir(-(shapelymidline.coords[-2] - end_coords))
+    # Extend the line by 1 unit in both directions
+    extended_start = LineString([start_coords, start_coords + direction_start])
+    extended_end = LineString([end_coords, end_coords + direction_end])
+    # Compute the intersection with the polygon
+    intersection_start = extended_start.intersection(shapelypoly)
+    intersection_end = extended_end.intersection(shapelypoly)
+    intersection_point_start = np.array(intersection_start.coords)[1]
+    intersection_point_end = np.array(intersection_end.coords)[1]
+    # find closest point index of points and intersections
+    le_ind = findNearest(points[:, :2], intersection_point_start)
+    te_ind = findNearest(points[:, :2], intersection_point_end)
 
+    skeleton_points = np.concatenate([np.array([points[le_ind][:2]]), sites_raw_clean, np.array([points[te_ind][:2]])])
+    zeros_column = np.zeros((skeleton_points.shape[0], 1))
+
+    skeletonline_complete = pv.PolyData(np.hstack((skeleton_points, zeros_column)))
+
+    return le_ind, te_ind, skeletonline_complete
+
+
+def voronoi_skeleton_sites(points_2d_closed_refined_voronoi):
+    vor = Voronoi(points_2d_closed_refined_voronoi)
+    polygon = shapely.geometry.Polygon(points_2d_closed_refined_voronoi)#.convex_hull
+    is_inside = [shapely.geometry.Point(i).within(polygon) for i in vor.vertices]
+    voronoi_sites_inside = vor.vertices[is_inside]
+
+    sort_indices = np.argsort(voronoi_sites_inside[:, 0])
+    sites_inside_sorted = voronoi_sites_inside[sort_indices]
+
+    return sites_inside_sorted
+
+
+def skeletonize_skeleton_sites(points_2d_closed_refined_skeletonize):
+    res = len(points_2d_closed_refined_skeletonize)
+    dx = np.min(points_2d_closed_refined_skeletonize[:, 0])
+    dy = np.min(points_2d_closed_refined_skeletonize[:, 1])
+
+    maxx = np.max(points_2d_closed_refined_skeletonize[:, 0])
+    maxy = np.max(points_2d_closed_refined_skeletonize[:, 1])
+
+    scale = max(maxx - dx, maxy - dy)
+    factor = res
+
+    px = (points_2d_closed_refined_skeletonize[:, 0] - dx) / scale * factor
+    py = (points_2d_closed_refined_skeletonize[:, 1] - dy) / scale * factor
+
+    polygon = np.stack((px, py)).T
+    image_size = (res, res)  # Image size
+    midline, img = compute_midline(polygon, image_size)
+
+    # Find midline points
+    xx_idx, yy_idx = np.where(midline > 0)
+    midline_points = np.column_stack((xx_idx, yy_idx))
+
+    mxx = (midline_points[:, 0]) / factor * scale + dy
+    myy = (midline_points[:, 1]) / factor * scale + dx
+
+    midline_skeletonize = np.stack([myy, mxx]).T
+
+    return midline_skeletonize
+
+
+def polygon_to_binary_image(polygon, image_size):
+    # Create a blank image
+    img = np.zeros(image_size, dtype=np.uint8)
+
+    # Create an array of polygon vertices
+    vertices = np.array([polygon], dtype=np.int64)
+
+    # Fill the polygon on the image
+    cv2.fillPoly(img, vertices, color=255)
+
+    return img
+
+
+def compute_midline(polygon, image_size):
+    # Convert polygon to binary image
+    binary_img = polygon_to_binary_image(polygon, image_size)
+
+    # Apply skeletonization
+    skeleton = skeletonize(binary_img, method='zhang')
+
+    return skeleton, binary_img
 
 
 def pointcloud_to_profile(points, res):

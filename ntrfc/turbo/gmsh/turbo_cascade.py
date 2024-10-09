@@ -55,9 +55,9 @@ def generate_turbocascade(domain2d: CascadeDomain2D,
     surfaces = {}
 
     # Set meshing options:
-    profilepoints_rolled_le = domain2d.blade.sortedpoints_pv
+    profilepoints_rolled_le = domain2d.blade.sortedpoints_pv_rolled
 
-    te_index = domain2d.blade.ite
+    te_index = domain2d.blade.ite_rolled
 
     profilepoints_line = lines_from_points(profilepoints_rolled_le.points).compute_cell_sizes()
 
