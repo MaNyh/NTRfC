@@ -15,6 +15,7 @@ class Blade2D:
     def __init__(self, points: np.ndarray or pv.PolyData):
         self.origpoints_pv = None
         self.sortedpoints_pv = None
+        self.sortedpoints_pv_rolled = None
         self.periodicsplinepoints = None
         self.skeletonline_pv = None
         self.ps_pv = None
@@ -22,6 +23,8 @@ class Blade2D:
         self.hullalpha = None
         self.ile = None
         self.ite = None
+        self.ile_rolled = None
+        self.ite_rolled = None
         self.beta_le = None
         self.beta_te = None
         self.camber_phi = None
@@ -61,6 +64,18 @@ class Blade2D:
     def compute_lete(self):
         self.ile, self.ite = extract_vk_hk(self.sortedpoints_pv)
 
+
+    def compute_rolledblade(self):
+        ids = np.roll(np.arange(self.sortedpoints_pv.number_of_points), -self.ile)
+        newSortedPoly = pv.PolyData()
+        for i in ids:
+            newSortedPoly = newSortedPoly.merge(self.sortedpoints_pv.extract_points(i))
+
+        self.ite_rolled = (self.ite - self.ile) % newSortedPoly.number_of_points
+        self.ile_rolled = 0
+        self.sortedpoints_pv_rolled = newSortedPoly
+
+
     def extract_sides(self):
         self.ps_pv, self.ss_pv = extractSidePolys(self.ite,self.ile, self.sortedpoints_pv)
 
@@ -82,6 +97,7 @@ class Blade2D:
         self.extract_sides()
         self.compute_skeleton()
         self.compute_stats()
+        self.compute_rolledblade()
 
     def plot(self, figurepath=tempfile.mkdtemp() + "/plot.png", window_size=[2400, 2400],off_screen=True):
         sfactor = window_size[0] / 200

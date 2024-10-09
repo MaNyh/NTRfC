@@ -8,6 +8,7 @@ def test_extract_vk_hk(verbose=False):
     """
     from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.geometry.alphashape import auto_concaveHull
     import numpy as np
     import pyvista as pv
 
@@ -19,11 +20,9 @@ def test_extract_vk_hk(verbose=False):
     angle = 0  # deg
     res = 512
     xs, ys = naca(naca_code, res, half_cosine_spacing=False, finite_te=False)
-    sorted_poly = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
+    xs_n, ys_n,_ = auto_concaveHull(xs,ys)
+    sorted_poly = pv.PolyData(np.stack([xs_n, ys_n, np.zeros(len(xs_n))]).T)
     sorted_poly.rotate_z(angle, inplace=True)
-    ind_1 = res
-    ind_2 = 0
-
 
     ind_vk, ind_hk = extract_vk_hk(sorted_poly)
 
@@ -35,8 +34,8 @@ def test_extract_vk_hk(verbose=False):
         p.view_xy()
         p.show()
 
-    assert all(sorted_poly.points[ind_2] == sorted_poly.points[ind_hk])
-    assert all(sorted_poly.points[ind_1] == sorted_poly.points[ind_vk])
+    assert all(sorted_poly.points[np.argmax(sorted_poly.points[:,0])] == sorted_poly.points[ind_hk])
+    assert all(sorted_poly.points[np.argmin(sorted_poly.points[:,0])] == sorted_poly.points[ind_vk])
 
 
 
@@ -53,7 +52,7 @@ def test_midline_from_sides(verbose=False):
     res = 256
     x, y = naca('0009', res, half_cosine_spacing=True)
 
-    points = np.stack((x[:], y[:], np.zeros(res * 2))).T
+    points = np.stack((x[:], y[:], np.zeros(len(x)))).T
     blade = Blade2D(points)
     blade.compute_all_frompoints()
 
