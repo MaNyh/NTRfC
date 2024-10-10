@@ -39,7 +39,6 @@ def test_symmetric_airfoil_stagger():
     ite_tol = 1
 
     ile = blade.ile
-    ile_test = 0
     ile_tol = 1
 
     assert np.abs(ite - ite_test) <= ite_tol
