@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import open3d as o3d
 import pyvista as pv
 import shapely
 from scipy.interpolate import splev
@@ -7,11 +8,9 @@ from scipy.interpolate import splprep
 from scipy.spatial import Voronoi
 from shapely.geometry import Polygon, LineString
 from skimage.morphology import skeletonize
+
 from ntrfc.math.vectorcalc import findNearest, vecDir
-import open3d as o3d
-import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('TkAgg')
+
 
 def filter_voronoi_sites(voronoi_sites_3d,sortedPoly,refinedPoints):
     points_3d = voronoi_sites_3d
@@ -28,7 +27,7 @@ def filter_voronoi_sites(voronoi_sites_3d,sortedPoly,refinedPoints):
     while goals != 100:
         pcd_new = pcd.voxel_down_sample(voxel_size=start_size)
         if len(pcd_new.points) > 95:
-            start_size += 0.0005
+            start_size += 0.00025
         elif len(pcd_new.points) < 35:
             start_size -= 0.00025
         elif (25 <= len(pcd_new.points) <= 95):
