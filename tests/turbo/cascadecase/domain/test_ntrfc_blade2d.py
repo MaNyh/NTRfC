@@ -35,11 +35,15 @@ def test_symmetric_airfoil_stagger():
     blade.compute_all_frompoints()
 
     ite = blade.ite
-
     ite_test = 140
     ite_tol = 1
 
+    ile = blade.ile
+    ile_test = 0
+    ile_tol = 1
+
     assert np.abs(ite - ite_test) <= ite_tol
+    assert np.abs(ile - ile_test) <= ile_tol
 
 
 def test_airfoil_nostagger():
