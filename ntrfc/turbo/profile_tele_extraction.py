@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')
 
-def filter_voronoi_sites(voronoi_sites_3d):
+def filter_voronoi_sites(voronoi_sites_3d,sortedPoly,refinedPoints):
     points_3d = voronoi_sites_3d
 
     # Create an Open3D PointCloud object
@@ -22,16 +22,39 @@ def filter_voronoi_sites(voronoi_sites_3d):
 
     # 2. Voxel downsampling
     start_size = 0.0005
-    voxelized = False
-    while not voxelized:
+    goals = 0
+    goal_le = []
+    goal_te = []
+    while goals != 100:
         pcd_new = pcd.voxel_down_sample(voxel_size=start_size)
-        if len(pcd_new.points) <= 95:
-            pcd = pcd_new
-            voxelized = True
-        else:
+        if len(pcd_new.points) > 95:
             start_size += 0.0005
+        elif len(pcd_new.points) < 35:
+            start_size -= 0.00025
+        elif (25 <= len(pcd_new.points) <= 95):
+            goals += 1
+
+            filtered_sites = np.asarray(pcd_new.points)
+            vr = pv.PolyData(filtered_sites)
+
+            x_new = vr.points[:, 0]
+            y_new = vr.points[:, 1]
+
+            # sort x_new and y_new along x
+            sort_indices = np.argsort(x_new)
+            x_new = x_new[sort_indices]
+            y_new = y_new[sort_indices]
+            le_ind, te_ind, skeletonline_complete = skeletonline_completion(2, sortedPoly,
+                                                                            refinedPoints,
+                                                                            np.stack([x_new[1:-1], y_new[1:-1]]).T)
+
+            goal_le.append(le_ind)
+            goal_te.append(te_ind)
+
+            start_size += (np.random.rand()-0.5)*1e-3
+
     #o3d.visualization.draw_geometries([pcd])   # open3d.visualization.draw_geometries([outlier_cloud])
-    return np.asarray(pcd.points)
+    return np.bincount(goal_le).argmax(),np.bincount(goal_te).argmax()
 
 
 def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
@@ -41,19 +64,10 @@ def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
     points_2d_closed_refined_voronoi = pointcloud_to_profile(points_orig, voronoires)
 
     voronoi_sites = voronoi_skeleton_sites(points_2d_closed_refined_voronoi)
-    filtered_sites = filter_voronoi_sites(np.stack([voronoi_sites[:, 0], voronoi_sites[:, 1], np.zeros(len(voronoi_sites))]).T)
+    le_ind, te_ind = filter_voronoi_sites(np.stack([voronoi_sites[:, 0], voronoi_sites[:, 1], np.zeros(len(voronoi_sites))]).T,
+                                          sortedPoly.points,
+                                          points_2d_closed_refined_voronoi)
 
-    vr = pv.PolyData(filtered_sites)
-
-    x_new = vr.points[:, 0]
-    y_new = vr.points[:, 1]
-
-    # sort x_new and y_new along x
-    sort_indices = np.argsort(x_new)
-    x_new = x_new[sort_indices]
-    y_new = y_new[sort_indices]
-    le_ind, te_ind, skeletonline_complete = skeletonline_completion(2, points_orig, points_2d_closed_refined_voronoi,
-                                                                    np.stack([x_new[1:-1], y_new[1:-1]]).T)
 
     return le_ind, te_ind
 
