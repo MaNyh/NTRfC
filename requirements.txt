@@ -19,3 +19,4 @@ gmsh==4.13.0
 shapely==2.0.1
 scikit-image==0.22.0
 opencv-python==4.9.0.80
+open3d==0.18.0
