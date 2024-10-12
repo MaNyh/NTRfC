@@ -111,46 +111,6 @@ def voronoi_skeleton_sites(points_2d_closed_refined_voronoi):
     return sites_inside_sorted
 
 
-def skeletonize_skeleton_sites(points_2d_closed_refined_skeletonize):
-    res = len(points_2d_closed_refined_skeletonize)
-    dx = np.min(points_2d_closed_refined_skeletonize[:, 0])
-    dy = np.min(points_2d_closed_refined_skeletonize[:, 1])
-
-    maxx = np.max(points_2d_closed_refined_skeletonize[:, 0])
-    maxy = np.max(points_2d_closed_refined_skeletonize[:, 1])
-
-    scale = max(maxx - dx, maxy - dy)
-    factor = res
-
-    px = (points_2d_closed_refined_skeletonize[:, 0] - dx) / scale * factor
-    py = (points_2d_closed_refined_skeletonize[:, 1] - dy) / scale * factor
-
-    polygon = np.stack((px, py)).T
-    image_size = (res, res)  # Image size
-    midline, img = compute_midline(polygon, image_size)
-
-    # Find midline points
-    xx_idx, yy_idx = np.where(midline > 0)
-    midline_points = np.column_stack((xx_idx, yy_idx))
-
-    mxx = (midline_points[:, 0]) / factor * scale + dy
-    myy = (midline_points[:, 1]) / factor * scale + dx
-
-    midline_skeletonize = np.stack([myy, mxx]).T
-
-    return midline_skeletonize
-
-
-
-def compute_midline(polygon, image_size):
-    # Convert polygon to binary image
-    binary_img = polygon_to_binary_image(polygon, image_size)
-
-    # Apply skeletonization
-    skeleton = skeletonize(binary_img, method='zhang')
-
-    return skeleton, binary_img
-
 
 def pointcloud_to_profile(points, res):
     tck, u = splprep(points.T, u=None, s=0.0, per=1, k=3)
