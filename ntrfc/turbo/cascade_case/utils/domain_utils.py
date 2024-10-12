@@ -112,9 +112,12 @@ class Blade2D:
             font_size=int(sfactor))
         p.add_legend(size=(0.2, 0.2))
         p.view_xy()
-        p.show(screenshot=figurepath, window_size=window_size)
-        p.close()
-        return figurepath
+        if off_screen:
+            p.show(screenshot=figurepath, window_size=window_size)
+            return figurepath
+        else:
+            p.show(window_size=window_size)
+            return None
 
 
 @dataclass

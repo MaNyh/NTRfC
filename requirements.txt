@@ -3,11 +3,10 @@ numpy==1.26.4
 matplotlib==3.9.0
 pytest==8.2.0
 trame==3.6.0
-pyvista[all]==0.43.8
+pyvista[all]==0.44.1
 PyYAML==6.0.1
-scipy==1.13.0
+scipy==1.14.1
 pandas==2.2.2
-setuptools>=61.2.0
 fluidfoam==0.2.6
 tqdm==4.66.4
 statsmodels>=0.13.5

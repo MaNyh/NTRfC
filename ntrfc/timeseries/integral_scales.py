@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.integrate import simps
+from scipy.integrate import trapezoid as simps
 from scipy.signal import argrelmax
 
 from ntrfc.math.methods import autocorr, zero_crossings
