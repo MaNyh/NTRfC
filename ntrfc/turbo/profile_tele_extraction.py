@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 import open3d as o3d
 import pyvista as pv
@@ -7,7 +6,6 @@ from scipy.interpolate import splev
 from scipy.interpolate import splprep
 from scipy.spatial import Voronoi
 from shapely.geometry import Polygon, LineString
-from skimage.morphology import skeletonize
 
 from ntrfc.math.vectorcalc import findNearest, vecDir
 
@@ -142,18 +140,6 @@ def skeletonize_skeleton_sites(points_2d_closed_refined_skeletonize):
 
     return midline_skeletonize
 
-
-def polygon_to_binary_image(polygon, image_size):
-    # Create a blank image
-    img = np.zeros(image_size, dtype=np.uint8)
-
-    # Create an array of polygon vertices
-    vertices = np.array([polygon], dtype=np.int64)
-
-    # Fill the polygon on the image
-    cv2.fillPoly(img, vertices, color=255)
-
-    return img
 
 
 def compute_midline(polygon, image_size):
