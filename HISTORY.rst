@@ -18,12 +18,14 @@ History
 
 - wake angle hotfix (gmsh cascadecase)
 
+
 0.1.10 (2024-05-08)
 ------------------
 
 - skeletonize le-te-extraction filter
 - test improvements
 - code cleanups and readme update
+
 
 0.1.9 (2024-03-15)
 ------------------
@@ -32,6 +34,7 @@ History
 - cleanup
 - le-te-extraction fix
 - cascadebox meshing (gmsh)
+
 
 0.1.8 (2023-10-31)
 ------------------
@@ -45,6 +48,7 @@ History
 - turbocascade fixes: usable meshing algorithm
 - dependency updates
 
+
 0.1.6 (2023-10-13)
 ------------------
 
@@ -53,6 +57,7 @@ WITHDRAWN RELEASE
 - productive meshing algorithm
 - minor improvements
 
+
 0.1.5 (2023-07-04)
 ------------------
 - bugfixes alphashape
@@ -60,12 +65,14 @@ WITHDRAWN RELEASE
 - jupyternotebook testing
 - improved codecov
 
+
 0.1.4 (2023-06-25)
 ------------------
 - cleaner structure, more reliability
 - pypi deployment
 - sphynx docs
 - removed bugs
+
 
 0.1.3 (2023-03-11)
 ------------------
