@@ -14,17 +14,17 @@ from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
 class Blade2D:
     def __init__(self, points: np.ndarray or pv.PolyData):
         self.origpoints_pv = None
-        self.__sortedpoints_pv = None
-        self.sortedpointsrolled_pv = None
+        self.sortedpoints_pv = None
+        self.sortedpoints_pv_rolled = None
         self.periodicsplinepoints = None
         self.skeletonline_pv = None
         self.ps_pv = None
         self.ss_pv = None
         self.hullalpha = None
-        self.__ile_orig = None
-        self.__ite_orig = None
         self.ile = None
         self.ite = None
+        self.ile_rolled = None
+        self.ite_rolled = None
         self.beta_le = None
         self.beta_te = None
         self.camber_phi = None
@@ -38,10 +38,11 @@ class Blade2D:
             print("working with np.ndarray pointcloud. No dataarrays cab be used for postprocessing")
 
     def compute_polygon(self, alpha=None):
+        unique_points = np.unique(self.origpoints_pv.points, axis=0)
         if alpha:
-            xs, ys = calc_concavehull(self.origpoints_pv.points[:, 0], self.origpoints_pv.points[:, 1], alpha)
+            xs, ys = calc_concavehull(unique_points[:, 0], unique_points[:, 1], alpha)
         else:
-            xs, ys, alpha = auto_concaveHull(self.origpoints_pv.points[:, 0], self.origpoints_pv.points[:, 1])
+            xs, ys, alpha = auto_concaveHull(unique_points[:, 0], unique_points[:, 1])
 
         line = polyline_from_points(np.stack((xs, ys, np.zeros(len(ys)))).T)
         orientation = is_counterclockwise(xs, ys)
@@ -55,27 +56,28 @@ class Blade2D:
             index_sort = index_sort[::-1]
 
         self.hullalpha = alpha
-        self.__sortedpoints_pv = pv.PolyData()
+        self.sortedpoints_pv = pv.PolyData()
 
         for i in index_sort:
-            self.__sortedpoints_pv = self.__sortedpoints_pv.merge(self.origpoints_pv.extract_points([i]))
+            self.sortedpoints_pv = self.sortedpoints_pv.merge(self.origpoints_pv.extract_points([i]))
 
     def compute_lete(self):
-        self.__ile_orig, self.__ite_orig = extract_vk_hk(self.__sortedpoints_pv)
+        self.ile, self.ite = extract_vk_hk(self.sortedpoints_pv)
+
 
     def compute_rolledblade(self):
-        ids = np.roll(np.arange(self.__sortedpoints_pv.number_of_points), -self.__ile_orig)
-
+        ids = np.roll(np.arange(self.sortedpoints_pv.number_of_points), -self.ile)
         newSortedPoly = pv.PolyData()
         for i in ids:
-            newSortedPoly = newSortedPoly.merge(self.__sortedpoints_pv.extract_points(i))
+            newSortedPoly = newSortedPoly.merge(self.sortedpoints_pv.extract_points(i))
 
-        self.ite = (self.__ile_orig - self.__ite_orig) % newSortedPoly.number_of_points
-        self.ile = 0
-        self.sortedpointsrolled_pv = newSortedPoly
+        self.ite_rolled = (self.ite - self.ile) % newSortedPoly.number_of_points
+        self.ile_rolled = 0
+        self.sortedpoints_pv_rolled = newSortedPoly
+
 
     def extract_sides(self):
-        self.ps_pv, self.ss_pv = extractSidePolys(self.ite,self.ile, self.sortedpointsrolled_pv)
+        self.ps_pv, self.ss_pv = extractSidePolys(self.ite,self.ile, self.sortedpoints_pv)
 
     def compute_skeleton(self):
         self.skeletonline_pv = midline_from_sides(self.ps_pv, self.ss_pv)
@@ -83,7 +85,7 @@ class Blade2D:
     def compute_stats(self):
         vk_tangent = self.skeletonline_pv.points[0] - self.skeletonline_pv.points[1]
         hk_tangent = self.skeletonline_pv.points[-2] - self.skeletonline_pv.points[-1]
-        chord = -self.sortedpointsrolled_pv.points[self.ile] + self.sortedpointsrolled_pv.points[self.ite]
+        chord = -self.sortedpoints_pv.points[self.ile] + self.sortedpoints_pv.points[self.ite]
         self.beta_le = vecAngle(vk_tangent, -np.array([1, 0, 0])) / np.pi * 180
         self.beta_te = vecAngle(hk_tangent, np.array([1, 0, 0])) / np.pi * 180
         self.camber_phi = vecAngle(chord, np.array([1, 0, 0])) / np.pi * 180
@@ -92,27 +94,30 @@ class Blade2D:
     def compute_all_frompoints(self, alpha=None):
         self.compute_polygon(alpha)
         self.compute_lete()
-        self.compute_rolledblade()
         self.extract_sides()
         self.compute_skeleton()
         self.compute_stats()
+        self.compute_rolledblade()
 
-    def plot(self, figurepath=tempfile.mkdtemp() + "/plot.png", window_size=[2400, 2400]):
+    def plot(self, figurepath=tempfile.mkdtemp() + "/plot.png", window_size=[2400, 2400],off_screen=True):
         sfactor = window_size[0] / 200
-        p = pv.Plotter(off_screen=True)
+        p = pv.Plotter(off_screen=off_screen)
         p.add_mesh(self.ps_pv, color="red", label="pressure side", line_width=1)
         p.add_mesh(self.ss_pv, color="blue", label="suction side", line_width=1)
         p.add_mesh(self.skeletonline_pv, color="black", label="skeleton line", line_width=1)
-        p.add_mesh(pv.PolyData(self.sortedpointsrolled_pv.points[self.ile]), color="green", label="ile", point_size=16)
-        p.add_mesh(pv.PolyData(self.sortedpointsrolled_pv.points[self.ite]), color="yellow", label="ite", point_size=16)
+        p.add_mesh(pv.PolyData(self.sortedpoints_pv.points[self.ile]), color="green", label="ile", point_size=16)
+        p.add_mesh(pv.PolyData(self.sortedpoints_pv.points[self.ite]), color="yellow", label="ite", point_size=16)
         p.add_text(
             f"beta_le: {self.beta_le} \nbeta_te: {self.beta_te}\nphi_camber: {self.camber_phi}\nlength_camber: {self.camber_length}",
             font_size=int(sfactor))
         p.add_legend(size=(0.2, 0.2))
         p.view_xy()
-        p.show(screenshot=figurepath, window_size=window_size)
-        p.close()
-        return figurepath
+        if off_screen:
+            p.show(screenshot=figurepath, window_size=window_size)
+            return figurepath
+        else:
+            p.show(window_size=window_size)
+            return None
 
 
 @dataclass

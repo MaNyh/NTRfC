@@ -1,6 +1,7 @@
 import numpy as np
 import pyvista as pv
-from scipy.interpolate import interp1d
+from scipy.interpolate import CubicSpline,interp1d
+from scipy.interpolate import PchipInterpolator
 
 
 def polyline_from_points(points):
@@ -22,26 +23,30 @@ def lines_from_points(points):
     poly.lines = cells
     return poly
 
-
-def refine_spline(x, y, res, half_cosine_spacing=False):
+def refine_spline(x, y, res, half_cosine_spacing=False,kind='linear'):
     """
-    https://stackoverflow.com/questions/51512197/python-equidistant-points-along-a-line-joining-set-of-points/51515357
+    Refine spline using cubic interpolation.
 
-    :param x:
-    :param y:
-    :param res:
-    :return: x,y
+    :param x: Array of x coordinates.
+    :param y: Array of y coordinates.
+    :param res: Number of interpolated points.
+    :param half_cosine_spacing: Boolean flag for using half-cosine spacing.
+    :return: Interpolated x and y coordinates.
     """
 
     distance = np.cumsum(np.sqrt(np.ediff1d(x, to_begin=0) ** 2 + np.ediff1d(y, to_begin=0) ** 2))
     distance = distance / distance[-1]
 
-    fx, fy = interp1d(distance, x), interp1d(distance, y)
+    # Cubic spline interpolation
+    fx = interp1d(distance, x,kind=kind)
+    fy = interp1d(distance, y,kind=kind)
 
     if half_cosine_spacing:
         beta = np.linspace(0.0, np.pi, res)
-        alpha_ = [(0.5 * (1.0 - np.cos(xa))) for xa in beta]  # Half cosine based spacing
+        alpha_ = [(0.5 * (1.0 - np.cos(xa))) for xa in beta]  # Half-cosine based spacing
     else:
         alpha_ = np.linspace(0, 1, res)
-    x, y = fx(alpha_), fy(alpha_)
-    return x, y
+
+    # Interpolated x and y values
+    x_new, y_new = fx(alpha_), fy(alpha_)
+    return x_new, y_new

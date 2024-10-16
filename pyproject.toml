@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ntrfc"
+version = "0.2.0"
+description = "Numerical Test Rig for Cascades. A workflows-library for CFD analysis of cascade-flows"
+authors = [
+    {name = "Malte Nyhuis", email = "nyhuis@tfd.uni-hannover.de"}
+]
+readme = "README.rst"
+requires-python = ">=3.10"
+license = { text = "MIT License" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.11"
+]
+keywords = ["ntrfc"]
+
+# i want to read the dependencies from requirements.txt
+
+dynamic = ["dependencies"]
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+
+[project.optional-dependencies]
+test = ["pytest>=3"]
+
+[project.scripts]
+ntrfc = "ntrfc.cli:main"
+
+[tool.setuptools.package-data]
+ntrfc = ["data/*"]
+
+[tool.setuptools.packages.find]
+include = ["ntrfc", "ntrfc.*"]

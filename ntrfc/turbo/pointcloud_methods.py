@@ -10,16 +10,16 @@ def midline_from_sides(ps_poly, ss_poly,res =100):
     z = ps_poly.points[0][2]
     midsres = res
     if x_ps[0] > x_ps[-1]:
-        ax, ay = refine_spline(x_ps[::-1], y_ps[::-1], midsres)
+        ax, ay = refine_spline(x_ps[::-1], y_ps[::-1], midsres,kind="linear")
     else:
-        ax, ay = refine_spline(x_ps, y_ps, midsres)
+        ax, ay = refine_spline(x_ps, y_ps, midsres,kind="linear")
     if x_ss[0] > x_ss[-1]:
-        bx, by = refine_spline(x_ss[::-1], y_ss[::-1], midsres)
+        bx, by = refine_spline(x_ss[::-1], y_ss[::-1], midsres,kind="linear")
     else:
-        bx, by = refine_spline(x_ss, y_ss, midsres)
+        bx, by = refine_spline(x_ss, y_ss, midsres,kind="linear")
     xmids, ymids = ((ax + bx) / 2, (ay + by) / 2)
 
-    midsPoly = polyline_from_points(np.stack((xmids, ymids, z * np.ones(len(ymids)))).T)
+    midsPoly = polyline_from_points(np.stack((xmids,ymids, z * np.ones(len(ymids)))).T)
     return midsPoly
 
 

@@ -71,5 +71,6 @@ class GenericCascadeCase():
         bladepoly = pv.PolyData(self.active_blade_slice.points)
         for arr in self.active_blade_slice.point_data.keys():
             bladepoly[arr] = self.active_blade_slice.point_data[arr]
+
         self.blade = Blade2D(bladepoly)
         self.blade.compute_all_frompoints(alpha)

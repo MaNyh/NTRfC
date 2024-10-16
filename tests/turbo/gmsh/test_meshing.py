@@ -6,10 +6,13 @@ def test_cascade_meshing_gmshcascade(tmpdir):
     from ntrfc.turbo.cascade_case.utils.domain_utils import CascadeDomain2DParameters, Blade2D
     from ntrfc.turbo.cascade_case.domain import CascadeDomain2D
     from ntrfc.filehandling.mesh import load_mesh
+    from ntrfc.geometry.alphashape import auto_concaveHull
 
     ptsx, ptsy = naca("6510", 200, False)
+    ptsx_n, ptsy_n, _ = auto_concaveHull(ptsx, ptsy)
     # create a 3d pointcloud using pv.PolyData, all z values are 0
-    pts = pv.PolyData(np.c_[ptsx, ptsy, np.zeros(len(ptsx))])
+    pts = pv.PolyData(np.c_[ptsx_n, ptsy_n, np.zeros(len(ptsx_n))])
+
     domainparams = CascadeDomain2DParameters(xinlet=-3, xoutlet=4, pitch=2, blade_yshift=0.1)
     blade = Blade2D(pts)
     blade.compute_all_frompoints(1)
@@ -56,9 +59,11 @@ def test_cascade_meshing_gmshwindtunnel(tmpdir):
     import pyvista as pv
     import numpy as np
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.geometry.alphashape import auto_concaveHull
 
     xs, ys = naca("6510", 256)
-    points = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T * 0.06)
+    xs_n,ys_n,_ = auto_concaveHull(xs,ys)
+    points = pv.PolyData(np.stack([xs_n, ys_n, np.zeros(len(xs_n))]).T * 0.06)
 
     gwkconfig = CascadeWindTunnelDomain2DParameters(gamma=6,
                                                     gittervor=0.03,
@@ -71,7 +76,7 @@ def test_cascade_meshing_gmshwindtunnel(tmpdir):
 
     meshconfig = MeshConfig(lc_high=0.0008,
                             lc_low=0.008,
-                            bl_size=8e-6,
+                            bl_size=10e-6,
                             progression_le=0.01,
                             progression_te=0.01,
                             bl_thickness=0.0014,

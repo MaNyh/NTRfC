@@ -1,4 +1,4 @@
-image: python:3.10
+image: python:3.11
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
@@ -131,8 +131,8 @@ build-singularity:
     - echo $SYLABSTOKEN
     - singularity remote login --username $SREGISTRY_USERNAME --tokenfile $SYLABSTOKEN
     - singularity build --remote library://nyhuma/ntrflows/ntr.sif:latest singularitybuild/ntrfc_container.def
-#  only:
-#    - tags
+  only:
+   - tags
 
 publish:
   stage: deploy
