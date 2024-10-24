@@ -2,6 +2,17 @@
 History
 =======
 
+
+0.2.0 (2024-10-10)
+------------------
+
+- improved statistical le-te-extraction extraction with voxelization.
+- new installation with pyproject.toml
+- dependency upgrades
+- python 3.11 support
+- code cleanups and readme update
+
+
 0.1.11 (2024-06-11)
 ------------------
 
