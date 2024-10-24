@@ -18,11 +18,6 @@ History
 
 - wake angle hotfix (gmsh cascadecase)
 
-0.1.11 (2024-06-11)
-------------------
-
-- wake angle hotfix (gmsh cascadecase)
-
 
 0.1.10 (2024-05-08)
 ------------------
