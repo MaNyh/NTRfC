@@ -22,13 +22,16 @@ def filter_voronoi_sites(voronoi_sites_3d,sortedPoly,refinedPoints):
     goals = 0
     goal_le = []
     goal_te = []
+
+    upper = 160
+    lower = 50
     while goals != 100:
         pcd_new = pcd.voxel_down_sample(voxel_size=start_size)
-        if len(pcd_new.points) > 95:
-            start_size += 0.00025
-        elif len(pcd_new.points) < 35:
-            start_size -= 0.00025
-        elif (25 <= len(pcd_new.points) <= 95):
+        if len(pcd_new.points) > upper:
+            start_size += 0.0005*np.random.rand()
+        elif len(pcd_new.points) < lower:
+            start_size -= 0.0005*np.random.rand()
+        elif (lower <= len(pcd_new.points) <= upper):
             goals += 1
 
             filtered_sites = np.asarray(pcd_new.points)
