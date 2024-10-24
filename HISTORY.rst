@@ -14,7 +14,6 @@ History
 - test improvements
 - code cleanups and readme update
 
-
 0.1.9 (2024-03-15)
 ------------------
 
