@@ -27,7 +27,9 @@ def filter_voronoi_sites(voronoi_sites_3d,sortedPoly,refinedPoints):
     lower = 75
     while goals != 512:
         pcd_new = pcd.voxel_down_sample(voxel_size=start_size)
-        if len(pcd_new.points) > upper:
+        if start_size <=0:
+            start_size = 0.00025
+        elif len(pcd_new.points) > upper:
             start_size += 0.0005*np.random.rand()
         elif len(pcd_new.points) < lower:
             start_size -= 0.0005*np.random.rand()
