@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy import signal
+from scipy.spatial.distance import jensenshannon
 
 from ntrfc.math.methods import minmax_normalize
 
@@ -76,6 +77,31 @@ def smd_probability_compare(sample1, sample2, verbose=False):
     #     plt.show()
     return similarity
 
+def calculate_histogram(signal, bins=30):
+    # Calculate histogram as an approximation of the distribution
+    hist, bin_edges = np.histogram(signal, bins=bins, density=True)
+    hist = hist / hist.sum()  # Normalize to make it a probability distribution
+    return hist
+
+def calculate_stationarity_score(sample_1, sample_2):
+
+    bins = optimal_bin_width(sample_1, sample_2)
+
+    def js_divergence_with_reference(sample1,sample2,bins):
+        hist1 = calculate_histogram(sample1, bins)
+        hist2 = calculate_histogram(sample2, bins)
+        return jensenshannon(hist1, hist2)
+
+    # Apply rol
+    # Calculate JS divergence for each rolling window compared to the reference
+    js_divergences = js_divergence_with_reference(sample_1,sample_2,bins)
+
+    # Calculate average distance
+    avg_distance = js_divergences
+    score = avg_distance  # Lower distance means more staionary
+
+    return score
+
 
 def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbose=False):
     """
@@ -107,30 +133,42 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
 
     # Get the length of the time series and define a range of allowed window sizes
     series_length = len(normalized_series)
-    allowed_window_sizes = np.array(range(int(series_length * min_interval), int(series_length * max_interval) + 1))
+    min_window_size = int(series_length * min_interval)
+    max_window_size = int(series_length * max_interval)
+    allowed_window_sizes = range(min_window_size, max_window_size)
 
-    # Iterate through the allowed window sizes and perform the Kolmogorov-Smirnov test and correlation coefficient calculation
+    def rdiff(a,b):
+        if a != 0:
+            return np.abs((a-b)/a)
+        elif b != 0:
+            return np.abs((a-b)/b)
+        else:
+            return 0
+
+    scores = []
     mean_scores = []
     var_scores = []
     for window_size in allowed_window_sizes:
-        check_window = normalized_series[-window_size * 2:]
-        check_window_df = pd.DataFrame(check_window)
-        rolling_check = check_window_df.rolling(window_size)
-        mean_scores.append(np.std(rolling_check.mean()).values[0])
-        var_scores.append(np.std(rolling_check.var()).values[0])
+        window_1 = normalized_series[-window_size:]
+        window_2 = normalized_series[-window_size * 2:-window_size]
+        mean_scores.append(rdiff(window_1.mean(), window_2.mean()))
+        var_scores.append(rdiff(window_1.var(), window_2.var()))
         # Compute the correlation coefficient
-    cumulated_scores = minmax_normalize(mean_scores) + minmax_normalize(np.array(var_scores))
+        scores.append(calculate_stationarity_score(window_1, window_2))
 
+    mean_scores = np.array(mean_scores)
+    var_scores = np.array(var_scores)
+
+    cumulated_scores = minmax_normalize(mean_scores) + minmax_normalize(var_scores)
     optimal_window_size_index = np.argmin(cumulated_scores)
-    opt_window_size = allowed_window_sizes[optimal_window_size_index]
+    opt_window_size = allowed_window_sizes[optimal_window_size_index]*2
 
     #
-    opt_window = time_series[-opt_window_size * 2:]
+    opt_window = time_series[-opt_window_size:]
 
-    assert len(opt_window) == opt_window_size * 2
-    probability_similiarity = smd_probability_compare(opt_window[:opt_window_size], opt_window[opt_window_size:])
+    assert len(opt_window) == opt_window_size
 
-    if probability_similiarity < 0.96:
+    if scores[optimal_window_size_index] > 0.1:
         return False, False, False
 
     # Compute the period of the time series
@@ -166,38 +204,38 @@ def estimate_stationarity(timeseries, verbose=False):
 
     reference_mean = np.mean(reference_window)
     reference_variance = np.var(reference_window)
-    opt_rolling_window = np.lib.stride_tricks.sliding_window_view(opt_window, opt_window_size)
+    opt_rolling_window = pd.DataFrame(reference_window).rolling(window=opt_window_size//2)
 
-    rolling_means = np.mean(opt_rolling_window, axis=1)
-    rolling_vars = np.var(opt_rolling_window, axis=1)
+    rolling_means = opt_rolling_window.mean().values
+    rolling_vars = opt_rolling_window.var().values
 
-    assert len(rolling_means) == len(opt_rolling_window)
-    assert len(rolling_vars) == len(opt_rolling_window)
+    mean_uncertainty = np.nanstd(rolling_means)
+    var_uncertainty = np.nanstd(rolling_vars)
 
-    mean_uncertainty = np.std(rolling_means)
-    var_uncertainty = np.std(rolling_vars)
 
-    checkseries = normalized_series[:-opt_window_size * 2]
+    mean_tolerance = (0.005)
+    var_tolerance = 0.15*mean_tolerance
+
+
+
+    checkseries = normalized_series[:-opt_window_size]
 
     checkseries_reversed = pd.DataFrame(checkseries[::-1])
-    rolling_win_reversed = checkseries_reversed.rolling(window=opt_window_size)
+    rolling_win_reversed = checkseries_reversed.rolling(window=opt_window_size//2)
 
     rolling_means_reversed = rolling_win_reversed.mean().values
     rolling_vars_reversed = rolling_win_reversed.var().values
 
-    outer_mean_uncertainty = 0.0015
-    outer_var_uncertainty = outer_mean_uncertainty * 0.25  # variance can only be 25% of minmax normed series
-
     rolling_means_errors_reversed = np.abs(rolling_means_reversed - reference_mean)
     rolling_vars_errors_reversed = np.abs(rolling_vars_reversed - reference_variance)
 
-    mean_limits = sigma_threshold * (mean_uncertainty) + outer_mean_uncertainty
-    var_limits = sigma_threshold * (var_uncertainty) + outer_var_uncertainty
+    mean_limits = sigma_threshold * (mean_uncertainty) + mean_tolerance
+    var_limits = sigma_threshold * (var_uncertainty) + var_tolerance
 
     rolling_means_errors_inliers_reversed = rolling_means_errors_reversed[opt_window_size:] <= mean_limits
     rolling_vars_errors_inliers_reversed = rolling_vars_errors_reversed[opt_window_size:] <= var_limits
 
-    def last_coherent_interval(arr, threshold=1):
+    def last_coherent_interval(arr, threshold=0.99):
         reversed_arr = arr[::-1]
         false_indices = np.where(reversed_arr == False)[0]
         last_false_index = false_indices[-1] if len(false_indices) > 0 else 0
@@ -206,11 +244,11 @@ def estimate_stationarity(timeseries, verbose=False):
         answer_index = np.where(success_rate >= threshold)[0][0]
         return len(arr) - answer_index
 
-    mean_index = datalength - last_coherent_interval(rolling_means_errors_inliers_reversed) - 3 * opt_window_size
+    mean_index = datalength - last_coherent_interval(rolling_means_errors_inliers_reversed) - 3 * opt_window_size//2
 
-    variance_index = datalength - last_coherent_interval(rolling_vars_errors_inliers_reversed) - 3 * opt_window_size
+    variance_index = datalength - last_coherent_interval(rolling_vars_errors_inliers_reversed) - 3 * opt_window_size//2
 
-    stationary_start_index = max(mean_index, variance_index)
+    stationary_start_index = max(mean_index, variance_index)-opt_window_size//2
 
     # if verbose:
     #     fig, axs = plt.subplots(3, 1, figsize=(24, 20))

@@ -38,8 +38,9 @@ def test_extractSidePolys():
 
     circlepoly = pv.PolyData(pv.Circle(radius=1, resolution=res).points)
 
+    ind_1 = 0
     ind_2 = circlepoly.number_of_points // 2
-    side_1, side_2 = extractSidePolys(ind_2, circlepoly)
+    side_1, side_2 = extractSidePolys(ind_1, ind_2, circlepoly)
 
     assert side_1.number_of_points == res // 2 + 1
     assert side_2.number_of_points == res // 2 + 1
@@ -72,9 +73,9 @@ def test_extractSidePolys():
     res = 100
 
     circlepoly = pv.PolyData(np.roll(pv.Circle(radius=1, resolution=res).points, res // 2, axis=0))
-
+    ind_1 = 0
     ind_2 = circlepoly.number_of_points // 2
-    side_1, side_2 = extractSidePolys(ind_2, circlepoly)
+    side_1, side_2 = extractSidePolys(ind_1,ind_2, circlepoly)
 
     assert side_1.number_of_points == res // 2 + 1
     assert side_2.number_of_points == res // 2 + 1
@@ -91,8 +92,9 @@ def test_midline_from_sides():
 
     circlepoly = pv.PolyData(np.roll(pv.Circle(radius=1, resolution=res).points, res // 2, axis=0))
 
+    ind_1 = 0
     ind_2 = circlepoly.number_of_points // 2
-    side_1, side_2 = extractSidePolys(ind_2, circlepoly)
+    side_1, side_2 = extractSidePolys(ind_1, ind_2, circlepoly)
 
     mids = midline_from_sides(side_1, side_2)
 

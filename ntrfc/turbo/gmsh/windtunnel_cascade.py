@@ -33,7 +33,7 @@ def create_mesh(domain2d: CascadeWindTunnelDomain2D,
     pslengths = lines_from_points(blade.ps_pv.points).compute_cell_sizes()
     pslength = np.sum(pslengths["Length"])
     ss_half_idx = np.where(np.cumsum(sslengths["Length"]) >= sslength / 2)[0][0]
-    ps_half_idx = np.where(np.cumsum(pslengths["Length"]) >= pslength / 2)[0][0] + blade.ite
+    ps_half_idx = np.where(np.cumsum(pslengths["Length"]) >= pslength / 2)[0][0] + blade.ite_rolled
 
     path = filename
     gwkconfig = domainparams
@@ -49,7 +49,7 @@ def create_mesh(domain2d: CascadeWindTunnelDomain2D,
     line8 = domain2d.line8
     line9 = domain2d.line9
 
-    te_index = blade.ite
+    te_index = blade.ite_rolled
     sscells = int(sslength // config.lc_high)
     pscells = int(pslength // config.lc_high)
 
@@ -107,7 +107,7 @@ def create_mesh(domain2d: CascadeWindTunnelDomain2D,
         blade_splines_gmsh[f"{name}_te_halfps"] = gmsh.model.occ.add_spline(
             [*pointlist[te_index:ps_half_idx], pointlist[ps_half_idx]])
         blade_splines_gmsh[f"{name}_halfps_le"] = gmsh.model.occ.add_spline(
-            [*pointlist[ps_half_idx:], pointlist[0]])
+            [*pointlist[ps_half_idx:]])#pointlist[0]
         gmsh.model.occ.synchronize()
         # Boundary layer
         f = gmsh.model.mesh.field.add('BoundaryLayer')

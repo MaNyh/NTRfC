@@ -36,7 +36,7 @@ def test_postprocessing():
     postprocessing = GenericCascadeCase()
     postprocessing.mesh_dict["inlet"] = inlet
     postprocessing.mesh_dict["outlet"] = outlet
-    postprocessing.mesh_dict["blade"] = blade.sortedpointsrolled_pv
+    postprocessing.mesh_dict["blade"] = blade.sortedpoints_pv
     postprocessing.blade = blade
 
     # Test compute_avdr method

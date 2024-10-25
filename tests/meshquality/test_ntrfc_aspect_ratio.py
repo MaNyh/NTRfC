@@ -4,7 +4,7 @@ def test_aspect_ratio():
     import numpy as np
 
     # test good mesh
-    grid = pv.UniformGrid()
+    grid = pv.ImageData()
     values = np.linspace(0, 10, 1000).reshape((20, 5, 10))
     values.shape
     # Set the grid dimensions: shape + 1 because we want to inject our values on
@@ -20,7 +20,7 @@ def test_aspect_ratio():
     assert np.all(aspect_ratios == max(grid.spacing) / min(grid.spacing))
 
     # test bad mesh
-    grid = pv.UniformGrid()
+    grid = pv.ImageData()
     values = np.linspace(0, 10, 1000).reshape((20, 5, 10))
     values.shape
     # Set the grid dimensions: shape + 1 because we want to inject our values on

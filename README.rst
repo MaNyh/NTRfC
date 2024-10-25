@@ -24,10 +24,10 @@ Tested methods and functions for math, time-series, and mesh quality analysis.
 - libxcursor1 (gmsh dependency)
 - libxinerama1 (gmsh dependency)
 
-Current NTRfC versions are based on Python 3.10. Only versions <v0.1.0 can be used with older versions of Python. Library requirements will be installed with the package itself.
+Python requirement is Python>=3.10. Current NTRfC versions are based on Python 3.11. Only versions <v0.1.0 can be used with older versions of Python. Library requirements will be installed with the package itself.
 Installation
 
-NTRfC is utilizing powerful and complex dependencies like pyvista and gmsh. We strongly recommend using virtual or conda environments for installation.
+NTRfC is utilizing powerful and complex dependencies like pyvista,open3d and gmsh. We strongly recommend using virtual or conda environments for installation.
 
 For more information, see:
 

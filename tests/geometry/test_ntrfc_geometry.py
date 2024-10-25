@@ -8,6 +8,7 @@ def test_extract_vk_hk(verbose=False):
     """
     from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
+    from ntrfc.geometry.alphashape import auto_concaveHull
     import numpy as np
     import pyvista as pv
 
@@ -19,15 +20,10 @@ def test_extract_vk_hk(verbose=False):
     angle = 0  # deg
     res = 512
     xs, ys = naca(naca_code, res, half_cosine_spacing=False, finite_te=False)
-    sorted_poly = pv.PolyData(np.stack([xs[:-1], ys[:-1], np.zeros(len(xs) - 1)]).T)
+    xs_n, ys_n,_ = auto_concaveHull(xs,ys)
+    sorted_poly = pv.PolyData(np.stack([xs_n, ys_n, np.zeros(len(xs_n))]).T)
     sorted_poly.rotate_z(angle, inplace=True)
-    X, Y = sorted_poly.points[::, 0], sorted_poly.points[::, 1]
-    ind_1 = res
-    ind_2 = 0
 
-    points = np.stack((X[:], Y[:], np.zeros(len(X)))).T
-    profile_points = pv.PolyData(points)
-    sorted_poly = pv.PolyData(profile_points)
     ind_vk, ind_hk = extract_vk_hk(sorted_poly)
 
     if verbose:
@@ -35,10 +31,15 @@ def test_extract_vk_hk(verbose=False):
         p.add_mesh(sorted_poly.points[ind_hk], color="yellow", point_size=20)
         p.add_mesh(sorted_poly.points[ind_vk], color="red", point_size=20)
         p.add_mesh(sorted_poly)
+        p.view_xy()
         p.show()
 
-    assert ind_hk == ind_2, "wrong hk-index chosen"
-    assert ind_vk == ind_1, "wrong vk-index chosen"
+    assert all(sorted_poly.points[np.argmax(sorted_poly.points[:,0])] == sorted_poly.points[ind_hk])
+    assert all(sorted_poly.points[np.argmin(sorted_poly.points[:,0])] == sorted_poly.points[ind_vk])
+
+
+
+
 
 
 def test_midline_from_sides(verbose=False):
@@ -48,10 +49,10 @@ def test_midline_from_sides(verbose=False):
     import numpy as np
     import pyvista as pv
 
-    res = 512
+    res = 256
     x, y = naca('0009', res, half_cosine_spacing=True)
 
-    points = np.stack((x[:], y[:], np.zeros(res * 2))).T
+    points = np.stack((x[:], y[:], np.zeros(len(x)))).T
     blade = Blade2D(points)
     blade.compute_all_frompoints()
 
@@ -60,10 +61,10 @@ def test_midline_from_sides(verbose=False):
 
     if verbose:
         p = pv.Plotter()
-        p.add_mesh(blade.sortedpointsrolled_pv)
+        p.add_mesh(blade.sortedpoints_pv)
         p.add_mesh(blade.skeletonline_pv)
-        p.add_mesh(blade.sortedpointsrolled_pv.points[blade.ite], color="k", label="hk", point_size=20)
-        p.add_mesh(blade.sortedpointsrolled_pv.points[blade.ile], color="g", label="vk", point_size=20)
+        p.add_mesh(blade.sortedpoints_pv.points[blade.ite], color="k", label="hk", point_size=20)
+        p.add_mesh(blade.sortedpoints_pv.points[blade.ile], color="g", label="vk", point_size=20)
         p.add_legend()
         p.show()
 

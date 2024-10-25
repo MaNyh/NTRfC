@@ -21,8 +21,6 @@ def blade_loading_cp(
     if not figpath:
         figpath = tempfile.mkdtemp() + "/blade_loading_cp.png"
 
-    camber_length = case_instance.blade.camber_length
-
     inlet = case_instance.mesh_dict["inlet"]
     inlet["u"] = inlet[velvar][::, 0]
     inlet["v"] = inlet[velvar][::, 1]
@@ -33,6 +31,11 @@ def blade_loading_cp(
     v = massflowave_plane(inlet, valname="v", rhoname=densityvar, velocityname=velvar)
     w = massflowave_plane(inlet, valname="w", rhoname=densityvar, velocityname=velvar)
     U = vecAbs([u, v, w])
+
+    px_min = np.min(case_instance.blade.ps_pv.points[:, 0])
+    px_max = np.max(case_instance.blade.ps_pv.points[:, 0])
+    cax_len = px_max - px_min
+
     pt1 = p1 + 1 / 2 * rho * U ** 2
 
     ssmeshpoints = case_instance.blade.ss_pv
@@ -42,14 +45,16 @@ def blade_loading_cp(
     ps_cp = np.zeros(psmeshpoints.number_of_points)
 
     for idx, pts1 in enumerate(psmeshpoints.points):
-        ps_xc[idx] = pts1[0] / camber_length
+        #minmax norm ps_xc
+
+        ps_xc[idx] = (pts1[0] - px_min) / cax_len
         ps_cp[idx] = calc_inflow_cp(psmeshpoints.point_data[pressurevar][idx], pt1, p1)
 
     ss_xc = np.zeros(ssmeshpoints.number_of_points)
     ss_cp = np.zeros(ssmeshpoints.number_of_points)
 
     for idx, pts1 in enumerate(ssmeshpoints.points):
-        ss_xc[idx] = pts1[0] / camber_length
+        ss_xc[idx] = (pts1[0] - px_min) / cax_len
         ss_cp[idx] = calc_inflow_cp(ssmeshpoints.point_data[pressurevar][idx], pt1, p1)
 
     plt.figure()

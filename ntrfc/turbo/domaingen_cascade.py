@@ -58,7 +58,7 @@ def cascade_2d_domain(profilepoints2d, x_inlet, x_outlet, pitch, unit, blade_shi
     p.view_xy()
     p.screenshot(path)
 
-    return blade.sortedpointsrolled_pv, blade.ps_pv, blade.ss_pv, per_y_upper, per_y_lower, inletPoly, outletPoly
+    return blade.sortedpoints_pv, blade.ps_pv, blade.ss_pv, per_y_upper, per_y_lower, inletPoly, outletPoly
 
 
 def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inletPoly, outletPoly, zspan, avdr=1,

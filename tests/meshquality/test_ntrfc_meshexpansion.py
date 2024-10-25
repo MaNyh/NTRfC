@@ -2,7 +2,7 @@ def test_mesh_expansion():
     from ntrfc.meshquality.meshexpansion import compute_expansion_factors
     import pyvista as pv
     import numpy as np
-    grid = pv.UniformGrid()
+    grid = pv.ImageData()
     values = np.linspace(0, 10, 1000).reshape((20, 5, 10))
     values.shape
     # Set the grid dimensions: shape + 1 because we want to inject our values on

@@ -8,16 +8,18 @@ def test_symmetric_airfoil_nostagger():
     points = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     blade = Blade2D(points)
     blade.compute_all_frompoints()
-    bladepts = blade.sortedpointsrolled_pv.points
 
-    xs, ys = bladepts[:, 0], bladepts[:, 1]
     ite = blade.ite
 
-    ite_test = len(xs) // 2
+    ite_test = 507
     ite_tol = 2
 
-    assert np.abs(ite - ite_test) <= ite_tol
+    ile = blade.ile
+    ile_test = 27
+    ile_tol = 1
 
+    assert np.abs(ite - ite_test) <= ite_tol
+    assert np.abs(ile - ile_test) <= ile_tol
 
 def test_symmetric_airfoil_stagger():
     import pyvista as pv
@@ -31,15 +33,17 @@ def test_symmetric_airfoil_stagger():
 
     blade = Blade2D(points)
     blade.compute_all_frompoints()
-    bladepts = blade.sortedpointsrolled_pv.points
 
-    xs, ys = bladepts[:, 0], bladepts[:, 1]
     ite = blade.ite
+    ite_test = 140
+    ite_tol = 1
 
-    ite_test = len(xs) // 2
-    ite_tol = 2
+    ile = blade.ile
+    ile_test = 620
+    ile_tol = 1
 
     assert np.abs(ite - ite_test) <= ite_tol
+    assert np.abs(ile - ile_test) <= ile_tol
 
 
 def test_airfoil_nostagger():
@@ -52,16 +56,17 @@ def test_airfoil_nostagger():
     points = pv.PolyData(np.stack([xs, ys, np.zeros(len(xs))]).T)
     blade = Blade2D(points)
     blade.compute_all_frompoints()
-    bladepts = blade.sortedpointsrolled_pv.points
 
-    xs, ys = bladepts[:, 0], bladepts[:, 1]
     ite = blade.ite
+    ite_test = 146
+    ite_tol = 1
 
-    ite_test = len(xs) // 2
-    ite_tol = 2
+    ile = blade.ile
+    ile_test = 626
+    ile_tol = 1
 
     assert np.abs(ite - ite_test) <= ite_tol
-
+    assert np.abs(ile - ile_test) <= ile_tol
 
 def test_airfoil_stagger():
     import pyvista as pv
@@ -75,15 +80,16 @@ def test_airfoil_stagger():
 
     blade = Blade2D(points)
     blade.compute_all_frompoints()
-    bladepts = blade.sortedpointsrolled_pv.points
-
-    xs, ys = bladepts[:, 0], bladepts[:, 1]
     ite = blade.ite
+    ite_test = 141
+    ite_tol = 1
 
-    ite_test = len(xs) // 2
-    ite_tol = 2
+    ile = blade.ile
+    ile_test=621
+    ile_tol = 1
 
     assert np.abs(ite - ite_test) <= ite_tol
+    assert np.abs(ile - ile_test) <= ile_tol
 
 
 def test_t106():
@@ -102,13 +108,15 @@ def test_t106():
 
     blade = Blade2D(points)
     blade.compute_all_frompoints()
-    blade.plot()
-    bladepts = blade.sortedpointsrolled_pv.points
 
-    xs, ys = bladepts[:, 0], bladepts[:, 1]
     ite = blade.ite
 
-    ite_test = len(xs) // 2
-    ite_tol = 2
+    ite_test = 38
+    ite_tol = 1
+
+    ile = blade.ile
+    ile_test = 87
+    ile_tol = 1
 
     assert np.abs(ite - ite_test) <= ite_tol
+    assert np.abs(ile - ile_test) <= ile_tol
