@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ntrfc"
-version = "0.2.0"
+version = "0.2.1"
 description = "Numerical Test Rig for Cascades. A workflows-library for CFD analysis of cascade-flows"
 authors = [
     {name = "Malte Nyhuis", email = "nyhuis@tfd.uni-hannover.de"}
