@@ -120,7 +120,7 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     print("finding walladjacent cells")
     merged_mesh = surfacenormals_surface + volmesh
     # Compute cell-based derivative of a vector field
-    derivatives = compute_scalar_gradient(merged_mesh, "U")
+    derivatives = compute_scalar_gradient(merged_mesh, use_velfield)
 
     derivatives = derivatives.ctp()
     # Extract the volumetric mesh of the derivative-field
