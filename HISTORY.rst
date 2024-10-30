@@ -2,6 +2,10 @@
 History
 =======
 
+0.2.0 (2024-10-30)
+------------------
+
+- hotfix nondimensionals: now compatible to more then just OpenFOAM simulations
 
 0.2.0 (2024-10-10)
 ------------------
