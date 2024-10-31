@@ -2,10 +2,16 @@
 History
 =======
 
-0.2.1 (2024-10-30)
+0.2.2 (2024-10-31)
 ------------------
 
 - hotfix nondimensionals: now compatible to more then just OpenFOAM simulations
+
+
+0.2.1 (2024-10-30)
+------------------
+
+- WITHDRAWN RELEASE
 
 0.2.0 (2024-10-10)
 ------------------

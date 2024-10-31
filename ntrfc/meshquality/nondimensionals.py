@@ -141,7 +141,7 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     facemesh = facemesh.ptc()
     # Construct a KDTree from the surface cell centers and their normals
     surface_normals = facemesh["Normals"]
-    surface_gradients = facemesh["grad_U"]
+    surface_gradients = facemesh[f"grad_{use_velfield}"]
     tree = KDTree(surfacemesh_surface_centers)
 
     # Find the indices of the closest surface cell centers to each wall-adjacent cell center
