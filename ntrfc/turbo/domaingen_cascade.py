@@ -119,6 +119,6 @@ def cascade_3d_domain(sortedPoly, psPoly, ssPoly, per_y_upper, per_y_lower, inle
     p.screenshot(path)
 
     return sortedPoly_lowz, sortedPoly_high, per_y_upper_lowz, per_y_upper_highz, \
-           per_y_lower_lowz, per_y_lower_highz, \
-           inletPoly_lowz, inletPoly_highz, \
-           outletPoly_lowz, outletPoly_highz
+        per_y_lower_lowz, per_y_lower_highz, \
+        inletPoly_lowz, inletPoly_highz, \
+        outletPoly_lowz, outletPoly_highz

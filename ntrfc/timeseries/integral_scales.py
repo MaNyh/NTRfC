@@ -16,7 +16,8 @@ def integralscales(signal, timesteparray):
     if len(zero_crossings(autocorrelated)) > 0:
         acorr_zero_crossings = zero_crossings(autocorrelated)[0]
     else:
-        print("no zero crossing found, using first minimal value (possibly last timestep). check data quality!")
+        print(
+            "[ntrfc info] no zero crossing found, using first minimal value (possibly last timestep). check data quality!")
         acorr_zero_crossings = np.where(autocorrelated == min(autocorrelated))[0][0]
 
     if all(np.isnan(autocorrelated)) or acorr_zero_crossings == 0:

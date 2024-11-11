@@ -10,7 +10,7 @@ from shapely.geometry import Polygon, LineString
 from ntrfc.math.vectorcalc import findNearest, vecDir
 
 
-def filter_voronoi_sites(voronoi_sites_3d,sortedPoly,refinedPoints):
+def filter_voronoi_sites(voronoi_sites_3d, sortedPoly, refinedPoints):
     points_3d = voronoi_sites_3d
 
     # Create an Open3D PointCloud object
@@ -27,15 +27,15 @@ def filter_voronoi_sites(voronoi_sites_3d,sortedPoly,refinedPoints):
     lower = 75
     while goals != 512:
 
-        if start_size <=0:
+        if start_size <= 0:
             start_size = 0.00025
 
         pcd_new = pcd.voxel_down_sample(voxel_size=start_size)
 
         if len(pcd_new.points) > upper:
-            start_size += 0.0005*np.random.rand()
+            start_size += 0.0005 * np.random.rand()
         elif len(pcd_new.points) < lower:
-            start_size -= 0.0005*np.random.rand()
+            start_size -= 0.0005 * np.random.rand()
         elif (lower <= len(pcd_new.points) <= upper):
             goals += 1
 
@@ -56,10 +56,10 @@ def filter_voronoi_sites(voronoi_sites_3d,sortedPoly,refinedPoints):
             goal_le.append(le_ind)
             goal_te.append(te_ind)
 
-            start_size += (np.random.rand()-0.5)*1e-3
+            start_size += (np.random.rand() - 0.5) * 1e-3
 
-    #o3d.visualization.draw_geometries([pcd])   # open3d.visualization.draw_geometries([outlier_cloud])
-    return np.bincount(goal_le).argmax(),np.bincount(goal_te).argmax()
+    # o3d.visualization.draw_geometries([pcd])   # open3d.visualization.draw_geometries([outlier_cloud])
+    return np.bincount(goal_le).argmax(), np.bincount(goal_te).argmax()
 
 
 def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
@@ -69,10 +69,10 @@ def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
     points_2d_closed_refined_voronoi = pointcloud_to_profile(points_orig, voronoires)
 
     voronoi_sites = voronoi_skeleton_sites(points_2d_closed_refined_voronoi)
-    le_ind, te_ind = filter_voronoi_sites(np.stack([voronoi_sites[:, 0], voronoi_sites[:, 1], np.zeros(len(voronoi_sites))]).T,
-                                          sortedPoly.points,
-                                          points_2d_closed_refined_voronoi)
-
+    le_ind, te_ind = filter_voronoi_sites(
+        np.stack([voronoi_sites[:, 0], voronoi_sites[:, 1], np.zeros(len(voronoi_sites))]).T,
+        sortedPoly.points,
+        points_2d_closed_refined_voronoi)
 
     return le_ind, te_ind
 
@@ -109,7 +109,7 @@ def skeletonline_completion(diag_dist, points, points_2d_closed_refined, sites_r
 
 def voronoi_skeleton_sites(points_2d_closed_refined_voronoi):
     vor = Voronoi(points_2d_closed_refined_voronoi)
-    polygon = shapely.geometry.Polygon(points_2d_closed_refined_voronoi)#.convex_hull
+    polygon = shapely.geometry.Polygon(points_2d_closed_refined_voronoi)  # .convex_hull
     is_inside = [shapely.geometry.Point(i).within(polygon) for i in vor.vertices]
     voronoi_sites_inside = vor.vertices[is_inside]
 
@@ -117,7 +117,6 @@ def voronoi_skeleton_sites(points_2d_closed_refined_voronoi):
     sites_inside_sorted = voronoi_sites_inside[sort_indices]
 
     return sites_inside_sorted
-
 
 
 def pointcloud_to_profile(points, res):

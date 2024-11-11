@@ -13,25 +13,25 @@ from scipy.spatial import KDTree
 from ntrfc.math.vectorcalc import vecAbs_list, unitvec
 
 
-def cellDirections(cellUMean, wallNorm):
-    x = unitvec(cellUMean)  # mainDirection
-    y = unitvec(wallNorm)  # tangential
+def cell_directions(cell_u_Mean, wall_norm):
+    x = unitvec(cell_u_Mean)  # mainDirection
+    y = unitvec(wall_norm)  # tangential
     z = unitvec(np.cross(x, y))  # spanwise
     return np.array([x, y, z])
 
 
-def cellSpans(solutionMesh, calcFrom):
+def cell_spans(solution_mesh, calc_from):
     cell_spans = []
-    cellIds = np.arange(0, solutionMesh.number_of_cells)
-    for cellIdx in cellIds:
-        wallNormal = solutionMesh["wallNormal"][cellIdx]
-        uMean = solutionMesh[calcFrom][cellIdx]
+    cell_ids = np.arange(0, solution_mesh.number_of_cells)
+    for cellIdx in cell_ids:
+        wall_normal = solution_mesh["wallNormal"][cellIdx]
+        u_mean = solution_mesh[calc_from][cellIdx]
 
-        cellDirs = cellDirections(uMean, wallNormal)
-        xx = cellDirs[0]
-        yy = cellDirs[1]
-        zz = cellDirs[2]
-        cellfaces = solutionMesh.extract_cells(cellIdx).extract_surface()
+        cell_dirs = cell_directions(u_mean, wall_normal)
+        xx = cell_dirs[0]
+        yy = cell_dirs[1]
+        zz = cell_dirs[2]
+        cellfaces = solution_mesh.extract_cells(cellIdx).extract_surface()
         facecenters = cellfaces.cell_centers().points
         spans = facecenters[:, np.newaxis] - facecenters
         spans_x = np.abs(np.dot(spans, xx))
@@ -68,7 +68,7 @@ def get_wall_shear_stress_velocity(mesh, dynamic_viscosity, density_fieldname, v
     return np.sqrt(tau_w / fluid_density)
 
 
-def constructWallMesh(surfaces):
+def construct_wallmesh(surfaces):
     wall = pv.UnstructuredGrid()
     for surf in surfaces:
         wall = wall.merge(surf)
@@ -82,8 +82,8 @@ def compute_scalar_gradient(mesh, arrayname):
 
 
 def calc_dimensionless_yplus(volmesh, surfaces, use_velfield, use_rhofield, mu_0):
-    surfaceMesh = constructWallMesh(surfaces)
-    surfacenormals_surface = surfaceMesh.extract_surface().compute_normals()
+    surface_mesh = construct_wallmesh(surfaces)
+    surfacenormals_surface = surface_mesh.extract_surface().compute_normals()
 
     volmesh = compute_scalar_gradient(volmesh, use_velfield)
     walladjacentids = volmesh.find_containing_cell(surfacenormals_surface.cell_centers().points)
@@ -93,12 +93,12 @@ def calc_dimensionless_yplus(volmesh, surfaces, use_velfield, use_rhofield, mu_0
         surfacenormals_surface.point_data["Normals"][surfacenormals_surface.find_closest_point(i)]
         for i in volmesh_walladjacent.points]
     distcompute = pv.PolyData(volmesh_walladjacent["cellCenters"]).compute_implicit_distance(
-        surfaceMesh.extract_surface())
+        surface_mesh.extract_surface())
     volmesh_walladjacent["cellCentersWallDistance"] = distcompute["implicit_distance"]
     volmesh_walladjacent["uTaus"] = get_wall_shear_stress_velocity(volmesh_walladjacent, mu_0, use_rhofield,
                                                                    use_velfield)
-    YPlus = np.abs(volmesh_walladjacent["cellCentersWallDistance"]) * volmesh_walladjacent["uTaus"] / mu_0
-    volmesh_walladjacent["yPlus"] = YPlus
+    y_plus = np.abs(volmesh_walladjacent["cellCentersWallDistance"]) * volmesh_walladjacent["uTaus"] / mu_0
+    volmesh_walladjacent["yPlus"] = y_plus
     return volmesh_walladjacent
 
 
@@ -112,12 +112,12 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     :return: volmesh_walladjacent: pyvista-vtk object with the nondimensionals
     """
 
-    print("constructing surfacemesh from wall meshes ...")
-    surfaceMesh = constructWallMesh(surfaces)
-    print("calculating wall-normal vectors...")
-    surfacenormals_surface = surfaceMesh.extract_surface().compute_normals()
+    print("[ntrfc info] constructing surfacemesh from wall meshes ...")
+    surface_mesh = construct_wallmesh(surfaces)
+    print("[ntrfc info] calculating wall-normal vectors...")
+    surfacenormals_surface = surface_mesh.extract_surface().compute_normals()
 
-    print("finding walladjacent cells")
+    print("[ntrfc info] finding walladjacent cells")
     merged_mesh = surfacenormals_surface + volmesh
     # Compute cell-based derivative of a vector field
     derivatives = compute_scalar_gradient(merged_mesh, use_velfield)
@@ -151,13 +151,13 @@ def calc_dimensionless_gridspacing(volmesh, surfaces, use_velfield, use_rhofield
     volmesh_walladjacent["wallNormal"] = surface_normals[indices]
     volmesh_walladjacent["wallUGradient"] = surface_gradients[indices]
 
-    print("calculating cell spans from WallNormals...")
-    spanS = cellSpans(volmesh_walladjacent, use_velfield)
+    print("[ntrfc info] calculating cell spans from WallNormals...")
+    spanS = cell_spans(volmesh_walladjacent, use_velfield)
     volmesh_walladjacent["xSpan"] = np.array([i[0] for i in spanS])  # calculate cell span in flow direction
     volmesh_walladjacent["ySpan"] = np.array([i[1] for i in spanS])  # calculate cell span in wall normal direction
     volmesh_walladjacent["zSpan"] = np.array([i[2] for i in spanS])  # calculate cell span in span direction
 
-    print("calculating wall-shear and friction-velocity")
+    print("[ntrfc info] calculating wall-shear and friction-velocity")
     volmesh_walladjacent = volmesh_walladjacent.ptc()
     grad_velocity = volmesh_walladjacent["wallUGradient"].reshape(volmesh_walladjacent.number_of_cells, 3, 3)
     wall_normals = volmesh_walladjacent["wallNormal"]

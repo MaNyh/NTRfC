@@ -55,7 +55,10 @@ def calc_concavehull(x, y, alpha):
             c = np.linalg.norm(pc - pa)
             s = (a + b + c) / 2.0
             area = np.sqrt(s * (s - a) * (s - b) * (s - c))
-            circum_r = a * b * c / (4.0 * area)
+            if area == 0:
+                circum_r = np.inf
+            else:
+                circum_r = a * b * c / (4.0 * area)
             if circum_r < alpha:
                 add_edge(edges, ia, ib)
                 add_edge(edges, ib, ic)

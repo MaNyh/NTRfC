@@ -107,7 +107,7 @@ def create_mesh(domain2d: CascadeWindTunnelDomain2D,
         blade_splines_gmsh[f"{name}_te_halfps"] = gmsh.model.occ.add_spline(
             [*pointlist[te_index:ps_half_idx], pointlist[ps_half_idx]])
         blade_splines_gmsh[f"{name}_halfps_le"] = gmsh.model.occ.add_spline(
-            [*pointlist[ps_half_idx:]])#pointlist[0]
+            [*pointlist[ps_half_idx:]])  # pointlist[0]
         gmsh.model.occ.synchronize()
         # Boundary layer
         f = gmsh.model.mesh.field.add('BoundaryLayer')

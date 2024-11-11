@@ -43,11 +43,10 @@ def calc_dist_from_surface(surface_primary, surface_secondary, verbose=False):
         dist = np.sqrt(np.sum((ip - p) ** 2))
         h0n["distances"][i] = dist
 
-    if any(h0n["distances"] == 0):
-        # Replace zeros with nans
-        mask = h0n["distances"] == 0
-        h0n["distances"][mask] = np.nan
-        np.nanmean(h0n["distances"])
+    # Replace zeros with nans
+    mask = h0n["distances"] == 0
+    h0n["distances"][mask] = np.nan
+    np.nanmean(h0n["distances"])
 
     # if verbose:
     #     ###############################################################################

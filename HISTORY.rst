@@ -2,6 +2,15 @@
 History
 =======
 
+
+0.2.3 (2024-11-08)
+------------------
+
+- CascadeCase postprocessing plots
+- parallelized pytests in CI and local
+- 96% test coverage
+
+
 0.2.2 (2024-10-31)
 ------------------
 
@@ -11,7 +20,10 @@ History
 0.2.1 (2024-10-30)
 ------------------
 
-- WITHDRAWN RELEASE
+WITHDRAWN RELEASE (hotfix was incomplete)
+
+- hotfix nondimensionals: now compatible to more then just OpenFOAM simulations
+
 
 0.2.0 (2024-10-10)
 ------------------
@@ -62,7 +74,7 @@ History
 0.1.6 (2023-10-13)
 ------------------
 
-WITHDRAWN RELEASE
+WITHDRAWN RELEASE (incomplete meshing algorithm)
 
 - productive meshing algorithm
 - minor improvements

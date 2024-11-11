@@ -1,7 +1,7 @@
 quality_definitions = {
     "AspectRatio": {"good": (1, 100), "ok": (100, 1000)},
     "MeshExpansion": {"good": (1, 20), "ok": (20, 40)},
-    "Skewness": {"good": (0, 0.2), "ok": (0.2, 0.35)},
+    "Skewness": {"good": (0, 0.5), "ok": (0.5, 0.75)},
     # Add more mesh quality definitions as needed
 }
 
@@ -15,14 +15,14 @@ def classify_mesh_quality(quality_name, value_array):
     ok_range = definitions["ok"]
 
     if all((good_range[0] <= value_array) * (value_array <= good_range[1])):
-        print("meshquality: GOOD")
+        print("[ntrfc info] meshquality: GOOD")
         return True
     elif any(ok_range[1] <= value_array):
-        print("meshquality: BAD")
+        print("[ntrfc info] meshquality: BAD")
         return False
     elif any((ok_range[0] <= value_array) * (value_array <= ok_range[1])):
-        print("meshquality: OK")
+        print("[ntrfc info] meshquality: OK")
         return True
     else:
-        print("Undefined Quality")
+        print("[ntrfc info] Undefined Quality")
         return False

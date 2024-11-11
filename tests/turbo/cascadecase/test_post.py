@@ -7,6 +7,7 @@ def test_postprocessing():
     from ntrfc.turbo.cascade_case.post import compute_avdr_inout_massave
     from ntrfc.turbo.cascade_case.post import blade_loading_mais
     from ntrfc.turbo.cascade_case.post import blade_loading_cp
+    from ntrfc.turbo.cascade_case.post import blade_loading_absolute
     from ntrfc.turbo.cascade_case.utils.domain_utils import Blade2D
     from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
 
@@ -38,6 +39,9 @@ def test_postprocessing():
     postprocessing.mesh_dict["outlet"] = outlet
     postprocessing.mesh_dict["blade"] = blade.sortedpoints_pv
     postprocessing.blade = blade
+    postprocessing.case_meta.meanvelocity_name = "UMean"
+    postprocessing.case_meta.meandensity_name = "rhoMean"
+    postprocessing.case_meta.meanpressure_name = "pMean"
 
     # Test compute_avdr method
     compute_avdr_inout_massave(postprocessing)
@@ -49,3 +53,117 @@ def test_postprocessing():
     assert len(px) == len(pc)
     # Test blade_loading method
     blade_loading_mais(postprocessing)
+
+    sax, sac, pax, pac, _ = blade_loading_absolute(postprocessing)
+    assert len(sax) == len(sac)
+    assert len(pax) == len(pac)
+
+
+def test_cascade_blade_deltas():
+    from ntrfc.turbo.cascade_case.solution import GenericCascadeCase
+    from ntrfc.turbo.cascade_case.post import blade_deltas
+    import pyvista as pv
+    import importlib.resources
+    from PIL import Image
+
+    def is_valid_png(file_path):
+        try:
+            with Image.open(file_path) as img:
+                # Check if the format is PNG
+                if img.format == 'PNG':
+                    return True
+                else:
+                    return False
+        except (IOError, OSError):
+            return False
+
+    pv.set_jupyter_backend('trame')
+
+    inlet_path = importlib.resources.files("ntrfc") / "data/openfoam_cascade_case/boundary/inlet.vtp"
+    outlet_path = importlib.resources.files("ntrfc") / "data/openfoam_cascade_case/boundary/outlet.vtp"
+    blade_path = importlib.resources.files("ntrfc") / "data/openfoam_cascade_case/boundary/blade_wall.vtp"
+    fluid_path = importlib.resources.files("ntrfc") / "data/openfoam_cascade_case/internal.vtu"
+
+    case = GenericCascadeCase()
+
+    case.read_meshes(inlet_path, "inlet")
+    case.read_meshes(outlet_path, "outlet")
+    case.read_meshes(blade_path, "blade")
+    case.read_meshes(fluid_path, "fluid")
+
+    case.case_meta.meandensity_name = "rho"
+    case.case_meta.meanvelocity_name = "U"
+    case.case_meta.meanturbulentkineticenergy_name = "k"
+    fig = blade_deltas(case)
+
+    assert is_valid_png(fig)
+
+
+def test_cascade_case_tux():
+    from ntrfc.turbo.cascade_case.solution import GenericCascadeCase
+    from ntrfc.turbo.cascade_case.post import cascade_case_tux
+    import pyvista as pv
+    import importlib.resources
+    from PIL import Image
+
+    def is_valid_png(file_path):
+        try:
+            with Image.open(file_path) as img:
+                # Check if the format is PNG
+                if img.format == 'PNG':
+                    return True
+                else:
+                    return False
+        except (IOError, OSError):
+            return False
+
+    pv.set_jupyter_backend('trame')
+
+    inlet_path = importlib.resources.files("ntrfc") / "data/openfoam_cascade_case/boundary/inlet.vtp"
+    outlet_path = importlib.resources.files("ntrfc") / "data/openfoam_cascade_case/boundary/outlet.vtp"
+    blade_path = importlib.resources.files("ntrfc") / "data/openfoam_cascade_case/boundary/blade_wall.vtp"
+    fluid_path = importlib.resources.files("ntrfc") / "data/openfoam_cascade_case/internal.vtu"
+
+    case = GenericCascadeCase()
+
+    case.read_meshes(inlet_path, "inlet")
+    case.read_meshes(outlet_path, "outlet")
+    case.read_meshes(blade_path, "blade")
+    case.read_meshes(fluid_path, "fluid")
+
+    case.case_meta.meandensity_name = "rho"
+    case.case_meta.meanvelocity_name = "U"
+    case.case_meta.meanturbulentkineticenergy_name = "k"
+    fig = cascade_case_tux(case, res=6)
+
+    assert is_valid_png(fig)
+
+
+def test_cascade_case_meshquality():
+    from ntrfc.turbo.cascade_case.solution import GenericCascadeCase
+    from ntrfc.turbo.cascade_case.post import cascade_case_meshquality
+    import pyvista as pv
+    import importlib.resources
+    from PIL import Image
+
+    def is_valid_png(file_path):
+        try:
+            with Image.open(file_path) as img:
+                # Check if the format is PNG
+                if img.format == 'PNG':
+                    return True
+                else:
+                    return False
+        except (IOError, OSError):
+            return False
+
+    pv.set_jupyter_backend('trame')
+
+    fluid_path = importlib.resources.files("ntrfc") / "data/openfoam_cascade_case/internal.vtu"
+
+    case = GenericCascadeCase()
+
+    case.read_meshes(fluid_path, "fluid")
+    fig = cascade_case_meshquality(case)
+
+    assert is_valid_png(fig[0])

@@ -32,10 +32,10 @@ class Blade2D:
 
         if isinstance(points, pv.PolyData):
             self.origpoints_pv = points
-            print("working with pv.PolyData, dataarrays can be used for postprocessing")
+            print("[ntrfc info] working with pv.PolyData, dataarrays can be used for postprocessing")
         elif isinstance(points, np.ndarray):
             self.origpoints_pv = pv.PolyData(points)
-            print("working with np.ndarray pointcloud. No dataarrays cab be used for postprocessing")
+            print("[ntrfc info]working with np.ndarray pointcloud. No dataarrays cab be used for postprocessing")
 
     def compute_polygon(self, alpha=None):
         unique_points = np.unique(self.origpoints_pv.points, axis=0)
@@ -64,7 +64,6 @@ class Blade2D:
     def compute_lete(self):
         self.ile, self.ite = extract_vk_hk(self.sortedpoints_pv)
 
-
     def compute_rolledblade(self):
         ids = np.roll(np.arange(self.sortedpoints_pv.number_of_points), -self.ile)
         newSortedPoly = pv.PolyData()
@@ -75,9 +74,8 @@ class Blade2D:
         self.ile_rolled = 0
         self.sortedpoints_pv_rolled = newSortedPoly
 
-
     def extract_sides(self):
-        self.ps_pv, self.ss_pv = extractSidePolys(self.ite,self.ile, self.sortedpoints_pv)
+        self.ps_pv, self.ss_pv = extractSidePolys(self.ite, self.ile, self.sortedpoints_pv)
 
     def compute_skeleton(self):
         self.skeletonline_pv = midline_from_sides(self.ps_pv, self.ss_pv)
@@ -99,7 +97,7 @@ class Blade2D:
         self.compute_stats()
         self.compute_rolledblade()
 
-    def plot(self, figurepath=tempfile.mkdtemp() + "/plot.png", window_size=[2400, 2400],off_screen=True):
+    def plot(self, figurepath=tempfile.mkdtemp() + "/plot.png", window_size=[2400, 2400], off_screen=True):
         sfactor = window_size[0] / 200
         p = pv.Plotter(off_screen=off_screen)
         p.add_mesh(self.ps_pv, color="red", label="pressure side", line_width=1)

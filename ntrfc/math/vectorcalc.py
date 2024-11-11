@@ -165,16 +165,6 @@ def eulersFromRPG(R):
         eul2 = m.atan2(-R.item(2, 0), cp * R.item(0, 0) + sp * R.item(1, 0))
         eul3 = m.atan2(sp * R.item(0, 2) - cp * R.item(1, 2), cp * R.item(1, 1) - sp * R.item(0, 1))
 
-    """
-    print("z - phi =", eul1)
-    print("y - theta  =", eul2)
-    print("x - psi =", eul3)
-
-    print("checkRPGRepo")
-    print(R)
-
-    print(np.dot(np.dot(Rz(eul1),Ry(eul2)),Rx(eul3)))
-    """
     return eul1, eul2, eul3
 
 
