@@ -20,7 +20,7 @@ def test_extract_vk_hk(verbose=False):
     angle = 0  # deg
     res = 512
     xs, ys = naca(naca_code, res, half_cosine_spacing=False, finite_te=False)
-    xs_n, ys_n,_ = auto_concaveHull(xs,ys)
+    xs_n, ys_n, _ = auto_concaveHull(xs, ys)
     sorted_poly = pv.PolyData(np.stack([xs_n, ys_n, np.zeros(len(xs_n))]).T)
     sorted_poly.rotate_z(angle, inplace=True)
 
@@ -34,12 +34,8 @@ def test_extract_vk_hk(verbose=False):
         p.view_xy()
         p.show()
 
-    assert all(sorted_poly.points[np.argmax(sorted_poly.points[:,0])] == sorted_poly.points[ind_hk])
-    assert all(sorted_poly.points[np.argmin(sorted_poly.points[:,0])] == sorted_poly.points[ind_vk])
-
-
-
-
+    assert all(sorted_poly.points[np.argmax(sorted_poly.points[:, 0])] == sorted_poly.points[ind_hk])
+    assert all(sorted_poly.points[np.argmin(sorted_poly.points[:, 0])] == sorted_poly.points[ind_vk])
 
 
 def test_midline_from_sides(verbose=False):

@@ -62,7 +62,7 @@ def test_cascade_meshing_gmshwindtunnel(tmpdir):
     from ntrfc.geometry.alphashape import auto_concaveHull
 
     xs, ys = naca("6510", 256)
-    xs_n,ys_n,_ = auto_concaveHull(xs,ys)
+    xs_n, ys_n, _ = auto_concaveHull(xs, ys)
     points = pv.PolyData(np.stack([xs_n, ys_n, np.zeros(len(xs_n))]).T * 0.06)
 
     gwkconfig = CascadeWindTunnelDomain2DParameters(gamma=6,

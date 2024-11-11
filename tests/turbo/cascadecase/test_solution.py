@@ -33,6 +33,8 @@ def test_solution(tmpdir):
     case = GenericCascadeCase()
     case.read_meshes(inletname, "inlet")
     case.read_meshes(outletname, "outlet")
+    case.case_meta.meanvelocity_name = "UMean"
+    case.case_meta.meandensity_name = "rhoMean"
     compute_avdr_inout_massave(case)
     assert case.avdr == 1, "should be avdr==1"
 

@@ -77,24 +77,25 @@ def smd_probability_compare(sample1, sample2, verbose=False):
     #     plt.show()
     return similarity
 
+
 def calculate_histogram(signal, bins=30):
     # Calculate histogram as an approximation of the distribution
     hist, bin_edges = np.histogram(signal, bins=bins, density=True)
     hist = hist / hist.sum()  # Normalize to make it a probability distribution
     return hist
 
-def calculate_stationarity_score(sample_1, sample_2):
 
+def calculate_stationarity_score(sample_1, sample_2):
     bins = optimal_bin_width(sample_1, sample_2)
 
-    def js_divergence_with_reference(sample1,sample2,bins):
+    def js_divergence_with_reference(sample1, sample2, bins):
         hist1 = calculate_histogram(sample1, bins)
         hist2 = calculate_histogram(sample2, bins)
         return jensenshannon(hist1, hist2)
 
     # Apply rol
     # Calculate JS divergence for each rolling window compared to the reference
-    js_divergences = js_divergence_with_reference(sample_1,sample_2,bins)
+    js_divergences = js_divergence_with_reference(sample_1, sample_2, bins)
 
     # Calculate average distance
     avg_distance = js_divergences
@@ -137,11 +138,11 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
     max_window_size = int(series_length * max_interval)
     allowed_window_sizes = range(min_window_size, max_window_size)
 
-    def rdiff(a,b):
+    def rdiff(a, b):
         if a != 0:
-            return np.abs((a-b)/a)
+            return np.abs((a - b) / a)
         elif b != 0:
-            return np.abs((a-b)/b)
+            return np.abs((a - b) / b)
         else:
             return 0
 
@@ -161,7 +162,7 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
 
     cumulated_scores = minmax_normalize(mean_scores) + minmax_normalize(var_scores)
     optimal_window_size_index = np.argmin(cumulated_scores)
-    opt_window_size = allowed_window_sizes[optimal_window_size_index]*2
+    opt_window_size = allowed_window_sizes[optimal_window_size_index] * 2
 
     #
     opt_window = time_series[-opt_window_size:]
@@ -204,7 +205,7 @@ def estimate_stationarity(timeseries, verbose=False):
 
     reference_mean = np.mean(reference_window)
     reference_variance = np.var(reference_window)
-    opt_rolling_window = pd.DataFrame(reference_window).rolling(window=opt_window_size//2)
+    opt_rolling_window = pd.DataFrame(reference_window).rolling(window=opt_window_size // 2)
 
     rolling_means = opt_rolling_window.mean().values
     rolling_vars = opt_rolling_window.var().values
@@ -212,16 +213,13 @@ def estimate_stationarity(timeseries, verbose=False):
     mean_uncertainty = np.nanstd(rolling_means)
     var_uncertainty = np.nanstd(rolling_vars)
 
-
     mean_tolerance = (0.005)
-    var_tolerance = 0.15*mean_tolerance
-
-
+    var_tolerance = 0.15 * mean_tolerance
 
     checkseries = normalized_series[:-opt_window_size]
 
     checkseries_reversed = pd.DataFrame(checkseries[::-1])
-    rolling_win_reversed = checkseries_reversed.rolling(window=opt_window_size//2)
+    rolling_win_reversed = checkseries_reversed.rolling(window=opt_window_size // 2)
 
     rolling_means_reversed = rolling_win_reversed.mean().values
     rolling_vars_reversed = rolling_win_reversed.var().values
@@ -244,11 +242,12 @@ def estimate_stationarity(timeseries, verbose=False):
         answer_index = np.where(success_rate >= threshold)[0][0]
         return len(arr) - answer_index
 
-    mean_index = datalength - last_coherent_interval(rolling_means_errors_inliers_reversed) - 3 * opt_window_size//2
+    mean_index = datalength - last_coherent_interval(rolling_means_errors_inliers_reversed) - 3 * opt_window_size // 2
 
-    variance_index = datalength - last_coherent_interval(rolling_vars_errors_inliers_reversed) - 3 * opt_window_size//2
+    variance_index = datalength - last_coherent_interval(
+        rolling_vars_errors_inliers_reversed) - 3 * opt_window_size // 2
 
-    stationary_start_index = max(mean_index, variance_index)-opt_window_size//2
+    stationary_start_index = max(mean_index, variance_index) - opt_window_size // 2
 
     # if verbose:
     #     fig, axs = plt.subplots(3, 1, figsize=(24, 20))

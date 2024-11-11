@@ -53,4 +53,4 @@ def test_calc_optimize_alphashape():
 
         xs, ys, alpha = auto_concaveHull(points[::, 0], points[::, 1])
 
-        assert abs(len(xs)-len(X)) <= 1
+        assert abs(len(xs) - len(X)) <= 1

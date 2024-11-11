@@ -15,6 +15,13 @@ def test_loadmesh_vtk(tmpdir):
     mesh_load = load_mesh(test_file)
     assert "Density" in mesh_load.array_names
 
+    test_file = tmpdir / "tmp.vtp"
+    mesh = pv.Box()
+    mesh["Density"] = np.ones(mesh.number_of_cells)
+    mesh.save(test_file)
+    mesh_load = load_mesh(test_file)
+    assert "Density" in mesh_load.array_names
+
 
 def test_loadmesh_cgns(tmpdir):
     from ntrfc.filehandling.mesh import load_mesh
@@ -86,14 +93,42 @@ def test_read_vtk(tmpdir):
     assert isinstance(mesh, (pv.UnstructuredGrid, pv.StructuredGrid))
 
 
-#
-# def test_read_vtm():
-#     mesh = read_vtm(VTM_FILE)
-#     assert isinstance(mesh, (pv.UnstructuredGrid, pv.StructuredGrid))
-
 def test_read_cgns():
     from pyvista import examples
     from ntrfc.filehandling.mesh import read_cgns
     CGNS_FILE = examples.download_cgns_structured(load=False)
     mesh = read_cgns(CGNS_FILE)
+    assert isinstance(mesh, (pv.UnstructuredGrid, pv.StructuredGrid))
+
+
+def test_read_msh():
+    import gmsh
+    from ntrfc.filehandling.mesh import load_mesh
+
+    gmsh.initialize()
+    gmsh.model.add("t1")
+
+    lc = 1e-2
+    gmsh.model.geo.addPoint(0, 0, 0, lc, 1)
+
+    gmsh.model.geo.addPoint(.1, 0, 0, lc, 2)
+    gmsh.model.geo.addPoint(.1, .3, 0, lc, 3)
+    p4 = gmsh.model.geo.addPoint(0, .3, 0, lc)
+
+    gmsh.model.geo.addLine(1, 2, 1)
+    gmsh.model.geo.addLine(3, 2, 2)
+    gmsh.model.geo.addLine(3, p4, 3)
+    gmsh.model.geo.addLine(4, 1, p4)
+
+    gmsh.model.geo.addCurveLoop([4, 1, -2, 3], 1)
+
+    gmsh.model.geo.addPlaneSurface([1], 1)
+
+    gmsh.model.geo.synchronize()
+
+    gmsh.model.mesh.generate(2)
+    gmsh.write("t1.msh")
+    gmsh.finalize()
+
+    mesh = load_mesh("t1.msh")
     assert isinstance(mesh, (pv.UnstructuredGrid, pv.StructuredGrid))

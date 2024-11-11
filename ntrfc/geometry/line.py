@@ -1,7 +1,6 @@
 import numpy as np
 import pyvista as pv
-from scipy.interpolate import CubicSpline,interp1d
-from scipy.interpolate import PchipInterpolator
+from scipy.interpolate import interp1d
 
 
 def polyline_from_points(points):
@@ -23,7 +22,8 @@ def lines_from_points(points):
     poly.lines = cells
     return poly
 
-def refine_spline(x, y, res, half_cosine_spacing=False,kind='linear'):
+
+def refine_spline(x, y, res, half_cosine_spacing=False, kind='linear'):
     """
     Refine spline using cubic interpolation.
 
@@ -38,8 +38,8 @@ def refine_spline(x, y, res, half_cosine_spacing=False,kind='linear'):
     distance = distance / distance[-1]
 
     # Cubic spline interpolation
-    fx = interp1d(distance, x,kind=kind)
-    fy = interp1d(distance, y,kind=kind)
+    fx = interp1d(distance, x, kind=kind)
+    fy = interp1d(distance, y, kind=kind)
 
     if half_cosine_spacing:
         beta = np.linspace(0.0, np.pi, res)

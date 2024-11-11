@@ -49,7 +49,7 @@ test: # This job runs in the build stage, which runs first.
     script:
         - pip install .
         - pip install -r requirements_dev.txt
-        - pytest tests/.
+        - pytest -n auto tests/.
     dependencies:
         - build
 
@@ -83,7 +83,7 @@ coverage_test:
   script:
         - pip install .
         - pip install -r requirements_dev.txt
-        - python -m  pytest --cov=ntrfc tests
+        - python -m  pytest -n auto --cov=ntrfc tests
         - coverage xml
   coverage: '/TOTAL.*\s+(\d+\%)/'
   artifacts:

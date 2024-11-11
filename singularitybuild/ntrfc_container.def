@@ -2,13 +2,13 @@ Bootstrap: docker
 From: ubuntu:20.04
 
 %labels
-    Version v0.0.3
+    Version v0.0.4
 
 %help
-    With the python system-installatioon of this container can access all the ntrfc functionality
-    The container can render images.
+ The container’s Python installation provides full access to all NTRfC functionality and supports image rendering.
+ Use cases can be found here:
+ https://gitlab.uni-hannover.de/tfd_public/tools/NTRFlows
 
-    Example cases will follow
 
 %environment
     export LIBGL_ALWAYS_INDIRECT=0
@@ -56,9 +56,9 @@ From: ubuntu:20.04
     export PYENV_ROOT=/opt/pyenv
     export PATH="/opt/pyenv/bin:$PATH"
     wget -O- https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
-    pyenv install 3.10.8
-    echo 'export PATH=/opt/pyenv/versions/3.10.8/bin/:$PATH' >> $SINGULARITY_ENVIRONMENT
-    export PATH=/opt/pyenv/versions/3.10.8/bin/:$PATH
+    pyenv install 3.11.10
+    echo 'export PATH=/opt/pyenv/versions/3.11.10/bin/:$PATH' >> $SINGULARITY_ENVIRONMENT
+    export PATH=/opt/pyenv/versions/3.11.10/bin/:$PATH
 
     apt install python3-wheel -y
 

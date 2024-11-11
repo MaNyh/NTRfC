@@ -2,7 +2,7 @@ import numpy as np
 import pyvista as pv
 
 from ntrfc.math.methods import calcAnisoMatrix, calcAnisoEigs, C_barycentric, autocorr, zero_crossings, reldiff, \
-    return_intersection, is_equidistant, autocorrelate, minmax_normalize
+    return_intersection, is_equidistant, autocorrelate, minmax_normalize, find_nearest
 from ntrfc.timeseries.stationarity import estimate_error_jacknife
 
 
@@ -274,3 +274,10 @@ def test_minmax_normalize():
     input_array = np.array([-3, -1, 0, 2, 5])
     expected_output = np.array([0., 0.25, 0.375, 0.625, 1.])
     assert np.allclose(minmax_normalize(input_array), expected_output)
+
+
+def test_find_nearest():
+    array = np.array([1, 2, 3, 4, 5])
+    value = 3.01
+    idx = find_nearest(array, value)
+    assert idx == 2, f"Expected 2, got {idx}"

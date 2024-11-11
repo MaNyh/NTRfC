@@ -1,5 +1,6 @@
 pipreqs==0.4.11
 pytest-cov
+pytest-xdist
 coverage
 profilehooks
 twine

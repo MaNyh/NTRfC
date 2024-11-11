@@ -31,7 +31,7 @@ def compute_cell_skewness(grid):
     meshok = classify_mesh_quality(qualityname, skewnesses)
 
     if not meshok:
-        warnings.warn(f"Mesh quality ({qualityname}) is bad, consider refining the mesh.")
+        warnings.warn(f"[ntrfc warning] Mesh quality ({qualityname}) is bad, consider refining the mesh.")
 
     return skewnesses
 

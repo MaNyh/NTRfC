@@ -21,6 +21,7 @@ def test_symmetric_airfoil_nostagger():
     assert np.abs(ite - ite_test) <= ite_tol
     assert np.abs(ile - ile_test) <= ile_tol
 
+
 def test_symmetric_airfoil_stagger():
     import pyvista as pv
     import numpy as np
@@ -68,6 +69,7 @@ def test_airfoil_nostagger():
     assert np.abs(ite - ite_test) <= ite_tol
     assert np.abs(ile - ile_test) <= ile_tol
 
+
 def test_airfoil_stagger():
     import pyvista as pv
     import numpy as np
@@ -85,7 +87,7 @@ def test_airfoil_stagger():
     ite_tol = 1
 
     ile = blade.ile
-    ile_test=621
+    ile_test = 621
     ile_tol = 1
 
     assert np.abs(ite - ite_test) <= ite_tol

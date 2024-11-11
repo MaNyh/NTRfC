@@ -4,22 +4,22 @@ import pyvista as pv
 from ntrfc.geometry.line import refine_spline, polyline_from_points
 
 
-def midline_from_sides(ps_poly, ss_poly,res =100):
+def midline_from_sides(ps_poly, ss_poly, res=100):
     x_ps, y_ps = ps_poly.points[::, 0], ps_poly.points[::, 1]
     x_ss, y_ss = ss_poly.points[::, 0], ss_poly.points[::, 1]
     z = ps_poly.points[0][2]
     midsres = res
     if x_ps[0] > x_ps[-1]:
-        ax, ay = refine_spline(x_ps[::-1], y_ps[::-1], midsres,kind="linear")
+        ax, ay = refine_spline(x_ps[::-1], y_ps[::-1], midsres, kind="linear")
     else:
-        ax, ay = refine_spline(x_ps, y_ps, midsres,kind="linear")
+        ax, ay = refine_spline(x_ps, y_ps, midsres, kind="linear")
     if x_ss[0] > x_ss[-1]:
-        bx, by = refine_spline(x_ss[::-1], y_ss[::-1], midsres,kind="linear")
+        bx, by = refine_spline(x_ss[::-1], y_ss[::-1], midsres, kind="linear")
     else:
-        bx, by = refine_spline(x_ss, y_ss, midsres,kind="linear")
+        bx, by = refine_spline(x_ss, y_ss, midsres, kind="linear")
     xmids, ymids = ((ax + bx) / 2, (ay + by) / 2)
 
-    midsPoly = polyline_from_points(np.stack((xmids,ymids, z * np.ones(len(ymids)))).T)
+    midsPoly = polyline_from_points(np.stack((xmids, ymids, z * np.ones(len(ymids)))).T)
     return midsPoly
 
 

@@ -75,7 +75,7 @@ def test_extractSidePolys():
     circlepoly = pv.PolyData(np.roll(pv.Circle(radius=1, resolution=res).points, res // 2, axis=0))
     ind_1 = 0
     ind_2 = circlepoly.number_of_points // 2
-    side_1, side_2 = extractSidePolys(ind_1,ind_2, circlepoly)
+    side_1, side_2 = extractSidePolys(ind_1, ind_2, circlepoly)
 
     assert side_1.number_of_points == res // 2 + 1
     assert side_2.number_of_points == res // 2 + 1
