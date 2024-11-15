@@ -36,7 +36,7 @@ def test_solution(tmpdir):
     case.case_meta.meanvelocity_name = "UMean"
     case.case_meta.meandensity_name = "rhoMean"
     compute_avdr_inout_massave(case)
-    assert case.avdr == 1, "should be avdr==1"
+    assert case.statistics.avdr == 1, "should be avdr==1"
 
 
 def test_animations(tmpdir):

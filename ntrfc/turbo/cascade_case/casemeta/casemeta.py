@@ -1,6 +1,7 @@
 class CaseMeta:
-    def __init__(self, case_root_directory):
+    def __init__(self, case_root_directory, case_name=None):
         self.case_root_directory = case_root_directory
+        self.case_name = case_name
 
         self.velocity_name = None
         self.meanvelocity_name = None

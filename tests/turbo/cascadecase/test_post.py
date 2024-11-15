@@ -16,17 +16,17 @@ def test_postprocessing():
 
     testsolutionpoly.point_data["pMean"] = [1] * testsolutionpoly.number_of_points
     inlet = pv.Plane(direction=(1, 0, 0))
-    inlet["u"] = np.ones((inlet.number_of_cells))
-    inlet["v"] = np.zeros((inlet.number_of_cells))
-    inlet["w"] = np.zeros((inlet.number_of_cells))
+    inlet["u"] = np.ones(inlet.number_of_cells)
+    inlet["v"] = np.zeros(inlet.number_of_cells)
+    inlet["w"] = np.zeros(inlet.number_of_cells)
     inlet["UMean"] = np.stack([inlet["u"], inlet["v"], inlet["w"]]).T
     inlet["rhoMean"] = np.array([1] * inlet.number_of_cells)
     inlet["pMean"] = np.array([1] * inlet.number_of_cells)
     inlet.ctp()
     outlet = pv.Plane(direction=(-1, 0, 0))
-    outlet["u"] = np.ones((outlet.number_of_cells))
-    outlet["v"] = np.zeros((outlet.number_of_cells))
-    outlet["w"] = np.zeros((outlet.number_of_cells))
+    outlet["u"] = np.ones(outlet.number_of_cells)
+    outlet["v"] = np.zeros(outlet.number_of_cells)
+    outlet["w"] = np.zeros(outlet.number_of_cells)
     outlet["UMean"] = np.stack([inlet["u"], inlet["v"], inlet["w"]]).T
     outlet["rhoMean"] = np.array([1] * outlet.number_of_cells)
     outlet["pMean"] = np.array([1] * outlet.number_of_cells)
@@ -45,19 +45,21 @@ def test_postprocessing():
 
     # Test compute_avdr method
     compute_avdr_inout_massave(postprocessing)
-    assert postprocessing.avdr == 1
+    assert postprocessing.statistics.avdr == 1
 
     # Test blade_loading method
-    sx, sc, px, pc, _ = blade_loading_cp(postprocessing)
-    assert len(sx) == len(sc)
-    assert len(px) == len(pc)
+    _ = blade_loading_cp(postprocessing)
+    assert len(postprocessing.statistics.ps_cp) == len(postprocessing.statistics.ps_xc)
+    assert len(postprocessing.statistics.ss_cp) == len(postprocessing.statistics.ss_xc)
     # Test blade_loading method
+
     blade_loading_mais(postprocessing)
+    assert len(postprocessing.statistics.ps_mais) == len(postprocessing.statistics.ps_xc)
+    assert len(postprocessing.statistics.ss_mais) == len(postprocessing.statistics.ss_xc)
 
-    sax, sac, pax, pac, _ = blade_loading_absolute(postprocessing)
-    assert len(sax) == len(sac)
-    assert len(pax) == len(pac)
-
+    _ = blade_loading_absolute(postprocessing)
+    assert len(postprocessing.statistics.ps_pressure) == len(postprocessing.statistics.ps_xc)
+    assert len(postprocessing.statistics.ss_pressure) == len(postprocessing.statistics.ss_xc)
 
 def test_cascade_blade_deltas():
     from ntrfc.turbo.cascade_case.solution import GenericCascadeCase
