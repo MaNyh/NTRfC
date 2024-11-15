@@ -5,6 +5,8 @@ import pyvista as pv
 from PIL import Image
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+import os
+from typing import Union, List
 
 import ntrfc
 from ntrfc.fluid.isentropic import local_isentropic_mach_number
@@ -60,10 +62,17 @@ def cascade_case_meshquality(case_instance: GenericCascadeCase,
         pdfpath_qualityreport, "PDF", resolution=300.0, save_all=True, append_images=images[1:]
     )
 
+    case_instance.statistics.aspect_ratios = aspect_ratios
+    case_instance.statistics.skewness = skewnesses
+    case_instance.statistics.expansion_factors = expansion_factors
+
     return figpath_qualitystats, figpath_meshslice, figpath_badcells, pdfpath_qualityreport
 
 
 def plot_badcells(aspect_ratios, expansion_factors, figpath_badcells, grid, skewnesses):
+    if os.getenv('DISPLAY') is None:
+        pv.start_xvfb()  # Start X virtual framebuffer (Xvfb)
+
     ok_aspect_ratios = quality_definitions["AspectRatio"]["ok"]
     ok_skewnesses = quality_definitions["Skewness"]["ok"]
     ok_expansion_factors = quality_definitions["MeshExpansion"]["ok"]
@@ -100,6 +109,9 @@ def plot_badcells(aspect_ratios, expansion_factors, figpath_badcells, grid, skew
 
 
 def plot_gridslice(figpath_meshslice, grid):
+    if os.getenv('DISPLAY') is None:
+        pv.start_xvfb()  # Start X virtual framebuffer (Xvfb)
+
     # Plot the mesh slice
     p = pv.Plotter(off_screen=True)
     p.add_mesh(grid.slice(normal="z"), color="grey", opacity=0.5, show_edges=True)
@@ -135,37 +147,56 @@ def plot_meshstats_histograms(aspect_ratios, expansion_factors, figpath_qualitys
     axs[2].text(0.9, 0.5,
                 f"min {np.round(np.min(expansion_factors), 2)}\n mean: {np.round(np.mean(expansion_factors), 2)}\n max:{np.round(np.max(expansion_factors), 2)}",
                 horizontalalignment='right', verticalalignment='center', transform=axs[2].transAxes)
+    fig.text(0.05, 0.01, f"ntrfc.meshquality.nondimensionals@{ntrfc.__version__}", fontsize=8, color="grey", alpha=0.5)
     plt.tight_layout()
     plt.savefig(figpath_qualitystats)
 
 
-def cascade_case_tux(case_instance: GenericCascadeCase, res: int = 200, figpath: str = None) -> str:
+def cascade_case_tux(case_instances: Union[GenericCascadeCase, List[GenericCascadeCase]],
+                     res: int = 200,
+                     figpath: str = None
+                     ) -> str:
+    """
+    Generate a Tux plot of the turbulence intensity profile for a cascade case
+    :param case_instances: A list of GenericCascadeCase instances
+    :param res: The resolution of the plot
+    :param figpath: The path to save the figure
+    :return: The path to the figure
+    """
+    if isinstance(case_instances, GenericCascadeCase):
+        case_instances = [case_instances]
+
     if not figpath:
         figpath = tempfile.mkdtemp() + "/cascade_case_tux.png"
 
-    grid = case_instance.mesh_dict["fluid"]
-    umeanname = case_instance.case_meta.meanvelocity_name
-    rhomeanname = case_instance.case_meta.meandensity_name
-    kmeanname = case_instance.case_meta.meanturbulentkineticenergy_name
-    x0 = grid.bounds[0]
-    x1 = grid.bounds[1]
-    xs = np.linspace(x0 + 1e-6, x1 - 1e-6, res)
-    uabs = vecAbs_list(grid.cell_data[umeanname])
-    grid["uabs"] = uabs
-    tus = []
-    for x in tqdm(xs):
-        slicex = grid.slice(normal="x", origin=(x, 0, 0))
-        uabs = massflowave_plane(slicex, valname="uabs", rhoname=rhomeanname, velocityname=umeanname)
-        tke = massflowave_plane(slicex, valname=kmeanname, rhoname=rhomeanname, velocityname=umeanname)
-        tus.append(np.sqrt(2 / 3 * tke) / uabs)
-
     fig = plt.figure()
-    plt.plot(xs, tus)
+    for case_instance in case_instances:
+        grid = case_instance.mesh_dict["fluid"]
+        umeanname = case_instance.case_meta.meanvelocity_name
+        rhomeanname = case_instance.case_meta.meandensity_name
+        kmeanname = case_instance.case_meta.meanturbulentkineticenergy_name
+        x0 = grid.bounds[0]
+        x1 = grid.bounds[1]
+        xs = np.linspace(x0 + 1e-6, x1 - 1e-6, res)
+        uabs = vecAbs_list(grid.cell_data[umeanname])
+        grid["uabs"] = uabs
+        tus = []
+        for x in tqdm(xs):
+            slicex = grid.slice(normal="x", origin=(x, 0, 0))
+            uabs = massflowave_plane(slicex, valname="uabs", rhoname=rhomeanname, velocityname=umeanname)
+            tke = massflowave_plane(slicex, valname=kmeanname, rhoname=rhomeanname, velocityname=umeanname)
+            tus.append(np.sqrt(2 / 3 * tke) / uabs)
+
+        case_instance.statistics.turbulentintensity_x = np.array(tus)
+
+        plt.plot(xs, tus, label=f"Case {case_instance.case_meta.case_name}")
+
     plt.xlabel("x")
     plt.ylabel("Tu")
     plt.title("Turbulence intensity profile")
     plt.grid()
-    fig.text(0.05, 0.01, f"ntrfc.meshquality.nondimensionals@{ntrfc.__version__}", fontsize=16, color="grey", alpha=0.5)
+    plt.legend()
+    fig.text(0.05, 0.01, f"ntrfc.meshquality.nondimensionals@{ntrfc.__version__}", fontsize=8, color="grey", alpha=0.5)
 
     plt.savefig(figpath)
     plt.close()
@@ -174,260 +205,331 @@ def cascade_case_tux(case_instance: GenericCascadeCase, res: int = 200, figpath:
 
 
 def blade_deltas(
-    case_instance: GenericCascadeCase,
+    case_instances: Union[GenericCascadeCase, List[GenericCascadeCase]],
     figpath: str = None,
 ) -> str:
+    if isinstance(case_instances, GenericCascadeCase):
+        case_instances = [case_instances]
+
     if not figpath:
         figpath = tempfile.mkdtemp() + "/blade_deltas.png"
 
-    grid = case_instance.mesh_dict["fluid"]
-    blade = case_instance.mesh_dict["blade"]
-    velocity_arrayname = case_instance.case_meta.meanvelocity_name
-    density_arrayname = case_instance.case_meta.meandensity_name
-    mu_ref = case_instance.case_meta.dynamic_viscosity
-
-    dimless_gridspacings = calc_dimensionless_gridspacing(grid, [blade], velocity_arrayname, density_arrayname, mu_ref)
-    delta_cells_one = dimless_gridspacings.slice(normal="z")
-    delta_cc_one = delta_cells_one.cell_centers()
-
-    blade = Blade2D(delta_cc_one)
-    blade.compute_all_frompoints()
-
-    pspoly_one = blade.ps_pv
-    sspoly_one = blade.ss_pv
-
-    ps_delta_one = pspoly_one.interpolate(delta_cc_one)
-    ss_delta_one = sspoly_one.interpolate(delta_cc_one)
-
-    x0_one = ps_delta_one.points[0][0]
-    x1_one = ps_delta_one.points[-1][0]
-
-    ps_rc_one = (ps_delta_one.points[::, 0] - x0_one) / (x1_one - x0_one)
-    ss_rc_one = (ss_delta_one.points[::, 0] - x0_one) / (x1_one - x0_one)
-
     fig, axes = plt.subplots(3, 1, figsize=(15, 10))
 
-    axes[0].grid(axis="y")
-    axes[0].plot(ss_rc_one * -1, ss_delta_one.point_data["DeltaXPlus"], color='c', label='ps')
-    axes[0].plot(ps_rc_one, ps_delta_one.point_data["DeltaXPlus"], color='c', linestyle='dashed', label='ss')
+    for case_instance in case_instances:
+        grid = case_instance.mesh_dict["fluid"]
+        blade = case_instance.mesh_dict["blade"]
+        velocity_arrayname = case_instance.case_meta.meanvelocity_name
+        density_arrayname = case_instance.case_meta.meandensity_name
+        mu_ref = case_instance.case_meta.dynamic_viscosity
+
+        dimless_gridspacings = calc_dimensionless_gridspacing(grid, [blade], velocity_arrayname, density_arrayname,
+                                                              mu_ref)
+        delta_cells_one = dimless_gridspacings.slice(normal="z")
+        delta_cc_one = delta_cells_one.cell_centers()
+
+        blade = Blade2D(delta_cc_one)
+        blade.compute_all_frompoints()
+
+        pspoly_one = blade.ps_pv
+        sspoly_one = blade.ss_pv
+
+        ps_delta_one = pspoly_one.interpolate(delta_cc_one)
+        ss_delta_one = sspoly_one.interpolate(delta_cc_one)
+
+        x0_one = ps_delta_one.points[0][0]
+        x1_one = ps_delta_one.points[-1][0]
+
+        ps_rc_one = (ps_delta_one.points[::, 0] - x0_one) / (x1_one - x0_one)
+        ss_rc_one = (ss_delta_one.points[::, 0] - x0_one) / (x1_one - x0_one)
+
+        axes[0].plot(ss_rc_one * -1, ss_delta_one.point_data["DeltaXPlus"],
+                     label=f'ps {case_instance.case_meta.case_name}')
+        axes[0].plot(ps_rc_one, ps_delta_one.point_data["DeltaXPlus"], linestyle='dashed',
+                     label=f'ss {case_instance.case_meta.case_name}')
+
+        axes[1].plot(ss_rc_one * -1, ss_delta_one.point_data["DeltaYPlus"],
+                     label=f'ps {case_instance.case_meta.case_name}')
+        axes[1].plot(ps_rc_one, ps_delta_one.point_data["DeltaYPlus"], linestyle='dashed',
+                     label=f'ss {case_instance.case_meta.case_name}')
+
+        axes[2].plot(ss_rc_one * -1, ss_delta_one.point_data["DeltaZPlus"],
+                     label=f'ps {case_instance.case_meta.case_name}')
+        axes[2].plot(ps_rc_one, ps_delta_one.point_data["DeltaZPlus"], linestyle='dashed',
+                     label=f'ss {case_instance.case_meta.case_name}')
+
+        case_instance.statistics.delta_x_plus = ss_delta_one["DeltaXPlus"]
+        case_instance.statistics.delta_y_plus = ss_delta_one["DeltaYPlus"]
+        case_instance.statistics.delta_z_plus = ss_delta_one["DeltaZPlus"]
 
     axes[0].set_title('DeltaXPlus')
     axes[0].set_xlabel(r'$x/c_{ax}$')
     axes[0].set_ylabel(r'$\Delta \xi^{+}$', rotation=0, size=15, labelpad=20)
-    # axes[0].set_ylim(0,60)
+    axes[0].grid(axis="y")
     axes[0].legend()
 
     constrained_y_ticks_2 = [1, 2, 3, 4]
     axes[1].set_yticks(constrained_y_ticks_2)
-    axes[1].grid(axis="y")
-    axes[1].plot(ss_rc_one * -1, ss_delta_one.point_data["DeltaYPlus"], color='c', label='ps')
-    axes[1].plot(ps_rc_one, ps_delta_one.point_data["DeltaYPlus"], color='c', linestyle='dashed', label='ss')
-
     axes[1].set_title('DeltaYPlus')
     axes[1].set_xlabel(r'$x/c_{ax}$')
     axes[1].set_ylabel(r'$\Delta \eta^{+}$', rotation=0, size=15, labelpad=20)
-    # axes[1].set_ylim(0,4)
+    axes[1].grid(axis="y")
 
     constrained_y_ticks_3 = [25, 50]
     axes[2].set_yticks(constrained_y_ticks_3)
-    axes[2].grid(axis="y")
-
-    axes[2].plot(ss_rc_one * -1, ss_delta_one.point_data["DeltaZPlus"], color='c', label='ps')
-    axes[2].plot(ps_rc_one, ps_delta_one.point_data["DeltaZPlus"], color='c', linestyle='dashed', label='ss')
-
     axes[2].set_title('DeltaZPlus')
     axes[2].set_xlabel(r'$x/c_{ax}$')
-    # axes[2].set_ylim(0,60)
     axes[2].set_ylabel(r'$\Delta \zeta^{+}$', rotation=0, size=15, labelpad=20)
+    axes[2].grid(axis="y")
+
     fig.text(0.05, 0.01, f"ntrfc.meshquality.nondimensionals@{ntrfc.__version__}", fontsize=16, color="grey", alpha=0.5)
 
     plt.tight_layout()
-
-    # Show the plot
     plt.savefig(figpath)
 
     return figpath
 
 
 def blade_loading_cp(
-    case_instance: GenericCascadeCase,
+    case_instances: Union[GenericCascadeCase, List[GenericCascadeCase]],
     figpath: str = None
 ) -> tuple:
+    """
+    Plot the blade loading coefficient for a cascade case
+    :param case_instances: A list of GenericCascadeCase instances
+    :param figpath: The path to save the figure
+    :return: The path to the figure
+    """
+    if isinstance(case_instances, GenericCascadeCase):
+        case_instances = [case_instances]
+
     if not figpath:
         figpath = tempfile.mkdtemp() + "/blade_loading_cp.png"
 
-    if not case_instance.blade:
-        raise ValueError("blade not initialized, run case.set_bladeslice_midz() first")
+    fig, ax = plt.subplots()
 
-    pressurevar = case_instance.case_meta.meanpressure_name  # "pMean",
-    densityvar = case_instance.case_meta.meandensity_name  # "rhoMean",
-    velvar = case_instance.case_meta.meanvelocity_name
+    for case_instance in case_instances:
+        if not case_instance.blade:
+            raise ValueError("blade not initialized, run case.set_bladeslice_midz() first")
 
-    inlet = case_instance.mesh_dict["inlet"]
-    inlet["u"] = inlet[velvar][::, 0]
-    inlet["v"] = inlet[velvar][::, 1]
-    inlet["w"] = inlet[velvar][::, 2]
-    p1 = massflowave_plane(inlet, valname=pressurevar, rhoname=densityvar, velocityname=velvar)
-    rho = massflowave_plane(inlet, valname=densityvar, rhoname=densityvar, velocityname=velvar)
-    u = massflowave_plane(inlet, valname="u", rhoname=densityvar, velocityname=velvar)
-    v = massflowave_plane(inlet, valname="v", rhoname=densityvar, velocityname=velvar)
-    w = massflowave_plane(inlet, valname="w", rhoname=densityvar, velocityname=velvar)
-    U = vecAbs([u, v, w])
+        pressurevar = case_instance.case_meta.meanpressure_name  # "pMean",
+        densityvar = case_instance.case_meta.meandensity_name  # "rhoMean",
+        velvar = case_instance.case_meta.meanvelocity_name
 
-    px_min = np.min(case_instance.blade.ps_pv.points[:, 0])
-    px_max = np.max(case_instance.blade.ps_pv.points[:, 0])
-    cax_len = px_max - px_min
+        inlet = case_instance.mesh_dict["inlet"]
+        inlet["u"] = inlet[velvar][::, 0]
+        inlet["v"] = inlet[velvar][::, 1]
+        inlet["w"] = inlet[velvar][::, 2]
+        p1 = massflowave_plane(inlet, valname=pressurevar, rhoname=densityvar, velocityname=velvar)
+        rho = massflowave_plane(inlet, valname=densityvar, rhoname=densityvar, velocityname=velvar)
+        u = massflowave_plane(inlet, valname="u", rhoname=densityvar, velocityname=velvar)
+        v = massflowave_plane(inlet, valname="v", rhoname=densityvar, velocityname=velvar)
+        w = massflowave_plane(inlet, valname="w", rhoname=densityvar, velocityname=velvar)
+        U = vecAbs([u, v, w])
 
-    pt1 = p1 + 1 / 2 * rho * U ** 2
+        px_min = np.min(case_instance.blade.ps_pv.points[:, 0])
+        px_max = np.max(case_instance.blade.ps_pv.points[:, 0])
+        cax_len = px_max - px_min
 
-    ssmeshpoints = case_instance.blade.ss_pv
-    psmeshpoints = case_instance.blade.ps_pv
+        pt1 = p1 + 1 / 2 * rho * U ** 2
 
-    ps_xc = np.zeros(psmeshpoints.number_of_points)
-    ps_cp = np.zeros(psmeshpoints.number_of_points)
+        ssmeshpoints = case_instance.blade.ss_pv
+        psmeshpoints = case_instance.blade.ps_pv
 
-    for idx, pts1 in enumerate(psmeshpoints.points):
-        ps_xc[idx] = (pts1[0] - px_min) / cax_len
-        ps_cp[idx] = calc_inflow_cp(psmeshpoints.point_data[pressurevar][idx], pt1, p1)
+        ps_xc = np.zeros(psmeshpoints.number_of_points)
+        ps_cp = np.zeros(psmeshpoints.number_of_points)
 
-    ss_xc = np.zeros(ssmeshpoints.number_of_points)
-    ss_cp = np.zeros(ssmeshpoints.number_of_points)
+        for idx, pts1 in enumerate(psmeshpoints.points):
+            ps_xc[idx] = (pts1[0] - px_min) / cax_len
+            ps_cp[idx] = calc_inflow_cp(psmeshpoints.point_data[pressurevar][idx], pt1, p1)
 
-    for idx, pts1 in enumerate(ssmeshpoints.points):
-        ss_xc[idx] = (pts1[0] - px_min) / cax_len
-        ss_cp[idx] = calc_inflow_cp(ssmeshpoints.point_data[pressurevar][idx], pt1, p1)
+        ss_xc = np.zeros(ssmeshpoints.number_of_points)
+        ss_cp = np.zeros(ssmeshpoints.number_of_points)
 
-    plt.figure()
-    plt.title("blade loading")
-    plt.plot(ss_xc, ss_cp, label="suction side")
-    plt.plot(ps_xc, ps_cp, label="pressure side")
-    plt.xlabel("$x/c_{ax}$")
-    plt.ylabel("$c_{p}$")
-    plt.grid()
-    plt.legend()
+        for idx, pts1 in enumerate(ssmeshpoints.points):
+            ss_xc[idx] = (pts1[0] - px_min) / cax_len
+            ss_cp[idx] = calc_inflow_cp(ssmeshpoints.point_data[pressurevar][idx], pt1, p1)
+
+        ax.plot(ss_xc, ss_cp, label=f"{case_instance.case_meta.case_name} suction side")
+        ax.plot(ps_xc, ps_cp, label=f"{case_instance.case_meta.case_name} pressure side")
+
+        print("[ntrfc info] writing blade loading statistics")
+
+        case_instance.statistics.ps_cp = ps_cp
+        case_instance.statistics.ps_xc = ps_xc
+        case_instance.statistics.ss_xc = ss_xc
+        case_instance.statistics.ss_cp = ss_cp
+
+    ax.set_xlabel("$x/c_{ax}$")
+    ax.set_ylabel("$c_{p}$")
+    ax.set_title("blade loading")
+    ax.grid()
+    ax.legend()
     plt.savefig(figpath)
     plt.close()
 
-    return ss_xc, ss_cp, ps_xc, ps_cp, figpath
+    return figpath
 
 
 def blade_loading_absolute(
-    case_instance: GenericCascadeCase,
+    case_instances: Union[GenericCascadeCase, List[GenericCascadeCase]],
     figpath: str = None
 ) -> tuple:
+    """
+    Plot the absolute blade loading for a cascade case
+    :param case_instances: A list of GenericCascadeCase instances
+    :param figpath: The path to save the figure
+    :return: The path to the figure
+    """
+    if isinstance(case_instances, GenericCascadeCase):
+        case_instances = [case_instances]
+
     if not figpath:
         figpath = tempfile.mkdtemp() + "/blade_loading_abs.png"
 
-    if not case_instance.blade:
-        raise ValueError("blade not initialized, run case.set_bladeslice_midz() first")
+    fig, ax = plt.subplots()
 
-    pressurevar = case_instance.case_meta.meanpressure_name
-    velvar = case_instance.case_meta.meanvelocity_name
+    for case_instance in case_instances:
+        if not case_instance.blade:
+            raise ValueError("blade not initialized, run case.set_bladeslice_midz() first")
 
-    inlet = case_instance.mesh_dict["inlet"]
-    inlet["u"] = inlet[velvar][::, 0]
-    inlet["v"] = inlet[velvar][::, 1]
-    inlet["w"] = inlet[velvar][::, 2]
+        pressurevar = case_instance.case_meta.meanpressure_name
+        velvar = case_instance.case_meta.meanvelocity_name
 
-    px_min = np.min(case_instance.blade.ps_pv.points[:, 0])
-    px_max = np.max(case_instance.blade.ps_pv.points[:, 0])
-    cax_len = px_max - px_min
+        inlet = case_instance.mesh_dict["inlet"]
+        inlet["u"] = inlet[velvar][::, 0]
+        inlet["v"] = inlet[velvar][::, 1]
+        inlet["w"] = inlet[velvar][::, 2]
 
-    ssmeshpoints = case_instance.blade.ss_pv
-    psmeshpoints = case_instance.blade.ps_pv
+        px_min = np.min(case_instance.blade.ps_pv.points[:, 0])
+        px_max = np.max(case_instance.blade.ps_pv.points[:, 0])
+        cax_len = px_max - px_min
 
-    ps_xc = np.zeros(psmeshpoints.number_of_points)
-    ps_cp = np.zeros(psmeshpoints.number_of_points)
+        ssmeshpoints = case_instance.blade.ss_pv
+        psmeshpoints = case_instance.blade.ps_pv
 
-    for idx, pts1 in enumerate(psmeshpoints.points):
-        ps_xc[idx] = (pts1[0] - px_min) / cax_len
-        ps_cp[idx] = psmeshpoints.point_data[pressurevar][idx]
+        ps_xc = np.zeros(psmeshpoints.number_of_points)
+        ps_pabs = np.zeros(psmeshpoints.number_of_points)
 
-    ss_xc = np.zeros(ssmeshpoints.number_of_points)
-    ss_cp = np.zeros(ssmeshpoints.number_of_points)
+        for idx, pts1 in enumerate(psmeshpoints.points):
+            ps_xc[idx] = (pts1[0] - px_min) / cax_len
+            ps_pabs[idx] = psmeshpoints.point_data[pressurevar][idx]
 
-    for idx, pts1 in enumerate(ssmeshpoints.points):
-        ss_xc[idx] = (pts1[0] - px_min) / cax_len
-        ss_cp[idx] = ssmeshpoints.point_data[pressurevar][idx]
+        ss_xc = np.zeros(ssmeshpoints.number_of_points)
+        ss_pabs = np.zeros(ssmeshpoints.number_of_points)
 
-    plt.figure()
-    plt.title("blade loading")
-    plt.plot(ss_xc, ss_cp, label="suction side")
-    plt.plot(ps_xc, ps_cp, label="pressure side")
-    plt.xlabel("$x/c_{ax}$")
-    plt.ylabel("$p$")
-    plt.grid()
-    plt.legend()
+        for idx, pts1 in enumerate(ssmeshpoints.points):
+            ss_xc[idx] = (pts1[0] - px_min) / cax_len
+            ss_pabs[idx] = ssmeshpoints.point_data[pressurevar][idx]
+
+        ax.plot(ss_xc, ss_pabs, label=f"{case_instance.case_meta.case_name} suction side")
+        ax.plot(ps_xc, ps_pabs, label=f"{case_instance.case_meta.case_name} pressure side")
+
+        print("[ntrfc info] writing blade loading statistics")
+
+        case_instance.statistics.ps_pressure = ps_pabs
+        case_instance.statistics.ps_xc = ps_xc
+        case_instance.statistics.ss_xc = ss_xc
+        case_instance.statistics.ss_pressure = ss_pabs
+
+    ax.set_xlabel("$x/c_{ax}$")
+    ax.set_ylabel("$p$")
+    ax.set_title("blade loading")
+    ax.grid()
+    ax.legend()
     plt.savefig(figpath)
     plt.close()
 
-    return ss_xc, ss_cp, ps_xc, ps_cp, figpath
+    return figpath
 
 
-def blade_loading_mais(case_instance,
-                       figpath=tempfile.mkdtemp() + "/blade_loading_mais.png"):
-    pressurevar = case_instance.case_meta.meanpressure_name
-    densityvar = case_instance.case_meta.meandensity_name
-    velvar = case_instance.case_meta.meanvelocity_name
-    kappa = case_instance.case_meta.kappa
+def blade_loading_mais(case_instances: Union[GenericCascadeCase,
+List[GenericCascadeCase]],
+                       figpath: str = None) -> tuple:
+    """
+    Plot the blade loading for a cascade case using the Mach number
+    :param case_instances: A list of GenericCascadeCase instances
+    :param figpath: The path to save the figure
+    :return: The path to the figure
+    """
 
-    camber_length = case_instance.blade.camber_length
+    if isinstance(case_instances, GenericCascadeCase):
+        case_instances = [case_instances]
 
-    inlet = case_instance.mesh_dict["inlet"]
+    if not figpath:
+        figpath = tempfile.mkdtemp() + "/blade_loading_mais.png"
+    fig, ax = plt.subplots()
 
-    inlet["u"] = inlet[velvar][::, 0]
-    inlet["v"] = inlet[velvar][::, 1]
-    inlet["w"] = inlet[velvar][::, 2]
+    for case_instance in case_instances:
+        pressurevar = case_instance.case_meta.meanpressure_name
+        densityvar = case_instance.case_meta.meandensity_name
+        velvar = case_instance.case_meta.meanvelocity_name
+        kappa = case_instance.case_meta.kappa
 
-    ssmeshpoints = case_instance.blade.ss_pv
-    psmeshpoints = case_instance.blade.ps_pv
+        camber_length = case_instance.blade.camber_length
 
-    ps_xc = np.zeros(psmeshpoints.number_of_points)
-    ps_cp = np.zeros(psmeshpoints.number_of_points)
+        inlet = case_instance.mesh_dict["inlet"]
 
-    pressure_inlet = massflowave_plane(inlet, valname=pressurevar, rhoname=densityvar,
-                                       velocityname=velvar)
-    density_inlet = massflowave_plane(inlet, valname=densityvar, rhoname=densityvar,
-                                      velocityname=velvar)
-    inlet["u"] = inlet[velvar][::, 0]
-    inlet["v"] = inlet[velvar][::, 1]
-    inlet["w"] = inlet[velvar][::, 2]
-    velocity_inlet_u = massflowave_plane(inlet, valname="u", rhoname=densityvar,
-                                         velocityname=velvar)
-    velocity_inlet_v = massflowave_plane(inlet, valname="v", rhoname=densityvar,
-                                         velocityname=velvar)
-    velocity_inlet_w = massflowave_plane(inlet, valname="w", rhoname=densityvar,
-                                         velocityname=velvar)
-    velocity_inlet = vecAbs(np.array([velocity_inlet_u, velocity_inlet_v, velocity_inlet_w]))
-    totalpressure_inlet = pressure_inlet + 0.5 * density_inlet * velocity_inlet ** 2
+        inlet["u"] = inlet[velvar][::, 0]
+        inlet["v"] = inlet[velvar][::, 1]
+        inlet["w"] = inlet[velvar][::, 2]
 
-    for idx, pts1 in enumerate(psmeshpoints.points):
-        ps_xc[idx] = pts1[0] / camber_length
-        bladepressure = psmeshpoints.point_data[pressurevar][idx]
-        ps_cp[idx] = local_isentropic_mach_number(kappa, bladepressure, totalpressure_inlet)
+        ssmeshpoints = case_instance.blade.ss_pv
+        psmeshpoints = case_instance.blade.ps_pv
 
-    ss_xc = np.zeros(ssmeshpoints.number_of_points)
-    ss_cp = np.zeros(ssmeshpoints.number_of_points)
+        ps_xc = np.zeros(psmeshpoints.number_of_points)
+        ps_mais = np.zeros(psmeshpoints.number_of_points)
 
-    for idx, pts1 in enumerate(ssmeshpoints.points):
-        ss_xc[idx] = pts1[0] / camber_length
-        bladepressure = ssmeshpoints.point_data[pressurevar][idx]
-        ss_cp[idx] = local_isentropic_mach_number(kappa, bladepressure, totalpressure_inlet)
+        pressure_inlet = massflowave_plane(inlet, valname=pressurevar, rhoname=densityvar,
+                                           velocityname=velvar)
+        density_inlet = massflowave_plane(inlet, valname=densityvar, rhoname=densityvar,
+                                          velocityname=velvar)
+        inlet["u"] = inlet[velvar][::, 0]
+        inlet["v"] = inlet[velvar][::, 1]
+        inlet["w"] = inlet[velvar][::, 2]
+        velocity_inlet_u = massflowave_plane(inlet, valname="u", rhoname=densityvar,
+                                             velocityname=velvar)
+        velocity_inlet_v = massflowave_plane(inlet, valname="v", rhoname=densityvar,
+                                             velocityname=velvar)
+        velocity_inlet_w = massflowave_plane(inlet, valname="w", rhoname=densityvar,
+                                             velocityname=velvar)
+        velocity_inlet = vecAbs(np.array([velocity_inlet_u, velocity_inlet_v, velocity_inlet_w]))
+        totalpressure_inlet = pressure_inlet + 0.5 * density_inlet * velocity_inlet ** 2
 
-    plt.figure()
-    plt.title("blade loading")
-    plt.plot(ss_xc, ss_cp, label="suction side")
-    plt.plot(ps_xc, ps_cp, label="pressure side")
-    plt.xlabel("$x/c_{ax}$")
-    plt.ylabel("$Ma_{is}$")
-    plt.grid()
-    plt.legend()
+        for idx, pts1 in enumerate(psmeshpoints.points):
+            ps_xc[idx] = pts1[0] / camber_length
+            bladepressure = psmeshpoints.point_data[pressurevar][idx]
+            ps_mais[idx] = local_isentropic_mach_number(kappa, bladepressure, totalpressure_inlet)
+
+        ss_xc = np.zeros(ssmeshpoints.number_of_points)
+        ss_mais = np.zeros(ssmeshpoints.number_of_points)
+
+        for idx, pts1 in enumerate(ssmeshpoints.points):
+            ss_xc[idx] = pts1[0] / camber_length
+            bladepressure = ssmeshpoints.point_data[pressurevar][idx]
+            ss_mais[idx] = local_isentropic_mach_number(kappa, bladepressure, totalpressure_inlet)
+
+        ax.plot(ss_xc, ss_mais, label=f"{case_instance.case_meta.case_name} suction side")
+        ax.plot(ps_xc, ps_mais, label=f"{case_instance.case_meta.case_name} pressure side")
+
+        print("[ntrfc info] writing blade loading statistics")
+
+        case_instance.statistics.ps_mais = ps_mais
+        case_instance.statistics.ps_xc = ps_xc
+        case_instance.statistics.ss_xc = ss_xc
+        case_instance.statistics.ss_mais = ss_mais
+
+    ax.set_xlabel("$x/c_{ax}$")
+    ax.set_ylabel("$Ma_{is}$")
+    ax.set_title("blade loading")
+    ax.grid()
+    ax.legend()
     plt.savefig(figpath)
     plt.close()
-    return ss_xc, ss_cp, ps_xc, ps_cp, figpath
+    return figpath
 
 
-def compute_avdr_inout_massave(case_instance):
+def compute_avdr_inout_massave(case_instance: GenericCascadeCase) -> float:
     densityvar = case_instance.case_meta.meandensity_name
     velvar = case_instance.case_meta.meanvelocity_name
 
@@ -461,11 +563,14 @@ def compute_avdr_inout_massave(case_instance):
          massflowave_plane(outlet, "v", rhoname=densityvar, velocityname=velvar),
          massflowave_plane(outlet, "w", rhoname=densityvar, velocityname=velvar)]))
     beta_2 = vecAngle(U_2, np.array([1, 0, 0]))
-    case_instance.avdr = avdr(rho_1, mag_u_1, beta_1, rho_2, mag_u_2, beta_2)
-    return case_instance.avdr
+    case_instance.statistics.avdr = avdr(rho_1, mag_u_1, beta_1, rho_2, mag_u_2, beta_2)
+    return case_instance.statistics.avdr
 
 
 def cascadecase_contour(case_instance, varname, figpath=None):
+    if os.getenv('DISPLAY') is None:
+        pv.start_xvfb()  # Start X virtual framebuffer (Xvfb)
+
     if not figpath:
         figpath = tempfile.mkdtemp() + f"/contour_{varname}.png"
 

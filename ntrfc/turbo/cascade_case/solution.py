@@ -1,12 +1,45 @@
 import tempfile
-
+from dataclasses import dataclass
 import pyvista as pv
+import numpy as np
 
 from ntrfc.filehandling.mesh import load_mesh
 from ntrfc.turbo.cascade_case.casemeta.casemeta import CaseMeta
 from ntrfc.turbo.cascade_case.utils.domain_utils import CascadeDomain2DParameters, Blade2D
 from ntrfc.turbo.cascade_case.utils.probecontainer import ProbeContainer
 from ntrfc.turbo.cascade_case.utils.sliceseries import SliceSeries
+
+
+@dataclass
+class CaseStatistics:
+    """
+    A container for statistics data for a case.
+    """
+
+    ps_x: np.ndarray = None
+    ps_pressure: np.ndarray = None
+    ps_cp: np.ndarray = None
+    ps_deltax: np.ndarray = None
+    ps_deltay: np.ndarray = None
+    ps_deltaz: np.ndarray = None
+    ps_mais: np.ndarray = None
+
+    ss_x: np.ndarray = None
+    ss_pressure: np.ndarray = None
+    ss_cp: np.ndarray = None
+    ss_deltax: np.ndarray = None
+    ss_deltay: np.ndarray = None
+    ss_deltaz: np.ndarray = None
+    ss_mais: np.ndarray = None
+
+    avdr: float = None
+
+    aspect_ratios: np.ndarray = None
+    skewness: np.ndarray = None
+    expansion_factors: np.ndarray = None
+
+    turbulentintensity_tux: np.ndarray = None
+    turbulentintensity_x: np.ndarray = None
 
 
 class GenericCascadeCase():
@@ -16,17 +49,14 @@ class GenericCascadeCase():
     postprocessing, defining a probe proberegistry, and defining a sliceseriesregistry using inherited classes.
 
     Attributes:
-        solver (object): An object representing the solver used to generate the data for this case.
-        inlet (pv.PolyData): Geometry data for the inlet region of the case.
-        outlet (pv.PolyData): Geometry data for the outlet region of the case.
-        blade (pv.PolyData): Geometry data for the blade in the case.
-        fluid (pv.UnstructuredGrid): Fluid flow data for the case.
-        yper_low (pv.PolyData): Geometry data for the lower y-perpendicular plane of the case.
-        yper_high (pv.PolyData): Geometry data for the upper y-perpendicular plane of the case.
-        zper_low (pv.PolyData): Geometry data for the lower z-perpendicular plane of the case.
-        zper_high (pv.PolyData): Geometry data for the upper z-perpendicular plane of the case.
-        probes (ProbeContainer): A registry of probes defined for this case.
-        sliceseries (SliceSeries): A registry of slices defined for this case.
+    case_meta (CaseMeta): A CaseMeta object containing metadata for the case.
+    mesh_dict (dict): A dictionary containing the geometry data for the case.
+    sliceseries (SliceSeries): A SliceSeries object containing the slice series for the case.
+    probes (ProbeContainer): A ProbeContainer object containing the probe registry for the case.
+    statistics (CaseStatistics): A CaseStatistics object containing the statistics for the case.
+    domainparams (CascadeDomain2DParameters): A CascadeDomain2DParameters object containing the domain parameters for the case.
+    blade (Blade2D): A Blade2D object containing the blade geometry for the case.
+
     """
 
     def __init__(self, case_root_directory=None):
@@ -49,6 +79,7 @@ class GenericCascadeCase():
 
         self.sliceseries = SliceSeries()
         self.probes = ProbeContainer()
+        self.statistics = CaseStatistics()
         self.domainparams = CascadeDomain2DParameters()
         self.blade = None
         self.active_blade_slice = pv.PolyData()

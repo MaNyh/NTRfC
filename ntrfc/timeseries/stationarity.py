@@ -4,7 +4,7 @@ from scipy import signal
 from scipy.spatial.distance import jensenshannon
 
 from ntrfc.math.methods import minmax_normalize
-
+from ntrfc.math.methods import reldiff as rdiff
 
 def optimal_bin_width(sample1, sample2):
     """
@@ -138,14 +138,6 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
     max_window_size = int(series_length * max_interval)
     allowed_window_sizes = range(min_window_size, max_window_size)
 
-    def rdiff(a, b):
-        if a != 0:
-            return np.abs((a - b) / a)
-        elif b != 0:
-            return np.abs((a - b) / b)
-        else:
-            return 0
-
     scores = []
     mean_scores = []
     var_scores = []
@@ -164,12 +156,11 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
     optimal_window_size_index = np.argmin(cumulated_scores)
     opt_window_size = allowed_window_sizes[optimal_window_size_index] * 2
 
-    #
     opt_window = time_series[-opt_window_size:]
 
     assert len(opt_window) == opt_window_size
 
-    if scores[optimal_window_size_index] > 0.1:
+    if scores[optimal_window_size_index] > 0.15:
         return False, False, False
 
     # Compute the period of the time series
@@ -180,7 +171,6 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
         tperiod = freqs[np.argmax(psd)] ** -1
         nperiods = (opt_window_size + (-opt_window_size % tperiod)) // tperiod
     else:
-        tperiod = np.inf
         nperiods = 0
 
     # If verbose mode is enabled, display a plot of the correlation coefficient and KS test results for each window size

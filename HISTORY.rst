@@ -3,6 +3,13 @@ History
 =======
 
 
+0.2.4 (2024-11-15)
+------------------
+
+- CascadeCase postprocessing headless plot fix
+- CascadeCase postprocessing compare cases
+- 97% test coverage
+
 0.2.3 (2024-11-08)
 ------------------
 
