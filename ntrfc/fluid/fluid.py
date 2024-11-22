@@ -1,3 +1,8 @@
+import numpy as np
+from tqdm import tqdm
+
+from ntrfc.math.vectorcalc import vecAbs, vecProjection
+
 def sutherland_viscosity(temperature, sutherland_constant=1.458e-06, reference_temperature=110.4):
     """
     Calculate the dynamic viscosity of a gas using Sutherland's Law.
@@ -47,3 +52,21 @@ def mach_number(speed, specific_heat_ratio, specific_gas_constant, temperature):
     """
     mach_number = speed / ((specific_heat_ratio * specific_gas_constant * temperature) ** 0.5)
     return mach_number
+
+
+def compute_cell_cfl(fluid_mesh, velocityname,dt):
+    cfl_cells = np.zeros(fluid_mesh.number_of_cells)
+    for cidx in tqdm(range(fluid_mesh.number_of_cells)):
+        cell = fluid_mesh.extract_cells(cidx)
+        edges = cell.extract_all_edges()
+        cfl_cell = np.zeros(edges.number_of_cells)
+        for eidx in range(edges.number_of_cells):
+            edge = edges.extract_cells(eidx)
+            edge_as_vector = np.diff(edge.points,axis=0)[0]
+            velocity = vecAbs(vecProjection(edge_as_vector,edge[velocityname]))
+            length = edge.compute_cell_sizes()["Length"][0]
+            cfl_cell[eidx] = np.abs(velocity*dt/length)
+        cfl_cells[cidx] = np.max(cfl_cell)
+    fluid_mesh["cfl"] = cfl_cells
+    return fluid_mesh
+

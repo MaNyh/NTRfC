@@ -20,7 +20,7 @@ from ntrfc.meshquality.standards import quality_definitions
 from ntrfc.turbo.bladeloading import calc_inflow_cp
 from ntrfc.turbo.cascade_case.solution import GenericCascadeCase, Blade2D
 from ntrfc.turbo.integrals import avdr
-
+from ntrfc.fluid.fluid import compute_cell_cfl
 
 def cascade_case_meshquality(case_instance: GenericCascadeCase,
                              pdfpath_qualityreport: str = None,
@@ -582,3 +582,43 @@ def cascadecase_contour(case_instance, varname, figpath=None):
     p.show(screenshot=figpath)
 
     return figpath
+
+def case_cfl(case_instances: Union[GenericCascadeCase,
+List[GenericCascadeCase]],
+                       figpath: str = None) -> tuple:
+    """
+    Plot the blade loading for a cascade case using the Mach number
+    :param case_instances: A list of GenericCascadeCase instances
+    :param figpath: The path to save the figure
+    :return: The path to the figure
+    """
+
+    if isinstance(case_instances, GenericCascadeCase):
+        case_instances = [case_instances]
+
+    if not figpath:
+        figpath = tempfile.mkdtemp() + "/cfl_number.png"
+
+    if os.getenv('DISPLAY') is None:
+        pv.start_xvfb()  # Start X virtual framebuffer (Xvfb)
+
+    cfl_meshes = []
+    for case_instance in case_instances:
+        velvar = case_instance.case_meta.meanvelocity_name
+        fluid = case_instance.mesh_dict["fluid"]
+        dt = case_instance.case_meta.dt
+
+        cfl_mesh = compute_cell_cfl(fluid, velvar, dt)
+        cfl_meshes.append(cfl_mesh)
+
+
+    numplots = len(cfl_meshes)
+    p = pv.Plotter(off_screen=True,shape=(numplots,1))
+    for idx,cfl_mesh in enumerate(cfl_meshes):
+        slicez = cfl_mesh.slice(normal="z")
+        p.subplot(idx,0)
+        p.add_mesh(slicez, scalars="cfl", show_scalar_bar=True)
+    p.view_xy()
+    p.screenshot(figpath)
+    return figpath
+

@@ -169,3 +169,42 @@ def test_cascade_case_meshquality():
     fig = cascade_case_meshquality(case)
 
     assert is_valid_png(fig[0])
+
+
+
+def test_cascade_case_meshquality():
+    from ntrfc.turbo.cascade_case.solution import GenericCascadeCase
+    from ntrfc.turbo.cascade_case.post import case_cfl
+    from ntrfc.filehandling.mesh import load_mesh
+    import pyvista as pv
+    import importlib.resources
+    from PIL import Image
+
+    def is_valid_png(file_path):
+        try:
+            with Image.open(file_path) as img:
+                # Check if the format is PNG
+                if img.format == 'PNG':
+                    return True
+                else:
+                    return False
+        except (IOError, OSError):
+            return False
+
+    pv.set_jupyter_backend('trame')
+
+    fluid_path = importlib.resources.files("ntrfc") / "data/openfoam_cascade_case/internal.vtu"
+
+    case = GenericCascadeCase()
+
+    mesh = load_mesh(fluid_path)
+    zspan = mesh.bounds[5] - mesh.bounds[4]
+    crop_midspanz_percentage = 0.2
+    croped_mesh = mesh.clip("z", mesh.bounds[4] + zspan * crop_midspanz_percentage, invert=True)
+    case.mesh_dict["fluid"] = croped_mesh
+    case.case_meta.meanvelocity_name = "U"
+    case.case_meta.dt = 1e-5
+    fig = case_cfl(case)
+
+    assert is_valid_png(fig)
+

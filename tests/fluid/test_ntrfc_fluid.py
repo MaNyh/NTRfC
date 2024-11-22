@@ -1,5 +1,7 @@
 import numpy as np
 
+from ntrfc.fluid.fluid import compute_cell_cfl
+
 
 def test_total_pressure():
     from ntrfc.fluid.fluid import total_pressure
@@ -44,3 +46,21 @@ def test_isentropic_total_temperature():
     expected_output = 315
     output = calculate_isentropic_total_temperature(1.4, 0.5, 300)
     assert abs(output - expected_output) < 1e-2
+
+
+def test_compute_cell_cfl():
+    import pyvista as pv
+    import numpy as np
+
+    velname = "U"
+    xrng = np.arange(-10, 10, 2, dtype=np.float32)
+    yrng = np.arange(-10, 10, 5, dtype=np.float32)
+    zrng = np.arange(-10, 10, 1, dtype=np.float32)
+    x, y, z = np.meshgrid(xrng, yrng, zrng, indexing='ij')
+    boxmesh = pv.StructuredGrid(x, y, z)
+
+    boxmesh[velname] = boxmesh.number_of_cells*[np.array([1,0,0])]
+    dt = 1
+
+    boxmesh_cfl = compute_cell_cfl(boxmesh,velname,dt)
+    assert np.all(np.isclose(boxmesh_cfl["cfl"] , 0.5))
