@@ -1,6 +1,6 @@
 import os
 
-from ntrfc.filehandling.datafiles import inplace_change, get_filelist_fromdir, get_directory_structure
+from ntrfc.filehandling.datafiles import inplace_change, get_filelist_fromdir, get_directory_structure, read_datfile
 
 
 def test_yamlDictRead(tmpdir):
@@ -119,3 +119,35 @@ def test_get_directory_structure(tmpdir):
                              'subfolder1': {},
                              'subfolder2': {'file1.txt': None, 'file2.txt': None}},
                  'folder2': {'file4.txt': None}}}
+
+
+def test_read_datfile(tmp_path):
+    # Create a minimal test dataset
+    test_data = """
+    TITLE = "Test Section 1"
+    VARIABLES = "TimeStep" "Value1" "Value2"
+    1 10.5 20.1
+    2 15.3 25.6
+    3 18.9 1e-6
+    """
+
+    # Create a temporary file in the pytest-managed tmp_path directory
+    temp_file_path = tmp_path / "test_dataset.dat"
+    with open(temp_file_path, 'w') as file:
+        file.write(test_data)
+
+    # Call the function with the temporary file
+    parsed_data = read_datfile(temp_file_path)
+
+    # Check if the sections are correctly parsed
+    assert "Test Section 1" in parsed_data.keys()
+
+    # Validate the DataFrames for each section
+    df1 = parsed_data["Test Section 1"]
+
+    # Check contents of "Test Section 1"
+    assert df1.shape == (3, 3)
+    assert list(df1.columns) == ["TimeStep", "Value1", "Value2"]
+    assert df1.iloc[0]["TimeStep"] == 1
+    assert df1.iloc[2]["Value2"] == 1e-6
+    assert df1.iloc[2]["Value1"] == 18.9

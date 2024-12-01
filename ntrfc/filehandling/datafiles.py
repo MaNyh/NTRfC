@@ -2,9 +2,10 @@ import os
 import pickle
 from functools import reduce
 from pathlib import Path
-
+import pandas as pd
+import re
 import yaml
-
+from io import StringIO  # Use Python's StringIO for in-memory buffers
 
 def yaml_dict_read(yml_file):
     args_from_yaml = {}
@@ -115,3 +116,48 @@ def create_dirstructure(directories, path):
     for d in directories:
         Path(os.path.join(path, d)).mkdir(parents=True, exist_ok=True)
     return 0
+
+
+def read_datfile(file_path):
+    """
+    Reads a dataset file with metadata and numeric data into a dictionary of DataFrames.
+
+    Parameters:
+        file_path (str): Path to the dataset file.
+
+    Returns:
+        dict: A dictionary where keys are section titles and values are DataFrames.
+    """
+    dataframes = {}
+
+    # Read the entire file into a single string
+    with open(file_path, 'r') as file:
+        content = file.read()
+
+    # Split the content into sections based on TITLE markers
+    sections = re.split(r'TITLE\s*=\s*"(.*?)"', content)
+
+    # Iterate over sections; every even index is metadata, odd index is the section title
+    for i in range(1, len(sections), 2):
+        title = sections[i]
+        section_content = sections[i + 1]
+
+        # Extract VARIABLES line
+        variables_match = re.search(r'VARIABLES\s*=\s*(.*)', section_content)
+        if variables_match:
+            variables = re.findall(r'"([^"]+)"', variables_match.group(1))
+        else:
+            variables = None
+
+        # Extract numeric data (skip metadata)
+        data_block = "\n".join(
+            line for line in section_content.splitlines()
+            if re.match(r'^\s*-?\d+(\.\d+)?[eE]?[-+]?\d*', line)
+        )
+
+
+        df = pd.read_csv(StringIO(data_block), delim_whitespace=True, names=variables)
+        dataframes[title] = df
+
+    return dataframes
+
