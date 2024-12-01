@@ -101,9 +101,11 @@ def test_read_cgns():
     assert isinstance(mesh, (pv.UnstructuredGrid, pv.StructuredGrid))
 
 
-def test_read_msh():
+def test_read_msh(tmp_path):
     import gmsh
     from ntrfc.filehandling.mesh import load_mesh
+
+    meshpath = tmp_path / "t1.msh"
 
     gmsh.initialize()
     gmsh.model.add("t1")
@@ -127,8 +129,8 @@ def test_read_msh():
     gmsh.model.geo.synchronize()
 
     gmsh.model.mesh.generate(2)
-    gmsh.write("t1.msh")
+    gmsh.write(str(meshpath))
     gmsh.finalize()
 
-    mesh = load_mesh("t1.msh")
+    mesh = load_mesh(meshpath)
     assert isinstance(mesh, (pv.UnstructuredGrid, pv.StructuredGrid))

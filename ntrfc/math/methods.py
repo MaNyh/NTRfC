@@ -246,9 +246,8 @@ def minmax_normalize(series_array):
     """
 
     if not np.all(series_array == series_array[0]):
-        mins = min(series_array)
-        maxs = max(series_array)
-        f = (-mins + series_array) / (maxs - mins)
-        return f
+        mins = np.min(series_array)
+        maxs = np.max(series_array)
+        return (-mins + series_array) / (maxs - mins)
     else:
         return series_array
