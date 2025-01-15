@@ -184,8 +184,17 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
 
 
 def estimate_stationarity(timeseries, verbose=False):
+    import matplotlib.pyplot as plt
     sigma_threshold = 3
-    normalized_series = minmax_normalize(timeseries)  # minmax_normalize(timeseries)
+
+    # normalized_series = minmax_normalize(timeseries)  # minmax_normalize(timeseries)
+
+    # New normalization method using minmax_normalize_params
+    # mins, maxs, normalized_series = minmax_normalize_params(timeseries)
+
+    # Normalize using variance normalization
+    varts, normalized_series = var_normalize_params(timeseries)
+
     datalength = len(normalized_series)
     opt_window, opt_window_size, nperiods = optimal_window_size(normalized_series)
     if not opt_window_size:
@@ -205,6 +214,11 @@ def estimate_stationarity(timeseries, verbose=False):
 
     mean_tolerance = (0.005)
     var_tolerance = 0.15 * mean_tolerance
+    # mean_tolerance = reference_mean * 0.02  # 2% of the reference mean
+    # var_tolerance = reference_variance * 0.05  # 5% of the reference variance
+
+    # mean_tolerance = abs(reference_mean * 0.02)  # 2% of the reference mean
+    # var_tolerance = abs(reference_variance * 0.10)  # 5% of the reference variance
 
     checkseries = normalized_series[:-opt_window_size]
 
@@ -262,9 +276,33 @@ def estimate_stationarity(timeseries, verbose=False):
     #     axs[2].legend()
     #
     #     plt.show()
+    if verbose:
+        print(f"Reference Mean: {reference_mean}, Reference Variance: {reference_variance}")
+        print(f"Mean Tolerance: {mean_tolerance}, Variance Tolerance: {var_tolerance}")
+        print(f"Mean Limits: {mean_limits}, Variance Limits: {var_limits}")
+        print(f"Stationary Start Index: {stationary_start_index}")
+
+        plt.figure()
+        plt.plot(timeseries, label='Time Series')
+        plt.axvline(x=stationary_start_index, color='r', linestyle='--', label='Stationary Start')
+        plt.legend()
+        plt.show()
 
     return stationary_start_index
 
+def minmax_normalize_params(series_array):
+    if not np.all(series_array == series_array[0]):
+        mins = np.min(series_array)
+        maxs = np.max(series_array)
+        normalized_series = (series_array - mins) / (maxs - mins)
+        return mins, maxs, normalized_series
+    else:
+        return None, None, series_array
+
+def var_normalize_params(series_array):
+    varts = np.var(series_array)
+    normalized_series = series_array / varts
+    return varts, normalized_series
 
 def estimate_error_jacknife(timeseries, block_size=20, n_samples=4000):
     """
