@@ -27,18 +27,43 @@ def optimal_bin_width(sample1, sample2):
     n = len(data)
     h = 2 * np.std(data) * n ** (-1 / 3)  # initial bin width using Scott's rule
 
-    # perform cross-validation to estimate mean integrated squared error
+    # # perform cross-validation to estimate mean integrated squared error
+    # J_min = np.inf
+    # for i in range(12):
+    #     bins = np.arange(np.min(data), np.max(data) + h, h)
+    #     counts, _ = np.histogram(data, bins=bins)
+    #     N_k = counts[np.nonzero(counts)]
+    #     J = 2 / ((n - 1) * h) - (n + 1) / (n ** 2 * (n - 1) * h) * np.sum(N_k ** 2)
+    #     if J < J_min:
+    #         J_min = J
+    #         h_opt = h
+    #     h *= 0.8  # decrease bin width for better accuracy
+    # bins = np.arange(min(np.min(sample1), np.min(sample2)), max(np.max(sample1), np.max(sample2)), h_opt)
+    data_min, data_max = np.min(data), np.max(data)  # Compute once
+    bin_edges_list = []  # Store bins instead of recomputing
+    histograms = []  # Store histograms to avoid redundant calls
+
     J_min = np.inf
+    h_opt = None
+    h = 2 * np.std(data) * n ** (-1 / 3)
+
     for i in range(12):
-        bins = np.arange(np.min(data), np.max(data) + h, h)
+        bins = np.arange(data_min, data_max + h, h)
+        bin_edges_list.append(bins)
+
+        # Avoid recomputing histogram multiple times
         counts, _ = np.histogram(data, bins=bins)
+        histograms.append(counts)
+
         N_k = counts[np.nonzero(counts)]
         J = 2 / ((n - 1) * h) - (n + 1) / (n ** 2 * (n - 1) * h) * np.sum(N_k ** 2)
+
         if J < J_min:
             J_min = J
-            h_opt = h
-        h *= 0.8  # decrease bin width for better accuracy
-    bins = np.arange(min(np.min(sample1), np.min(sample2)), max(np.max(sample1), np.max(sample2)), h_opt)
+            h_opt = h  # Store best h
+
+        h *= 0.8  # Reduce bin width
+
     return bins
 
 
@@ -58,13 +83,16 @@ def smd_probability_compare(sample1, sample2, verbose=False):
     # Compute the number of bins using the Freedman-Diaconis rule.
     bins = optimal_bin_width(sample1, sample2)
 
-    # Compute the histogram and probability density of the first signal.
-    hist1, _ = np.histogram(sample1, bins=bins, density=True)
-    pdf1 = hist1 / np.sum(hist1)
+    # # Compute the histogram and probability density of the first signal.
+    # hist1, _ = np.histogram(sample1, bins=bins, density=True)
+    # pdf1 = hist1 / np.sum(hist1)
+    #
+    # # Compute the histogram and probability density of the second signal.
+    # hist2, _ = np.histogram(sample2, bins=bins, density=True)
+    # pdf2 = hist2 / np.sum(hist2)
 
-    # Compute the histogram and probability density of the second signal.
-    hist2, _ = np.histogram(sample2, bins=bins, density=True)
-    pdf2 = hist2 / np.sum(hist2)
+    pdf1, _ = np.histogram(sample1, bins=bins, density=True)
+    pdf2, _ = np.histogram(sample2, bins=bins, density=True)
 
     # Compute the mean squared error between the probability densities.
     mse = np.sum((pdf1 - pdf2) ** 2)
@@ -79,9 +107,11 @@ def smd_probability_compare(sample1, sample2, verbose=False):
 
 
 def calculate_histogram(signal, bins=30):
-    # Calculate histogram as an approximation of the distribution
-    hist, bin_edges = np.histogram(signal, bins=bins, density=True)
-    hist = hist / hist.sum()  # Normalize to make it a probability distribution
+    # # Calculate histogram as an approximation of the distribution
+    # hist, bin_edges = np.histogram(signal, bins=bins, density=True)
+    # hist = hist / hist.sum()  # Normalize to make it a probability distribution
+    hist, _ = np.histogram(signal, bins=bins, density=True)  # density=True handles normalization
+
     return hist
 
 
@@ -204,10 +234,18 @@ def estimate_stationarity(timeseries, verbose=False):
 
     reference_mean = np.mean(reference_window)
     reference_variance = np.var(reference_window)
-    opt_rolling_window = pd.DataFrame(reference_window).rolling(window=opt_window_size // 2)
+    # opt_rolling_window = pd.DataFrame(reference_window).rolling(window=opt_window_size // 2)
+    #
+    # rolling_means = opt_rolling_window.mean().values
+    # rolling_vars = opt_rolling_window.var().values
 
-    rolling_means = opt_rolling_window.mean().values
-    rolling_vars = opt_rolling_window.var().values
+    from numpy.lib.stride_tricks import sliding_window_view
+
+    window_size = opt_window_size // 2
+    windows = sliding_window_view(reference_window, window_size)
+
+    rolling_means = np.mean(windows, axis=1)
+    rolling_vars = np.var(windows, axis=1)
 
     mean_uncertainty = np.nanstd(rolling_means)
     var_uncertainty = np.nanstd(rolling_vars)
@@ -348,23 +386,36 @@ def estimate_error_jacknife(timeseries, block_size=20, n_samples=4000):
     var_jk = np.zeros(n_samples)
     acorr_jk = np.zeros(n_samples)
 
-    for i in range(n_samples):
-        # Generate a random index array of block indices
-        idx = np.random.randint(0, n_blocks, size=n_blocks)
-        # Select blocks according to the random indices
-        start = idx * block_size
-        end = start + block_size
-        x_jk = np.concatenate([x[start[i]:end[i]] for i in range(len(start))])
+    # for i in range(n_samples):
+    #     # Generate a random index array of block indices
+    #     idx = np.random.randint(0, n_blocks, size=n_blocks)
+    #     # Select blocks according to the random indices
+    #     start = idx * block_size
+    #     end = start + block_size
+    #     x_jk = np.concatenate([x[start[i]:end[i]] for i in range(len(start))])
+    #
+    #     # Calculate the mean, variance, and autocorrelation of the jackknife sample
+    #     mean_jk[i] = np.mean(x_jk)
+    #     var_jk[i] = np.var(x_jk)
+    #
+    #     freqs, psd = signal.periodogram(x_jk, return_onesided=False)
+    #     acorr_jk[i] = freqs[np.argmax(psd)]
 
-        # Calculate the mean, variance, and autocorrelation of the jackknife sample
-        mean_jk[i] = np.mean(x_jk)
-        var_jk[i] = np.var(x_jk)
+    idx = np.random.randint(0, n_blocks, size=(n_samples, n_blocks))  # Vectorized indices
+    start = idx * block_size
+    end = start + block_size
 
-        freqs, psd = signal.periodogram(x_jk, return_onesided=False)
-        acorr_jk[i] = freqs[np.argmax(psd)]
+    x_jk = np.hstack([x[start[i]:end[i]] for i in range(n_samples)])  # Vectorized concatenation
 
-    mean_jk_error = np.std(mean_jk)
-    var_jk_error = np.std(var_jk)
-    accr_jk_error = np.std(acorr_jk)
+    # mean_jk_error = np.std(mean_jk)
+    # var_jk_error = np.std(var_jk)
+    # accr_jk_error = np.std(acorr_jk)
+
+    # Compute jackknife errors
+    mean_jk_error = np.std(np.mean(x_jk, axis=1))
+    var_jk_error = np.std(np.var(x_jk, axis=1))
+    accr_jk_error = np.std([signal.periodogram(x_jk[i], return_onesided=False)[0][
+                                np.argmax(signal.periodogram(x_jk[i], return_onesided=False)[1])] for i in
+                            range(n_samples)])
 
     return mean_jk_error, var_jk_error, accr_jk_error
