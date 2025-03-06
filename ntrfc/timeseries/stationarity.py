@@ -1,107 +1,11 @@
 import numpy as np
 import pandas as pd
+import scipy.stats as stats
 from scipy import signal
-from scipy.spatial.distance import jensenshannon
-
+from statsmodels.tsa.stattools import adfuller
 from ntrfc.math.methods import minmax_normalize
-from ntrfc.math.methods import reldiff as rdiff
-
-def optimal_bin_width(sample1, sample2):
-    """
-    Compute the optimal bin width using cross-validation estimator for mean integrated squared error.
-
-    Parameters:
-    -----------
-    data : numpy array
-        One-dimensional array of data points.
-
-    Returns:
-    --------
-    h : float
-        Optimal bin width.
-    """
-
-    data = np.concatenate([sample1, sample2])
-    if np.all(data == data[0]):
-        return [data[0] - 0.5, data[0] + 0.5]
-    n = len(data)
-    h = 2 * np.std(data) * n ** (-1 / 3)  # initial bin width using Scott's rule
-
-    # perform cross-validation to estimate mean integrated squared error
-    J_min = np.inf
-    for i in range(12):
-        bins = np.arange(np.min(data), np.max(data) + h, h)
-        counts, _ = np.histogram(data, bins=bins)
-        N_k = counts[np.nonzero(counts)]
-        J = 2 / ((n - 1) * h) - (n + 1) / (n ** 2 * (n - 1) * h) * np.sum(N_k ** 2)
-        if J < J_min:
-            J_min = J
-            h_opt = h
-        h *= 0.8  # decrease bin width for better accuracy
-    bins = np.arange(min(np.min(sample1), np.min(sample2)), max(np.max(sample1), np.max(sample2)), h_opt)
-    return bins
 
 
-def smd_probability_compare(sample1, sample2, verbose=False):
-    """Compare the probability distribution of two signals using the Freedman-Diaconis rule
-    to determine the number of bins.
-
-    Args:
-        sample1 (numpy.ndarray): First signal.
-        sample2 (numpy.ndarray): Second signal.
-
-    Returns:
-        float: Mean squared error between the probability distribution densities
-            of the two signals. A value of 0 indicates that the probability distributions
-            are not alike, while a value of 1 indicates that they are equal.
-    """
-    # Compute the number of bins using the Freedman-Diaconis rule.
-    bins = optimal_bin_width(sample1, sample2)
-
-    # Compute the histogram and probability density of the first signal.
-    hist1, _ = np.histogram(sample1, bins=bins, density=True)
-    pdf1 = hist1 / np.sum(hist1)
-
-    # Compute the histogram and probability density of the second signal.
-    hist2, _ = np.histogram(sample2, bins=bins, density=True)
-    pdf2 = hist2 / np.sum(hist2)
-
-    # Compute the mean squared error between the probability densities.
-    mse = np.sum((pdf1 - pdf2) ** 2)
-    # Convert the mse to a similarity score between 0 and 1.
-    similarity = 1 - mse
-    # if verbose:
-    #     # Plot the histogram
-    #     plt.hist(sample1, bins=bins)
-    #     plt.hist(sample2, bins=bins)
-    #     plt.show()
-    return similarity
-
-
-def calculate_histogram(signal, bins=30):
-    # Calculate histogram as an approximation of the distribution
-    hist, bin_edges = np.histogram(signal, bins=bins, density=True)
-    hist = hist / hist.sum()  # Normalize to make it a probability distribution
-    return hist
-
-
-def calculate_stationarity_score(sample_1, sample_2):
-    bins = optimal_bin_width(sample_1, sample_2)
-
-    def js_divergence_with_reference(sample1, sample2, bins):
-        hist1 = calculate_histogram(sample1, bins)
-        hist2 = calculate_histogram(sample2, bins)
-        return jensenshannon(hist1, hist2)
-
-    # Apply rol
-    # Calculate JS divergence for each rolling window compared to the reference
-    js_divergences = js_divergence_with_reference(sample_1, sample_2, bins)
-
-    # Calculate average distance
-    avg_distance = js_divergences
-    score = avg_distance  # Lower distance means more staionary
-
-    return score
 
 
 def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbose=False):
@@ -129,141 +33,156 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
      necessary periodicity.
     """
 
-    # Normalize the time series
-    normalized_series = minmax_normalize(time_series)
-
     # Get the length of the time series and define a range of allowed window sizes
-    series_length = len(normalized_series)
+    series_length = len(time_series)
     min_window_size = int(series_length * min_interval)
     max_window_size = int(series_length * max_interval)
-    allowed_window_sizes = range(min_window_size, max_window_size)
+    allowed_window_sizes = range(min_window_size, max_window_size+1)
 
-    scores = []
     mean_scores = []
     var_scores = []
     for window_size in allowed_window_sizes:
-        window_1 = normalized_series[-window_size:]
-        window_2 = normalized_series[-window_size * 2:-window_size]
-        mean_scores.append(rdiff(window_1.mean(), window_2.mean()))
-        var_scores.append(rdiff(window_1.var(), window_2.var()))
-        # Compute the correlation coefficient
-        scores.append(calculate_stationarity_score(window_1, window_2))
+        test_window = time_series[-2 * window_size:]
+        test_rolling_window = pd.DataFrame(test_window).rolling(window=window_size)
+        mean_scores.append(np.nanstd(test_rolling_window.mean().values))
+        var_scores.append(np.nanstd(test_rolling_window.var().values))
+
 
     mean_scores = np.array(mean_scores)
     var_scores = np.array(var_scores)
 
     cumulated_scores = minmax_normalize(mean_scores) + minmax_normalize(var_scores)
     optimal_window_size_index = np.argmin(cumulated_scores)
-    opt_window_size = allowed_window_sizes[optimal_window_size_index] * 2
+    opt_window_size = allowed_window_sizes[optimal_window_size_index]
 
-    opt_window = time_series[-opt_window_size:]
+    reference_window = time_series[-2 * opt_window_size:]
 
-    assert len(opt_window) == opt_window_size
+    assert len(reference_window) == opt_window_size * 2
 
-    if scores[optimal_window_size_index] > 0.15:
-        return False, False, False
+    if not all(reference_window == reference_window[0]):
+        test_rolling_window = pd.DataFrame(reference_window).rolling(window=window_size)
+        if float(test_rolling_window.mean().max()-test_rolling_window.mean().min())>0.01:
+            return False, False, False
 
-    # Compute the period of the time series
-    freqs, psd = signal.welch(opt_window.T, fs=1, nperseg=opt_window_size // 2)
-    maxpsdid = np.argmax(psd)
-
-    if maxpsdid != 0:
-        tperiod = freqs[np.argmax(psd)] ** -1
-        nperiods = (opt_window_size + (-opt_window_size % tperiod)) // tperiod
-    else:
-        nperiods = 0
-
-    # If verbose mode is enabled, display a plot of the correlation coefficient and KS test results for each window size
-    # if verbose:
-    #     plt.plot(cumulated_scores)
-    #     plt.axvline(optimal_window_size_index)
-    #     plt.legend()
-    #     plt.show()
-
-    return opt_window, opt_window_size, nperiods
+    return reference_window, opt_window_size, False
 
 
-def estimate_stationarity(timeseries, verbose=False):
+def last_coherent_interval(arr, opt_window_size,threshold=0.95):
+    true_indices = np.where(arr == True)[0]
+    last_false_index = true_indices[-1]+1 if len(true_indices) > 0 else 0
+    success_rate = np.array([(np.sum(arr[:i])+2*opt_window_size) / (len(arr[:i])+2*opt_window_size)  for i in range(len(arr))])
+    success_rate[last_false_index:] = 0
+    answer_index = np.where(success_rate >= threshold)[0][-1]+1
+    return answer_index
+
+
+def estimate_stationarity(timeseries):
     sigma_threshold = 3
-    normalized_series = minmax_normalize(timeseries)  # minmax_normalize(timeseries)
-    datalength = len(normalized_series)
-    opt_window, opt_window_size, nperiods = optimal_window_size(normalized_series)
+    percentage = (stats.norm.cdf(sigma_threshold) - stats.norm.cdf(-sigma_threshold))
+
+    ref_window, opt_window_size, nperiods = optimal_window_size(timeseries)
     if not opt_window_size:
         return False
+    # normalize the reference window to have 0 mean and unit variance
+    # if std is 0, then the window is constant, we cant devide by 0
+    reference_window_normed = normalize_zscore(ref_window, np.std(ref_window), np.mean(ref_window))
 
-    reference_window = opt_window
+    reference_mean = np.mean(reference_window_normed)
+    reference_variance = np.var(reference_window_normed)
+    opt_rolling_window = pd.DataFrame(reference_window_normed).rolling(window=opt_window_size)
 
-    reference_mean = np.mean(reference_window)
-    reference_variance = np.var(reference_window)
-    opt_rolling_window = pd.DataFrame(reference_window).rolling(window=opt_window_size // 2)
+    rolling_means = np.nan_to_num(opt_rolling_window.mean().values,0)
+    rolling_vars = np.nan_to_num(opt_rolling_window.var().values,0)
 
-    rolling_means = opt_rolling_window.mean().values
-    rolling_vars = opt_rolling_window.var().values
+    mean_uncertainty = np.nanstd(rolling_means)#/np.sqrt(len(rolling_means))
+    var_uncertainty = np.nanstd(rolling_vars)#/np.sqrt(len(rolling_vars))
 
-    mean_uncertainty = np.nanstd(rolling_means)
-    var_uncertainty = np.nanstd(rolling_vars)
+    mean_trend_tolerance = (np.nanmax(rolling_means) - np.nanmin(rolling_means))
+    var_trend_tolerance = (np.nanmax(rolling_vars) - np.nanmin(rolling_vars))
 
-    mean_tolerance = (0.005)
-    var_tolerance = 0.15 * mean_tolerance
-
-    checkseries = normalized_series[:-opt_window_size]
+    checkseries = normalize_zscore(timeseries, np.std(ref_window), np.mean(ref_window))
 
     checkseries_reversed = pd.DataFrame(checkseries[::-1])
-    rolling_win_reversed = checkseries_reversed.rolling(window=opt_window_size // 2)
+    rolling_win_reversed = checkseries_reversed.rolling(window=opt_window_size)
 
     rolling_means_reversed = rolling_win_reversed.mean().values
     rolling_vars_reversed = rolling_win_reversed.var().values
 
+    rolling_means_reversed = np.nan_to_num(rolling_means_reversed, nan=reference_mean)
+    rolling_vars_reversed = np.nan_to_num(rolling_vars_reversed, nan=reference_variance)
+
     rolling_means_errors_reversed = np.abs(rolling_means_reversed - reference_mean)
     rolling_vars_errors_reversed = np.abs(rolling_vars_reversed - reference_variance)
 
-    mean_limits = sigma_threshold * (mean_uncertainty) + mean_tolerance
-    var_limits = sigma_threshold * (var_uncertainty) + var_tolerance
+    mean_limits = (mean_uncertainty + mean_trend_tolerance) * (sigma_threshold)
+    var_limits = (var_uncertainty + var_trend_tolerance) * (sigma_threshold)
 
-    rolling_means_errors_inliers_reversed = rolling_means_errors_reversed[opt_window_size:] <= mean_limits
-    rolling_vars_errors_inliers_reversed = rolling_vars_errors_reversed[opt_window_size:] <= var_limits
+    rolling_means_errors_inliers_reversed = rolling_means_errors_reversed  <= mean_limits
+    rolling_vars_errors_inliers_reversed = rolling_vars_errors_reversed  <= var_limits
 
-    def last_coherent_interval(arr, threshold=0.99):
-        reversed_arr = arr[::-1]
-        false_indices = np.where(reversed_arr == False)[0]
-        last_false_index = false_indices[-1] if len(false_indices) > 0 else 0
-        coherent_arr = [False] * last_false_index + [True] * (len(reversed_arr) - last_false_index)
-        success_rate = np.array([np.sum(coherent_arr[i:]) / len(coherent_arr[i:]) for i in range(len(coherent_arr))])
-        answer_index = np.where(success_rate >= threshold)[0][0]
-        return len(arr) - answer_index
 
-    mean_index = datalength - last_coherent_interval(rolling_means_errors_inliers_reversed) - 3 * opt_window_size // 2
+    mean_index = last_coherent_interval(rolling_means_errors_inliers_reversed,opt_window_size,percentage)
 
-    variance_index = datalength - last_coherent_interval(
-        rolling_vars_errors_inliers_reversed) - 3 * opt_window_size // 2
+    variance_index = last_coherent_interval(rolling_vars_errors_inliers_reversed,opt_window_size,percentage)
 
-    stationary_start_index = max(mean_index, variance_index) - opt_window_size // 2
+    stationary_start_index = min(mean_index, variance_index)
 
-    # if verbose:
-    #     fig, axs = plt.subplots(3, 1, figsize=(24, 20))
-    #     axs[0].plot(normalized_series, label="normalized series", color="blue")
-    #     axs[0].vlines(x=stationary_start_index, ymin=0, ymax=np.nanmax(normalized_series), label="stationary_start",
-    #                   color="k")
+    # import matplotlib.pyplot as plt
     #
-    #     axs[1].plot(np.nan_to_num(rolling_means_errors_reversed[::-1], 0), label="mean error", color="red")
-    #     axs[1].hlines(y=(mean_limits), xmin=0, xmax=len(normalized_series), label="mean_limits", color="k")
-    #     axs[1].vlines(x=stationary_start_index, ymin=0, ymax=max(mean_limits, np.nanmax(rolling_means_errors_reversed)),
-    #                   label="stationary_start", color="k")
-    #     axs[1].vlines(x=mean_index, ymin=0, ymax=max(mean_limits, np.nanmax(rolling_means_errors_reversed)),
-    #                   label="mean_index", color="green")
-    #     axs[1].legend()
-    #
-    #     axs[2].plot(np.nan_to_num(rolling_vars_errors_reversed[::-1], 0), label="variance error", color="red")
-    #     axs[2].hlines(y=(var_limits), xmin=0, xmax=len(normalized_series), label="var_limits", color="k")
-    #     axs[2].vlines(x=stationary_start_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)),
-    #                   label="stationary_start", color="k")
-    #     axs[2].vlines(x=variance_index, ymin=0, ymax=max(var_limits, np.nanmax(rolling_vars_errors_reversed)),
-    #                   label="variance_index", color="k")
-    #     axs[2].legend()
-    #
-    #     plt.show()
+    # plt.figure(figsize=(120, 120))
+    # _, axs = plt.subplots(9, 1, )
+    # axs[0].plot(rolling_vars_errors_inliers_reversed, label="var inliers")
+    # axs[0].axvspan(0, variance_index, facecolor='lightblue', alpha=0.5)
+    # axs[1].plot(np.array([(np.sum(rolling_vars_errors_inliers_reversed[:i]) + 2 * opt_window_size) / (
+    #     len(rolling_vars_errors_inliers_reversed[:i]) + 2 * opt_window_size) for i in
+    #                       range(len(rolling_vars_errors_inliers_reversed))]))
+    # axs[1].set_ylim(0.95, 1)
+    # axs[2].plot(rolling_vars_errors_reversed, label="var errors reversed")
+    # axs[2].axhline(var_limits, 0, len(rolling_vars_errors_reversed))
+    # axs[3].plot(rolling_vars_reversed, label="variance reversed")
+    # axs[4].plot(rolling_means_errors_inliers_reversed, label="mean inliers")
+    # axs[4].axvspan(0, mean_index, facecolor='lightblue', alpha=0.5)
+    # axs[5].plot(np.array([(np.sum(rolling_means_errors_inliers_reversed[:i]) + 2 * opt_window_size) / (
+    #     len(rolling_means_errors_inliers_reversed[:i]) + 2 * opt_window_size) for i in
+    #                       range(len(rolling_means_errors_inliers_reversed))]))
+    # axs[5].set_ylim(0.95, 1)
+    # axs[6].plot(rolling_means_errors_reversed, label="mean_errors_reversed")
+    # axs[6].axhline(mean_limits, 0, len(rolling_vars_errors_reversed))
+    # axs[7].plot(rolling_means_reversed, label="mean reversed")
+    # axs[8].plot(timeseries[::-1], label="timeseries")
+    # axs[8].axvline(stationary_start_index + 2 * opt_window_size)
+    # axs[8].axvspan(0, opt_window_size * 2, facecolor='lightblue', alpha=0.5)
+    # axs[8].axvspan(opt_window_size * 2, opt_window_size * 3, facecolor='lightgreen', alpha=0.5)
+    # axs[0].legend()
+    # axs[1].legend()
+    # axs[2].legend()
+    # axs[3].legend()
+    # axs[4].legend()
+    # axs[5].legend()
+    # axs[6].legend()
+    # axs[7].legend()
+    # axs[8].legend()
+    # # plt.tight_layout()
+    # plt.show()
+    return_index = len(timeseries)-(stationary_start_index)
+    return return_index
 
-    return stationary_start_index
+
+def normalize_minmax(ref_window):
+    min_val = np.min(ref_window)
+    max_val = np.max(ref_window)
+    if min_val == max_val:
+        reference_window_normed = (ref_window - min_val)
+    else:
+        reference_window_normed = (ref_window - min_val) / (max_val - min_val)
+    return reference_window_normed
+
+def normalize_zscore(ref_window,win_std,win_mean):
+    if win_std == 0:
+        reference_window_normed = (ref_window - win_mean)
+    else:
+        reference_window_normed = (ref_window - win_mean) / win_std
+    return reference_window_normed
 
 
 def estimate_error_jacknife(timeseries, block_size=20, n_samples=4000):
