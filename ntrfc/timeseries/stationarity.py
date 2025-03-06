@@ -60,7 +60,7 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
     assert len(reference_window) == opt_window_size * 2
 
     if not all(reference_window == reference_window[0]):
-        test_rolling_window = pd.DataFrame(reference_window).rolling(window=window_size)
+        test_rolling_window = pd.DataFrame(reference_window).rolling(window=opt_window_size)
         if float(test_rolling_window.mean().max()-test_rolling_window.mean().min())>0.01:
             return False, False, False
 
