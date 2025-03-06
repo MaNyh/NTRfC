@@ -42,7 +42,10 @@ def extractSidePolys(ind_1, ind_2, sortedPoly):
     for i in side_two_idx:
         side_two = side_two.merge(sortedPoly.extract_points(i))
 
-    return side_one, side_two
+    if side_one.center[1]<side_two.center[1]:
+        return side_one, side_two
+    else:
+        return side_two, side_one
 
 
 def is_counterclockwise(xs, ys):

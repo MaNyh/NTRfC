@@ -18,6 +18,7 @@ def test_symmetric_airfoil_nostagger():
     ile_test = 27
     ile_tol = 1
 
+    assert blade.ss_pv.center[1]>blade.ps_pv.center[1], "Pressure side should be above suction side"
     assert np.abs(ite - ite_test) <= ite_tol
     assert np.abs(ile - ile_test) <= ile_tol
 
@@ -43,6 +44,7 @@ def test_symmetric_airfoil_stagger():
     ile_test = 620
     ile_tol = 1
 
+    assert blade.ss_pv.center[1]>blade.ps_pv.center[1], "Pressure side should be above suction side"
     assert np.abs(ite - ite_test) <= ite_tol
     assert np.abs(ile - ile_test) <= ile_tol
 
@@ -66,8 +68,9 @@ def test_airfoil_nostagger():
     ile_test = 626
     ile_tol = 1
 
-    assert np.abs(ite - ite_test) <= ite_tol
-    assert np.abs(ile - ile_test) <= ile_tol
+    assert blade.ss_pv.center[1]>blade.ps_pv.center[1], "Pressure side should be above suction side"
+    assert np.abs(ite - ite_test) <= ite_tol, "ite value is not as expected"
+    assert np.abs(ile - ile_test) <= ile_tol, "ile value is not as expected"
 
 
 def test_airfoil_stagger():
@@ -90,6 +93,7 @@ def test_airfoil_stagger():
     ile_test = 621
     ile_tol = 1
 
+    assert blade.ss_pv.center[1]>blade.ps_pv.center[1], "Pressure side should be above suction side"
     assert np.abs(ite - ite_test) <= ite_tol
     assert np.abs(ile - ile_test) <= ile_tol
 
@@ -120,5 +124,6 @@ def test_t106():
     ile_test = 87
     ile_tol = 1
 
+    assert blade.ss_pv.center[1]>blade.ps_pv.center[1], "Pressure side should be above suction side"
     assert np.abs(ite - ite_test) <= ite_tol
     assert np.abs(ile - ile_test) <= ile_tol
