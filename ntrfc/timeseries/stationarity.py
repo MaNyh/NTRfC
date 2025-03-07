@@ -61,7 +61,9 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
 
     if not all(reference_window == reference_window[0]):
         test_rolling_window = pd.DataFrame(reference_window).rolling(window=opt_window_size)
-        if float(test_rolling_window.mean().max()-test_rolling_window.mean().min())>0.01:
+        meandiff = (test_rolling_window.mean().max()-test_rolling_window.mean().min()).iloc[0]
+        vardiff = (test_rolling_window.var().max()-test_rolling_window.var().min()).iloc[0]
+        if meandiff> 1/30 or vardiff >1/30 :
             return False, False, False
 
     return reference_window, opt_window_size, False
