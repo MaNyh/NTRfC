@@ -66,7 +66,7 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
         meandiff = (test_rolling_window.mean().max()-test_rolling_window.mean().min()).iloc[0]
         vardiff = (test_rolling_window.var().max()-test_rolling_window.var().min()).iloc[0]
         # is non-stationary if the mean and variance are not constant
-        if meandiff> 1/30 or vardiff >1/30 :
+        if meandiff> 1/30 or vardiff >1/100 :
             return False, False, False
 
     return reference_window, opt_window_size, False
