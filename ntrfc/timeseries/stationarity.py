@@ -60,9 +60,12 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
     assert len(reference_window) == opt_window_size * 2
 
     if not all(reference_window == reference_window[0]):
-        test_rolling_window = pd.DataFrame(reference_window).rolling(window=opt_window_size)
+        # check with a minmax normalized series and a rolling window.
+        # needs to be normalized to have comparable values for a non-stationary check
+        test_rolling_window = pd.DataFrame(minmax_normalize(reference_window)).rolling(window=opt_window_size)
         meandiff = (test_rolling_window.mean().max()-test_rolling_window.mean().min()).iloc[0]
         vardiff = (test_rolling_window.var().max()-test_rolling_window.var().min()).iloc[0]
+        # is non-stationary if the mean and variance are not constant
         if meandiff> 1/30 or vardiff >1/30 :
             return False, False, False
 
