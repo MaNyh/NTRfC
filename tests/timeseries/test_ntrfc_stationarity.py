@@ -100,7 +100,7 @@ def test_stationarity_step():
     assert stationary_timestep_true == 10000
 
 
-def test_stationarity_transientonly():
+def test_stationarity_transientonly_linear():
     """
     this test proves that a pure transient function cant be considered stationary
     T10
