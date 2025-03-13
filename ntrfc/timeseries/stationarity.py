@@ -132,27 +132,26 @@ def estimate_stationarity(timeseries, create_plot=False):
 
     if create_plot:
         plot_args = {"mean_index": mean_index,
-                        "mean_limits": mean_limits,
-                        "opt_window_size": opt_window_size,
-                        "rolling_means_errors_inliers_reversed": rolling_means_errors_inliers_reversed,
-                        "rolling_means_errors_reversed": rolling_means_errors_reversed,
-                        "rolling_means_reversed": rolling_means_reversed,
-                        "rolling_vars_errors_inliers_reversed": rolling_vars_errors_inliers_reversed,
-                        "rolling_vars_errors_reversed": rolling_vars_errors_reversed,
-                        "rolling_vars_reversed": rolling_vars_reversed,
-                        "stationary_start_index": stationary_start_index,
-                        "timeseries": timeseries,
-                        "var_limits": var_limits,
-                        "variance_index": variance_index}
+                     "mean_limits": mean_limits,
+                     "opt_window_size": opt_window_size,
+                     "rolling_means_errors_inliers_reversed": rolling_means_errors_inliers_reversed,
+                     "rolling_means_errors_reversed": rolling_means_errors_reversed,
+                     "rolling_means_reversed": rolling_means_reversed,
+                     "rolling_vars_errors_inliers_reversed": rolling_vars_errors_inliers_reversed,
+                     "rolling_vars_errors_reversed": rolling_vars_errors_reversed,
+                     "rolling_vars_reversed": rolling_vars_reversed,
+                     "stationary_start_index": stationary_start_index,
+                     "timeseries": timeseries,
+                     "var_limits": var_limits,
+                     "variance_index": variance_index}
 
         plot_stationarity_analysis(plot_args)
-
 
     return_index = len(timeseries) - (stationary_start_index)
     return return_index
 
 
-def plot_stationarity_analysis(plotdir,plot_args):
+def plot_stationarity_analysis(plotdir, plot_args):
     mean_index = plot_args["mean_index"]
     mean_limits = plot_args["mean_limits"]
     opt_window_size = plot_args["opt_window_size"]
