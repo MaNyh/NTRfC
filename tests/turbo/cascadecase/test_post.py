@@ -61,6 +61,7 @@ def test_postprocessing():
     assert len(postprocessing.statistics.ps_pressure) == len(postprocessing.statistics.ps_xc)
     assert len(postprocessing.statistics.ss_pressure) == len(postprocessing.statistics.ss_xc)
 
+
 def test_cascade_blade_deltas():
     from ntrfc.turbo.cascade_case.solution import GenericCascadeCase
     from ntrfc.turbo.cascade_case.post import blade_deltas

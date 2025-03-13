@@ -2,10 +2,9 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 from scipy import signal
-from statsmodels.tsa.stattools import adfuller
+import matplotlib.pyplot as plt
+import os
 from ntrfc.math.methods import minmax_normalize
-
-
 
 
 def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbose=False):
@@ -37,7 +36,7 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
     series_length = len(time_series)
     min_window_size = int(series_length * min_interval)
     max_window_size = int(series_length * max_interval)
-    allowed_window_sizes = range(min_window_size, max_window_size+1)
+    allowed_window_sizes = range(min_window_size, max_window_size + 1)
 
     mean_scores = []
     var_scores = []
@@ -46,7 +45,6 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
         test_rolling_window = pd.DataFrame(test_window).rolling(window=window_size)
         mean_scores.append(np.nanstd(test_rolling_window.mean().values))
         var_scores.append(np.nanstd(test_rolling_window.var().values))
-
 
     mean_scores = np.array(mean_scores)
     var_scores = np.array(var_scores)
@@ -63,25 +61,26 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
         # check with a minmax normalized series and a rolling window.
         # needs to be normalized to have comparable values for a non-stationary check
         test_rolling_window = pd.DataFrame(minmax_normalize(reference_window)).rolling(window=opt_window_size)
-        meandiff = (test_rolling_window.mean().max()-test_rolling_window.mean().min()).iloc[0]
-        vardiff = (test_rolling_window.var().max()-test_rolling_window.var().min()).iloc[0]
+        meandiff = (test_rolling_window.mean().max() - test_rolling_window.mean().min()).iloc[0]
+        vardiff = (test_rolling_window.var().max() - test_rolling_window.var().min()).iloc[0]
         # is non-stationary if the mean and variance are not constant
-        if meandiff> 1/30 or vardiff >1/100 :
+        if meandiff > 1 / 30 or vardiff > 1 / 100:
             return False, False, False
 
     return reference_window, opt_window_size, False
 
 
-def last_coherent_interval(arr, opt_window_size,threshold=0.95):
+def last_coherent_interval(arr, opt_window_size, threshold=0.95):
     true_indices = np.where(arr == True)[0]
-    last_false_index = true_indices[-1]+1 if len(true_indices) > 0 else 0
-    success_rate = np.array([(np.sum(arr[:i])+2*opt_window_size) / (len(arr[:i])+2*opt_window_size)  for i in range(len(arr))])
+    last_false_index = true_indices[-1] + 1 if len(true_indices) > 0 else 0
+    success_rate = np.array(
+        [(np.sum(arr[:i]) + 2 * opt_window_size) / (len(arr[:i]) + 2 * opt_window_size) for i in range(len(arr))])
     success_rate[last_false_index:] = 0
-    answer_index = np.where(success_rate >= threshold)[0][-1]+1
+    answer_index = np.where(success_rate >= threshold)[0][-1] + 1
     return answer_index
 
 
-def estimate_stationarity(timeseries):
+def estimate_stationarity(timeseries, create_plot=False):
     sigma_threshold = 3
     percentage = (stats.norm.cdf(sigma_threshold) - stats.norm.cdf(-sigma_threshold))
 
@@ -96,11 +95,11 @@ def estimate_stationarity(timeseries):
     reference_variance = np.var(reference_window_normed)
     opt_rolling_window = pd.DataFrame(reference_window_normed).rolling(window=opt_window_size)
 
-    rolling_means = np.nan_to_num(opt_rolling_window.mean().values,0)
-    rolling_vars = np.nan_to_num(opt_rolling_window.var().values,0)
+    rolling_means = np.nan_to_num(opt_rolling_window.mean().values, 0)
+    rolling_vars = np.nan_to_num(opt_rolling_window.var().values, 0)
 
-    mean_uncertainty = np.nanstd(rolling_means)#/np.sqrt(len(rolling_means))
-    var_uncertainty = np.nanstd(rolling_vars)#/np.sqrt(len(rolling_vars))
+    mean_uncertainty = np.nanstd(rolling_means)  # /np.sqrt(len(rolling_means))
+    var_uncertainty = np.nanstd(rolling_vars)  # /np.sqrt(len(rolling_vars))
 
     mean_trend_tolerance = (np.nanmax(rolling_means) - np.nanmin(rolling_means))
     var_trend_tolerance = (np.nanmax(rolling_vars) - np.nanmin(rolling_vars))
@@ -122,55 +121,100 @@ def estimate_stationarity(timeseries):
     mean_limits = (mean_uncertainty + mean_trend_tolerance) * (sigma_threshold)
     var_limits = (var_uncertainty + var_trend_tolerance) * (sigma_threshold)
 
-    rolling_means_errors_inliers_reversed = rolling_means_errors_reversed  <= mean_limits
-    rolling_vars_errors_inliers_reversed = rolling_vars_errors_reversed  <= var_limits
+    rolling_means_errors_inliers_reversed = rolling_means_errors_reversed <= mean_limits
+    rolling_vars_errors_inliers_reversed = rolling_vars_errors_reversed <= var_limits
 
+    mean_index = last_coherent_interval(rolling_means_errors_inliers_reversed, opt_window_size, percentage)
 
-    mean_index = last_coherent_interval(rolling_means_errors_inliers_reversed,opt_window_size,percentage)
-
-    variance_index = last_coherent_interval(rolling_vars_errors_inliers_reversed,opt_window_size,percentage)
+    variance_index = last_coherent_interval(rolling_vars_errors_inliers_reversed, opt_window_size, percentage)
 
     stationary_start_index = min(mean_index, variance_index)
 
-    # import matplotlib.pyplot as plt
-    #
-    # plt.figure(figsize=(120, 120))
-    # _, axs = plt.subplots(9, 1, )
-    # axs[0].plot(rolling_vars_errors_inliers_reversed, label="var inliers")
-    # axs[0].axvspan(0, variance_index, facecolor='lightblue', alpha=0.5)
-    # axs[1].plot(np.array([(np.sum(rolling_vars_errors_inliers_reversed[:i]) + 2 * opt_window_size) / (
-    #     len(rolling_vars_errors_inliers_reversed[:i]) + 2 * opt_window_size) for i in
-    #                       range(len(rolling_vars_errors_inliers_reversed))]))
-    # axs[1].set_ylim(0.95, 1)
-    # axs[2].plot(rolling_vars_errors_reversed, label="var errors reversed")
-    # axs[2].axhline(var_limits, 0, len(rolling_vars_errors_reversed))
-    # axs[3].plot(rolling_vars_reversed, label="variance reversed")
-    # axs[4].plot(rolling_means_errors_inliers_reversed, label="mean inliers")
-    # axs[4].axvspan(0, mean_index, facecolor='lightblue', alpha=0.5)
-    # axs[5].plot(np.array([(np.sum(rolling_means_errors_inliers_reversed[:i]) + 2 * opt_window_size) / (
-    #     len(rolling_means_errors_inliers_reversed[:i]) + 2 * opt_window_size) for i in
-    #                       range(len(rolling_means_errors_inliers_reversed))]))
-    # axs[5].set_ylim(0.95, 1)
-    # axs[6].plot(rolling_means_errors_reversed, label="mean_errors_reversed")
-    # axs[6].axhline(mean_limits, 0, len(rolling_vars_errors_reversed))
-    # axs[7].plot(rolling_means_reversed, label="mean reversed")
-    # axs[8].plot(timeseries[::-1], label="timeseries")
-    # axs[8].axvline(stationary_start_index + 2 * opt_window_size)
-    # axs[8].axvspan(0, opt_window_size * 2, facecolor='lightblue', alpha=0.5)
-    # axs[8].axvspan(opt_window_size * 2, opt_window_size * 3, facecolor='lightgreen', alpha=0.5)
-    # axs[0].legend()
-    # axs[1].legend()
-    # axs[2].legend()
-    # axs[3].legend()
-    # axs[4].legend()
-    # axs[5].legend()
-    # axs[6].legend()
-    # axs[7].legend()
-    # axs[8].legend()
-    # # plt.tight_layout()
-    # plt.show()
-    return_index = len(timeseries)-(stationary_start_index)
+    if create_plot:
+        plot_args = {"mean_index": mean_index,
+                        "mean_limits": mean_limits,
+                        "opt_window_size": opt_window_size,
+                        "rolling_means_errors_inliers_reversed": rolling_means_errors_inliers_reversed,
+                        "rolling_means_errors_reversed": rolling_means_errors_reversed,
+                        "rolling_means_reversed": rolling_means_reversed,
+                        "rolling_vars_errors_inliers_reversed": rolling_vars_errors_inliers_reversed,
+                        "rolling_vars_errors_reversed": rolling_vars_errors_reversed,
+                        "rolling_vars_reversed": rolling_vars_reversed,
+                        "stationary_start_index": stationary_start_index,
+                        "timeseries": timeseries,
+                        "var_limits": var_limits,
+                        "variance_index": variance_index}
+
+        plot_stationarity_analysis(plot_args)
+
+
+    return_index = len(timeseries) - (stationary_start_index)
     return return_index
+
+
+def plot_stationarity_analysis(plotdir,plot_args):
+    mean_index = plot_args["mean_index"]
+    mean_limits = plot_args["mean_limits"]
+    opt_window_size = plot_args["opt_window_size"]
+    rolling_means_errors_inliers_reversed = plot_args["rolling_means_errors_inliers_reversed"]
+    rolling_means_errors_reversed = plot_args["rolling_means_errors_reversed"]
+    rolling_means_reversed = plot_args["rolling_means_reversed"]
+    rolling_vars_errors_inliers_reversed = plot_args["rolling_vars_errors_inliers_reversed"]
+    rolling_vars_errors_reversed = plot_args["rolling_vars_errors_reversed"]
+    rolling_vars_reversed = plot_args["rolling_vars_reversed"]
+    stationary_start_index = plot_args["stationary_start_index"]
+    timeseries = plot_args["timeseries"]
+    var_limits = plot_args["var_limits"]
+    variance_index = plot_args["variance_index"]
+
+    _, axs = plt.subplots(4, 1, )
+    axs[0].plot(rolling_vars_errors_inliers_reversed[::-1], label="var inliers")
+    axs[0].axvspan(0, variance_index, facecolor='lightblue', alpha=0.5)
+    axs[1].plot(np.array([(np.sum(rolling_vars_errors_inliers_reversed[:i]) + 2 * opt_window_size) / (
+        len(rolling_vars_errors_inliers_reversed[:i]) + 2 * opt_window_size) for i in
+                          range(len(rolling_vars_errors_inliers_reversed))])[::-1], label="var inliers percentage")
+    axs[1].set_ylim(0.95, 1.01)
+    axs[2].plot(rolling_vars_errors_reversed[::-1], label="var errors reversed")
+    axs[2].axhline(var_limits, 0, len(rolling_vars_errors_reversed))
+    axs[3].plot(rolling_vars_reversed[::-1], label="variance reversed")
+    axs[3].set_ylabel("rolling dataframe id")
+    axs[0].legend()
+    axs[1].legend()
+    axs[2].legend()
+    axs[3].legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(plotdir, "variance_errors.png"))
+
+    _, axs = plt.subplots(4, 1, )
+
+    axs[0].plot(rolling_means_errors_inliers_reversed[::-1], label="mean inliers")
+    axs[0].axvspan(len(timeseries) - mean_index, len(timeseries), facecolor='lightblue', alpha=0.5)
+    axs[1].plot(np.array([(np.sum(rolling_means_errors_inliers_reversed[:i]) + 2 * opt_window_size) / (
+        len(rolling_means_errors_inliers_reversed[:i]) + 2 * opt_window_size) for i in
+                          range(len(rolling_means_errors_inliers_reversed))])[::-1], label="mean inliers percentage")
+    axs[1].set_ylim(0.95, 1.01)
+    axs[2].plot(rolling_means_errors_reversed[::-1], label="mean_errors_reversed")
+    axs[2].axhline(mean_limits, 0, len(rolling_vars_errors_reversed))
+    axs[3].plot(rolling_means_reversed[::-1], label="mean reversed")
+    axs[3].set_ylabel("rolling dataframe id")
+    axs[0].legend()
+    axs[1].legend()
+    axs[2].legend()
+    axs[3].legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(plotdir, "mean_errors.png"))
+
+    _, axs = plt.subplots(1, 1, )
+    axs.plot(timeseries, label="timeseries")
+    axs.axvline(len(timeseries) - stationary_start_index, label="stationarity start", color="red")
+    axs.axvline(len(timeseries) - opt_window_size, min(timeseries), max(timeseries), label="rolling window size",
+                color="grey")
+    axs.axvline(len(timeseries), min(timeseries), max(timeseries), color="grey")
+    axs.axvspan(len(timeseries) - opt_window_size * 2, len(timeseries), facecolor='lightgreen', alpha=0.5,
+                label="reference window")
+    axs.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(plotdir, "timeseries.png"))
 
 
 def normalize_minmax(ref_window):
@@ -182,7 +226,8 @@ def normalize_minmax(ref_window):
         reference_window_normed = (ref_window - min_val) / (max_val - min_val)
     return reference_window_normed
 
-def normalize_zscore(ref_window,win_std,win_mean):
+
+def normalize_zscore(ref_window, win_std, win_mean):
     if win_std == 0:
         reference_window_normed = (ref_window - win_mean)
     else:

@@ -1,12 +1,12 @@
+import os
 import tempfile
+from typing import Union, List
 
 import numpy as np
 import pyvista as pv
 from PIL import Image
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-import os
-from typing import Union, List
 
 import ntrfc
 from ntrfc.fluid.isentropic import local_isentropic_mach_number

@@ -106,7 +106,10 @@ class Blade2D:
         p.add_mesh(pv.PolyData(self.sortedpoints_pv.points[self.ile]), color="green", label="ile", point_size=16)
         p.add_mesh(pv.PolyData(self.sortedpoints_pv.points[self.ite]), color="yellow", label="ite", point_size=16)
         p.add_text(
-            f"beta_le: {self.beta_le} \nbeta_te: {self.beta_te}\nphi_camber: {self.camber_phi}\nlength_camber: {self.camber_length}",
+            f"beta_le: {self.beta_le} \n"
+            f"beta_te: {self.beta_te}\n"
+            f"phi_camber: {self.camber_phi}\n"
+            f"length_camber: {self.camber_length}",
             font_size=int(sfactor))
         p.add_legend(size=(0.2, 0.2))
         p.view_xy()
