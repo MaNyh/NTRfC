@@ -10,7 +10,7 @@ from sklearn.utils.sparsefuncs import mean_variance_axis
 from ntrfc.math.methods import minmax_normalize
 
 
-def optimal_window_size(time_series, mean_error=0, var_error=0, min_interval=0.05, max_interval=0.25, verbose=False):
+def optimal_window_size(time_series, mean_error=0, min_interval=0.05, max_interval=0.25, verbose=False):
     """
     Determines the optimal window size for a given time series.
 
@@ -73,10 +73,10 @@ def optimal_window_size(time_series, mean_error=0, var_error=0, min_interval=0.0
         # limits are set to 1/30 and 1/100 for numerical errors
         # and mean_error and var_error as user defined error margins
 
-        allowed_mean_trend_error = 2e-2
-        allowed_mean_convergence_error = 2e-2
+        allowed_mean_trend_error = 2e-2+mean_error
+        allowed_mean_convergence_error = 2e-2+mean_error
 
-        allowed_var_trend_error = 1e-2
+        allowed_var_trend_error = 2e-2
         allowed_var_convergence_error = 1e-2
 
 
@@ -114,11 +114,11 @@ def last_coherent_interval(arr, opt_window_size, threshold=0.95):
     return answer_index
 
 
-def estimate_stationarity(timeseries,mean_error=0,var_error=0, create_plot_dir=False):
+def estimate_stationarity(timeseries,mean_error=0, create_plot_dir=False):
     sigma_threshold = 3
     percentage = (stats.norm.cdf(sigma_threshold) - stats.norm.cdf(-sigma_threshold))
 
-    ref_window, opt_window_size, nperiods = optimal_window_size(timeseries,mean_error=mean_error,var_error=var_error)
+    ref_window, opt_window_size, nperiods = optimal_window_size(timeseries,mean_error=mean_error)
     if not opt_window_size:
         return None, None, None
     # normalize the reference window to have 0 mean and unit variance
@@ -127,6 +127,8 @@ def estimate_stationarity(timeseries,mean_error=0,var_error=0, create_plot_dir=F
 
     reference_mean = np.mean(reference_window_normed)
     reference_variance = np.var(reference_window_normed)
+
+    mean_diff = abs((np.mean(ref_window) - reference_mean)/np.mean(ref_window))
 
     opt_rolling_window = pd.DataFrame(reference_window_normed).rolling(window=opt_window_size)
 
@@ -153,7 +155,7 @@ def estimate_stationarity(timeseries,mean_error=0,var_error=0, create_plot_dir=F
     rolling_means_errors_reversed = np.abs(rolling_means_reversed - reference_mean)
     rolling_vars_errors_reversed = np.abs(rolling_vars_reversed - reference_variance)
 
-    mean_limits = (mean_uncertainty + mean_trend_tolerance) * (sigma_threshold)
+    mean_limits = (mean_uncertainty + mean_trend_tolerance) * (sigma_threshold) + mean_diff*mean_error
     var_limits = (var_uncertainty + var_trend_tolerance) * (sigma_threshold)
 
     rolling_means_errors_inliers_reversed = rolling_means_errors_reversed <= mean_limits
