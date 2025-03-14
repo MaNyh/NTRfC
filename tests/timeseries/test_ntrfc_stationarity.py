@@ -107,11 +107,11 @@ def test_stationarity_transientonly_linear():
 
     values_high = np.linspace(0, 10, res)
     stationary_timestep ,_,_ = estimate_stationarity(values_high)
-    assert stationary_timestep is False
+    assert stationary_timestep is None
 
     values_low = np.linspace(0, 1e-6, res)
     stationary_timestep  ,_,_= estimate_stationarity(values_low)
-    assert stationary_timestep is False
+    assert stationary_timestep is None
 
 
 def test_stationarity_ramp():
@@ -148,7 +148,7 @@ def test_stationarity_noise():
 
     values = np.random.normal(-1, 1, res)
     stationary_timestep  ,_,_= estimate_stationarity(values)
-    assert stationary_timestep is False
+    assert stationary_timestep is None
 
     res = 20000
 
@@ -253,7 +253,7 @@ def test_stationarity_transientonly(verbose=False):
             plt.figure()
             plt.plot(timesteps, values)
             plt.show()
-        assert statidx is False
+        assert statidx is None
 
 
 def test_stationarity_nonlinear():
@@ -335,3 +335,19 @@ def test_last_coherent_interval():
     half_true = np.ones(100)
     half_true[50:] = False
     assert last_coherent_interval(half_true, 10, 1) == 50
+
+
+def test_statistical_convergence():
+    from ntrfc.timeseries.stationarity import estimate_stationarity
+
+    repetitions = 24
+    for i in range(repetitions):
+        res = 100
+        noise = np.random.normal(-1, 1, res)
+        idx,_,_ = estimate_stationarity(noise)
+        assert idx == None, f"computation failed, should alway return None for samplesize <= {res} in run {i}"
+
+        res = 3000
+        noise = np.random.normal(-1, 1, res)
+        idx,_,_ = estimate_stationarity(noise)
+        assert idx != None, f"computation failed, should not return None for samplesize > {res} in run {i}"

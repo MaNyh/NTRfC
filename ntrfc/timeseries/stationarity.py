@@ -69,7 +69,7 @@ def optimal_window_size(time_series, mean_error=0, var_error=0, min_interval=0.0
         # is non-stationary if the mean and variance are not constant
         # limits are set to 1/30 and 1/100 for numerical errors
         # and mean_error and var_error as user defined error margins
-        if meandiff > 1 / 30 + mean_error or vardiff > 1 / 100 + var_error:
+        if meandiff > 1 / 16 + mean_error or vardiff > 1 / 100 + var_error:
             return False, False, False
 
     return reference_window, opt_window_size, False
@@ -91,7 +91,7 @@ def estimate_stationarity(timeseries,mean_error=0,var_error=0, create_plot_dir=F
 
     ref_window, opt_window_size, nperiods = optimal_window_size(timeseries,mean_error=mean_error,var_error=var_error)
     if not opt_window_size:
-        return False, False, False
+        return None, None, None
     # normalize the reference window to have 0 mean and unit variance
     # if std is 0, then the window is constant, we cant devide by 0
     reference_window_normed = normalize_zscore(ref_window, np.std(ref_window), np.mean(ref_window))
