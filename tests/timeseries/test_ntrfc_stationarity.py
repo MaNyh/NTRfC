@@ -144,7 +144,7 @@ def test_stationarity_noise():
     from ntrfc.timeseries.stationarity import estimate_stationarity
     import numpy as np
 
-    res = 200
+    res = 100
 
     values = np.random.normal(-1, 1, res)
     stationary_timestep  ,_,_= estimate_stationarity(values)
@@ -342,12 +342,12 @@ def test_statistical_convergence():
 
     repetitions = 24
     for i in range(repetitions):
-        res = 100
+        res = 300
         noise = np.random.normal(-1, 1, res)
         idx,_,_ = estimate_stationarity(noise)
         assert idx == None, f"computation failed, should alway return None for samplesize <= {res} in run {i}"
 
-        res = 3000
+        res = 4000
         noise = np.random.normal(-1, 1, res)
         idx,_,_ = estimate_stationarity(noise)
         assert idx != None, f"computation failed, should not return None for samplesize > {res} in run {i}"

@@ -64,13 +64,42 @@ def optimal_window_size(time_series, mean_error=0, var_error=0, min_interval=0.0
         # check with a minmax normalized series and a rolling window.
         # needs to be normalized to have comparable values for a non-stationary check
         test_rolling_window = pd.DataFrame(minmax_normalize(reference_window)).rolling(window=opt_window_size)
-        meandiff = (test_rolling_window.mean().max() - test_rolling_window.mean().min()).iloc[0]
-        vardiff = (test_rolling_window.var().max() - test_rolling_window.var().min()).iloc[0]
+        mean_error_trend = (test_rolling_window.mean().max() - test_rolling_window.mean().min()).iloc[0]
+        var_error_trend = (test_rolling_window.var().max() - test_rolling_window.var().min()).iloc[0]
+
+        mean_error_convergence = test_rolling_window.mean().std().values[0]
+        var_error_convergence = test_rolling_window.var().std().values[0]
         # is non-stationary if the mean and variance are not constant
         # limits are set to 1/30 and 1/100 for numerical errors
         # and mean_error and var_error as user defined error margins
-        if meandiff > 1 / 16 + mean_error or vardiff > 1 / 100 + var_error:
+
+        allowed_mean_trend_error = 2e-2
+        allowed_mean_convergence_error = 2e-2
+
+        allowed_var_trend_error = 1e-2
+        allowed_var_convergence_error = 1e-2
+
+
+        if  mean_error_convergence > allowed_mean_convergence_error and var_error_convergence > allowed_var_convergence_error:
+            print("mean and var convergence error in optimal time window")
             return False, False, False
+        elif mean_error_convergence > allowed_mean_convergence_error:
+            print("mean  convergence error in optimal time window")
+            return False, False, False
+        elif  var_error_convergence > allowed_var_convergence_error:
+            print("var  convergence error in optimal time window")
+            return False, False, False
+
+        if  mean_error_trend > allowed_mean_trend_error and var_error_trend > allowed_var_trend_error:
+            print("mean and var trend error in optimal time window")
+            return False, False, False
+        elif mean_error_trend > allowed_mean_trend_error:
+            print("mean trend error in optimal time window")
+            return False, False, False
+        elif  var_error_trend > allowed_var_trend_error:
+            print("var  trend error in optimal time window")
+            return False, False, False
+
 
     return reference_window, opt_window_size, False
 
