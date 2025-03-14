@@ -73,7 +73,7 @@ def optimal_window_size(time_series, mean_error=0, min_interval=0.05, max_interv
         # limits are set to 1/30 and 1/100 for numerical errors
         # and mean_error and var_error as user defined error margins
 
-        allowed_mean_trend_error = 1.2e-2+mean_error
+        allowed_mean_trend_error = 1.25e-2+mean_error
         allowed_mean_convergence_error = 1e-2+mean_error
 
         allowed_var_trend_error = 1e-2
@@ -191,7 +191,7 @@ def estimate_stationarity(timeseries,mean_error=0, create_plot_dir=False):
     return_index = len(timeseries) - (stationary_start_index)
     stationary_signal = timeseries[return_index:]
     stationary_rolling_signal = pd.DataFrame(stationary_signal).rolling(window=opt_window_size)
-    mean_std = np.nanstd(stationary_rolling_signal.mean().values)
+    mean_std = np.nanmax(stationary_rolling_signal.mean().values)-np.nanmin(stationary_rolling_signal.mean().values)
 
     return return_index, stationary_signal, mean_std
 
