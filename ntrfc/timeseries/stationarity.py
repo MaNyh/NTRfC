@@ -10,7 +10,7 @@ from sklearn.utils.sparsefuncs import mean_variance_axis
 from ntrfc.math.methods import minmax_normalize
 
 
-def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbose=False):
+def optimal_window_size(time_series, mean_error=0, var_error=0, min_interval=0.05, max_interval=0.25, verbose=False):
     """
     Determines the optimal window size for a given time series.
 
@@ -67,7 +67,9 @@ def optimal_window_size(time_series, min_interval=0.05, max_interval=0.25, verbo
         meandiff = (test_rolling_window.mean().max() - test_rolling_window.mean().min()).iloc[0]
         vardiff = (test_rolling_window.var().max() - test_rolling_window.var().min()).iloc[0]
         # is non-stationary if the mean and variance are not constant
-        if meandiff > 1 / 30 or vardiff > 1 / 100:
+        # limits are set to 1/30 and 1/100 for numerical errors
+        # and mean_error and var_error as user defined error margins
+        if meandiff > 1 / 30 + mean_error or vardiff > 1 / 100 + var_error:
             return False, False, False
 
     return reference_window, opt_window_size, False
@@ -83,11 +85,11 @@ def last_coherent_interval(arr, opt_window_size, threshold=0.95):
     return answer_index
 
 
-def estimate_stationarity(timeseries, create_plot_dir=False):
+def estimate_stationarity(timeseries,mean_error=0,var_error=0, create_plot_dir=False):
     sigma_threshold = 3
     percentage = (stats.norm.cdf(sigma_threshold) - stats.norm.cdf(-sigma_threshold))
 
-    ref_window, opt_window_size, nperiods = optimal_window_size(timeseries)
+    ref_window, opt_window_size, nperiods = optimal_window_size(timeseries,mean_error=mean_error,var_error=var_error)
     if not opt_window_size:
         return False, False, False
     # normalize the reference window to have 0 mean and unit variance
@@ -96,6 +98,7 @@ def estimate_stationarity(timeseries, create_plot_dir=False):
 
     reference_mean = np.mean(reference_window_normed)
     reference_variance = np.var(reference_window_normed)
+
     opt_rolling_window = pd.DataFrame(reference_window_normed).rolling(window=opt_window_size)
 
     rolling_means = np.nan_to_num(opt_rolling_window.mean().values, 0)
