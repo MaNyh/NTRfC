@@ -61,7 +61,7 @@ def test_stationarity_stationarysine():
 
     for amplitude, frequency, time, mean in test_configs:
         timesteps, values = signal_generator(amplitude=amplitude, frequency=frequency, mean=mean, time=time)
-        stationary_timestep = estimate_stationarity(values)
+        stationary_timestep ,_,_= estimate_stationarity(values)
 
         assert 0 == timesteps[stationary_timestep], "computation failed"
 
@@ -83,7 +83,7 @@ def test_stationarity_step():
     values_stationary = signal_amplitude * np.ones(res)
     stepsize = snr_false / signal_amplitude
     values_stationary[res // 2:] = 1 + stepsize
-    stationary_timestep_false = estimate_stationarity(values_stationary)
+    stationary_timestep_false  ,_,_= estimate_stationarity(values_stationary)
 
     assert stationary_timestep_false == 10000
 
@@ -91,7 +91,7 @@ def test_stationarity_step():
     stepsize = snr / signal_amplitude
     values_stationary = np.ones(res) * signal_amplitude
     values_stationary[res // 2:] = 1 + stepsize
-    stationary_timestep_true = estimate_stationarity(values_stationary)
+    stationary_timestep_true ,_,_ = estimate_stationarity(values_stationary)
     assert stationary_timestep_true == 10000
 
 
@@ -106,11 +106,11 @@ def test_stationarity_transientonly_linear():
     res = 20000
 
     values_high = np.linspace(0, 10, res)
-    stationary_timestep = estimate_stationarity(values_high)
+    stationary_timestep ,_,_ = estimate_stationarity(values_high)
     assert stationary_timestep is False
 
     values_low = np.linspace(0, 1e-6, res)
-    stationary_timestep = estimate_stationarity(values_low)
+    stationary_timestep  ,_,_= estimate_stationarity(values_low)
     assert stationary_timestep is False
 
 
@@ -127,7 +127,7 @@ def test_stationarity_ramp():
 
     values_stationary = np.zeros(res) + noise
     values_stationary[:res // 2] = values_stationary[:res // 2] + np.linspace(ramp_amplitude, 0, res // 2)
-    stationary_timestep_true = estimate_stationarity(values_stationary)
+    stationary_timestep_true ,_,_ = estimate_stationarity(values_stationary)
     assert stationary_timestep_true in range(9000, 10000)
 
     snr = 1e-12
@@ -135,7 +135,7 @@ def test_stationarity_ramp():
     values_stationary_new = np.zeros(res) + noise
 
     values_stationary_new[:res // 2] = values_stationary_new[:res // 2] + np.linspace(ramp_amplitude, 0, res // 2)
-    stationary_timestep_false = estimate_stationarity(values_stationary_new)
+    stationary_timestep_false ,_,_ = estimate_stationarity(values_stationary_new)
 
     assert stationary_timestep_false == 0
 
@@ -147,13 +147,13 @@ def test_stationarity_noise():
     res = 200
 
     values = np.random.normal(-1, 1, res)
-    stationary_timestep = estimate_stationarity(values)
+    stationary_timestep  ,_,_= estimate_stationarity(values)
     assert stationary_timestep is False
 
     res = 20000
 
     values = np.random.normal(-1, 1, res)
-    stationary_timestep = estimate_stationarity(values)
+    stationary_timestep,_,_ = estimate_stationarity(values)
     assert stationary_timestep == 0
 
 
@@ -173,7 +173,7 @@ def test_stationarity_uncertainties_abatingsine():
     for amplitude, frequency, time, mean, abate in test_configs:
         timesteps, values = signal_generator(amplitude=amplitude, frequency=frequency, mean=mean, time=time,
                                              abate=abate)
-        stationary_timestep = estimate_stationarity(values)
+        stationary_timestep,_,_ = estimate_stationarity(values)
 
         well_computed_stationarity_limit = -np.log(0.005) / abate
         well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit
@@ -207,7 +207,7 @@ def test_stationarity_uncertainties_abatingsinenoise(verbose=False):
         timesteps, values = signal_generator(amplitude=amplitude, noise_amplitude=noiseamplitude,
                                              frequency=frequency, mean=mean, time=time,
                                              abate=abate)
-        stationary_timestep = estimate_stationarity(values)
+        stationary_timestep,_,_ = estimate_stationarity(values)
 
         well_computed_stationarity_limit = -np.log(0.01) / abate
         well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit
@@ -247,7 +247,7 @@ def test_stationarity_transientonly(verbose=False):
         timesteps, values = signalgen_abatingsine(amplitude=amplitude,
                                                   frequency=frequency, mean=mean, time=time)
 
-        statidx = estimate_stationarity(values)
+        statidx ,_,_= estimate_stationarity(values)
 
         if verbose:
             plt.figure()
@@ -266,17 +266,17 @@ def test_stationarity_nonlinear():
     values = np.zeros(res)
     noise = np.random.normal(-1, 1, res) * 1e-6
     values[:res // 2] = values[:res // 2] + np.e ** -np.linspace(0, 10, res // 2)
-    stationary_timestep = estimate_stationarity(values)
+    stationary_timestep,_,_ = estimate_stationarity(values)
     assert stationary_timestep == res // 2
 
     values_new = np.zeros(res) + noise
     values_new[:res // 2] = values_new[:res // 2] + np.e ** -np.linspace(0, 10, res // 2)
-    stationary_timestep_new = estimate_stationarity(values_new)
+    stationary_timestep_new ,_,_= estimate_stationarity(values_new)
     assert stationary_timestep_new in range(5000, 10000)
 
     values_highnoise = np.zeros(res) + noise * 3
     values_highnoise[:res // 2] = values_highnoise[:res // 2] + np.e ** -np.linspace(0, 10, res // 2)
-    stationary_timestep_new_new = estimate_stationarity(values_highnoise)
+    stationary_timestep_new_new ,_,_= estimate_stationarity(values_highnoise)
     assert stationary_timestep_new_new in range(stationary_timestep_new - 200, stationary_timestep_new + 200)
 
 
@@ -287,11 +287,11 @@ def test_stationarity_constant():
 
     res = 20000
     values_stationary = np.ones(res)
-    stationary_timestep = estimate_stationarity(values_stationary)
+    stationary_timestep,_,_ = estimate_stationarity(values_stationary)
     assert stationary_timestep == 0
 
 
-def test_stationarity_uncertainties_abating(verbose=False):
+def test_stationarity_uncertainties_abating(tmp_path,verbose=False):
     from ntrfc.timeseries.stationarity import estimate_stationarity
     from itertools import product
     import matplotlib.pyplot as plt
@@ -307,7 +307,7 @@ def test_stationarity_uncertainties_abating(verbose=False):
     for noiseamplitude, time, mean, abate in test_configs:
 
         timesteps, values = signal_generator(noise_amplitude=noiseamplitude, mean=mean, abate=abate, time=time)
-        stationary_timestep = estimate_stationarity(values, create_plot=True)
+        stationary_timestep,_,_ = estimate_stationarity(values, create_plot_dir=tmp_path)
 
         well_computed_stationarity_limit = -np.log(0.01) / abate
         well_computed_stationary_time = timesteps[-1] - well_computed_stationarity_limit

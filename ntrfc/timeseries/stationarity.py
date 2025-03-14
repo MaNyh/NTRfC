@@ -4,6 +4,9 @@ import scipy.stats as stats
 from scipy import signal
 import matplotlib.pyplot as plt
 import os
+
+from sklearn.utils.sparsefuncs import mean_variance_axis
+
 from ntrfc.math.methods import minmax_normalize
 
 
@@ -80,13 +83,13 @@ def last_coherent_interval(arr, opt_window_size, threshold=0.95):
     return answer_index
 
 
-def estimate_stationarity(timeseries, create_plot=False):
+def estimate_stationarity(timeseries, create_plot_dir=False):
     sigma_threshold = 3
     percentage = (stats.norm.cdf(sigma_threshold) - stats.norm.cdf(-sigma_threshold))
 
     ref_window, opt_window_size, nperiods = optimal_window_size(timeseries)
     if not opt_window_size:
-        return False
+        return False, False, False
     # normalize the reference window to have 0 mean and unit variance
     # if std is 0, then the window is constant, we cant devide by 0
     reference_window_normed = normalize_zscore(ref_window, np.std(ref_window), np.mean(ref_window))
@@ -130,7 +133,7 @@ def estimate_stationarity(timeseries, create_plot=False):
 
     stationary_start_index = min(mean_index, variance_index)
 
-    if create_plot:
+    if create_plot_dir:
         plot_args = {"mean_index": mean_index,
                      "mean_limits": mean_limits,
                      "opt_window_size": opt_window_size,
@@ -145,10 +148,14 @@ def estimate_stationarity(timeseries, create_plot=False):
                      "var_limits": var_limits,
                      "variance_index": variance_index}
 
-        plot_stationarity_analysis(plot_args)
+        plot_stationarity_analysis(create_plot_dir,plot_args)
 
     return_index = len(timeseries) - (stationary_start_index)
-    return return_index
+    stationary_signal = timeseries[return_index:]
+    stationary_rolling_signal = pd.DataFrame(stationary_signal).rolling(window=opt_window_size)
+    mean_std = np.nanstd(stationary_rolling_signal.mean().values)
+
+    return return_index, stationary_signal, mean_std
 
 
 def plot_stationarity_analysis(plotdir, plot_args):
