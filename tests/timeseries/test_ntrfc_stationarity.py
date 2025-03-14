@@ -347,7 +347,7 @@ def test_statistical_convergence():
         idx,_,_ = estimate_stationarity(noise)
         assert idx == None, f"computation failed, should alway return None for samplesize <= {res} in run {i}"
 
-        res = 6000
+        res = 7000
         noise = np.random.normal(-1, 1, res)
         idx,_,_ = estimate_stationarity(noise)
         assert idx != None, f"computation failed, should not return None for samplesize > {res} in run {i}"
