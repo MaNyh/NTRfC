@@ -64,7 +64,6 @@ def test_cellspans():
     assert np.all(np.isclose(spans[::, 2], span_z))
 
 
-
 def structured_testgrid(height, length, nodes, width):
     # define the mesh
     xrng = np.arange(0, nodes, 1, dtype=np.float32)

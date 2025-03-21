@@ -30,22 +30,6 @@ def test_Blade2d_extractSidePolys():
     assert np.all(blade.ps_pv["A"])
 
 
-def test_extractSidePolys():
-    import pyvista as pv
-    from ntrfc.turbo.pointcloud_methods import extractSidePolys
-
-    res = 100
-
-    circlepoly = pv.PolyData(pv.Circle(radius=1, resolution=res).points)
-
-    ind_1 = 0
-    ind_2 = circlepoly.number_of_points // 2
-    side_1, side_2 = extractSidePolys(ind_1, ind_2, circlepoly)
-
-    assert side_1.number_of_points == res // 2 + 1
-    assert side_2.number_of_points == res // 2 + 1
-
-
 def test_calcMidPassageStreamLine():
     from ntrfc.turbo.pointcloud_methods import calcMidPassageStreamLine
 

@@ -1,7 +1,8 @@
 import tempfile
 from dataclasses import dataclass
-import pyvista as pv
+
 import numpy as np
+import pyvista as pv
 
 from ntrfc.filehandling.mesh import load_mesh
 from ntrfc.turbo.cascade_case.casemeta.casemeta import CaseMeta
