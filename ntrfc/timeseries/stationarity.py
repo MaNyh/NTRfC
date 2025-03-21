@@ -4,13 +4,12 @@ import scipy.stats as stats
 from scipy import signal
 import matplotlib.pyplot as plt
 import os
-
-from sklearn.utils.sparsefuncs import mean_variance_axis
+from scipy.stats import linregress
 
 from ntrfc.math.methods import minmax_normalize
 
 
-def optimal_window_size(time_series, mean_error=0, min_interval=0.05, max_interval=0.25, verbose=False):
+def optimal_window_size(time_series, mean_error=0, min_interval=0.05, max_interval=0.25):
     """
     Determines the optimal window size for a given time series.
 
@@ -42,17 +41,17 @@ def optimal_window_size(time_series, mean_error=0, min_interval=0.05, max_interv
     allowed_window_sizes = range(min_window_size, max_window_size + 1)
 
     mean_scores = []
-    var_scores = []
+    std_scores = []
     for window_size in allowed_window_sizes:
         test_window = time_series[-2 * window_size:]
         test_rolling_window = pd.DataFrame(test_window).rolling(window=window_size)
         mean_scores.append(np.nanstd(test_rolling_window.mean().values))
-        var_scores.append(np.nanstd(test_rolling_window.var().values))
+        std_scores.append(np.nanstd(test_rolling_window.var().values))
 
     mean_scores = np.array(mean_scores)
-    var_scores = np.array(var_scores)
+    std_scores = np.array(std_scores)
 
-    cumulated_scores = minmax_normalize(mean_scores) + minmax_normalize(var_scores)
+    cumulated_scores = minmax_normalize(mean_scores) + minmax_normalize(std_scores)
     optimal_window_size_index = np.argmin(cumulated_scores)
     opt_window_size = allowed_window_sizes[optimal_window_size_index]
 
@@ -63,43 +62,33 @@ def optimal_window_size(time_series, mean_error=0, min_interval=0.05, max_interv
     if not all(reference_window == reference_window[0]):
         # check with a minmax normalized series and a rolling window.
         # needs to be normalized to have comparable values for a non-stationary check
-        test_rolling_window = pd.DataFrame(minmax_normalize(reference_window)).rolling(window=opt_window_size)
-        mean_error_trend = (test_rolling_window.mean().max() - test_rolling_window.mean().min()).iloc[0]
-        var_error_trend = (test_rolling_window.var().max() - test_rolling_window.var().min()).iloc[0]
 
-        mean_error_convergence = test_rolling_window.mean().std().values[0]
-        var_error_convergence = test_rolling_window.var().std().values[0]
-        # is non-stationary if the mean and variance are not constant
-        # limits are set to 1/30 and 1/100 for numerical errors
-        # and mean_error and var_error as user defined error margins
+        test_signal = minmax_normalize(reference_window)
+        test_rolling_window = pd.DataFrame(test_signal).rolling(window=opt_window_size)
+        test_mean = np.mean(test_signal)
+        test_var = np.var(test_signal)
 
-        allowed_mean_trend_error = 1.25e-2+mean_error
-        allowed_mean_convergence_error = 1e-2+mean_error
+        test_mean_rolling = test_rolling_window.mean().values[:, 0]
+        test_var_rolling = test_rolling_window.var().values[:, 0]
 
-        allowed_var_trend_error = 1e-2
-        allowed_var_convergence_error = 1e-2
+        test_mean_rolling_nonnan = test_mean_rolling[~np.isnan(test_mean_rolling)]
+        test_var_rolling_nonnan = test_var_rolling[~np.isnan(test_var_rolling)]
 
+        test_mean_rolling_error = test_mean_rolling_nonnan - test_mean
+        test_var_rolling_error = test_var_rolling_nonnan - test_var
 
-        if  mean_error_convergence > allowed_mean_convergence_error and var_error_convergence > allowed_var_convergence_error:
-            print("mean and var convergence error in optimal time window")
+        allowed_mean_mean_error = 0.005 + mean_error  # test_mean_diff *0.3 + mean_error
+        allowed_var_mean_error = 0.002 + mean_error  # test_var_diff*0.1 + mean_error
+
+        error_mean = np.std(test_mean_rolling_error)
+        error_var = np.std(test_var_rolling_error)
+
+        if abs(error_mean) > allowed_mean_mean_error:
+            print("Mean error too high")
             return False, False, False
-        elif mean_error_convergence > allowed_mean_convergence_error:
-            print("mean  convergence error in optimal time window")
+        if error_var > allowed_var_mean_error:
+            print("Variance error too high")
             return False, False, False
-        elif  var_error_convergence > allowed_var_convergence_error:
-            print("var  convergence error in optimal time window")
-            return False, False, False
-
-        if  mean_error_trend > allowed_mean_trend_error and var_error_trend > allowed_var_trend_error:
-            print("mean and var trend error in optimal time window")
-            return False, False, False
-        elif mean_error_trend > allowed_mean_trend_error:
-            print("mean trend error in optimal time window")
-            return False, False, False
-        elif  var_error_trend > allowed_var_trend_error:
-            print("var  trend error in optimal time window")
-            return False, False, False
-
 
     return reference_window, opt_window_size, False
 
@@ -114,11 +103,14 @@ def last_coherent_interval(arr, opt_window_size, threshold=0.95):
     return answer_index
 
 
-def estimate_stationarity(timeseries,mean_error=0, create_plot_dir=False):
-    sigma_threshold = 3
+def estimate_stationarity(timeseries, allowed_error=0, create_plot_dir=False):
+    if len(timeseries) < 400:
+        return None, None, None
+
+    sigma_threshold = 2
     percentage = (stats.norm.cdf(sigma_threshold) - stats.norm.cdf(-sigma_threshold))
 
-    ref_window, opt_window_size, nperiods = optimal_window_size(timeseries,mean_error=mean_error)
+    ref_window, opt_window_size, nperiods = optimal_window_size(timeseries, mean_error=allowed_error)
     if not opt_window_size:
         return None, None, None
     # normalize the reference window to have 0 mean and unit variance
@@ -127,12 +119,6 @@ def estimate_stationarity(timeseries,mean_error=0, create_plot_dir=False):
 
     reference_mean = np.mean(reference_window_normed)
     reference_variance = np.var(reference_window_normed)
-
-    unscaled_reference_mean = np.mean(ref_window)
-    if unscaled_reference_mean>0:
-        mean_diff = abs((np.mean(ref_window) - reference_mean)/np.mean(ref_window))
-    else:
-        mean_diff = 0
 
     opt_rolling_window = pd.DataFrame(reference_window_normed).rolling(window=opt_window_size)
 
@@ -159,8 +145,8 @@ def estimate_stationarity(timeseries,mean_error=0, create_plot_dir=False):
     rolling_means_errors_reversed = np.abs(rolling_means_reversed - reference_mean)
     rolling_vars_errors_reversed = np.abs(rolling_vars_reversed - reference_variance)
 
-    mean_limits = (mean_uncertainty + mean_trend_tolerance) * (sigma_threshold) + mean_diff*mean_error
-    var_limits = (var_uncertainty + var_trend_tolerance) * (sigma_threshold)
+    mean_limits = (mean_uncertainty + mean_trend_tolerance) * 1.6 + allowed_error
+    var_limits = (var_uncertainty + var_trend_tolerance) * 1.6 + allowed_error
 
     rolling_means_errors_inliers_reversed = rolling_means_errors_reversed <= mean_limits
     rolling_vars_errors_inliers_reversed = rolling_vars_errors_reversed <= var_limits
@@ -186,12 +172,12 @@ def estimate_stationarity(timeseries,mean_error=0, create_plot_dir=False):
                      "var_limits": var_limits,
                      "variance_index": variance_index}
 
-        plot_stationarity_analysis(create_plot_dir,plot_args)
+        plot_stationarity_analysis(create_plot_dir, plot_args)
 
     return_index = len(timeseries) - (stationary_start_index)
     stationary_signal = timeseries[return_index:]
     stationary_rolling_signal = pd.DataFrame(stationary_signal).rolling(window=opt_window_size)
-    mean_std = np.nanmax(stationary_rolling_signal.mean().values)-np.nanmin(stationary_rolling_signal.mean().values)
+    mean_std = np.nanmax(stationary_rolling_signal.mean().values) - np.nanmin(stationary_rolling_signal.mean().values)
 
     return return_index, stationary_signal, mean_std
 
@@ -321,7 +307,6 @@ def estimate_error_jacknife(timeseries, block_size=20, n_samples=4000):
     # Initialize arrays to store jackknife estimates
     mean_jk = np.zeros(n_samples)
     var_jk = np.zeros(n_samples)
-    acorr_jk = np.zeros(n_samples)
 
     for i in range(n_samples):
         # Generate a random index array of block indices
@@ -335,11 +320,7 @@ def estimate_error_jacknife(timeseries, block_size=20, n_samples=4000):
         mean_jk[i] = np.mean(x_jk)
         var_jk[i] = np.var(x_jk)
 
-        freqs, psd = signal.periodogram(x_jk, return_onesided=False)
-        acorr_jk[i] = freqs[np.argmax(psd)]
-
     mean_jk_error = np.std(mean_jk)
     var_jk_error = np.std(var_jk)
-    accr_jk_error = np.std(acorr_jk)
 
-    return mean_jk_error, var_jk_error, accr_jk_error
+    return mean_jk_error, var_jk_error

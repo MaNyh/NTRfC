@@ -2,6 +2,12 @@
 History
 =======
 
+0.2.5 (2024-03-15)
+------------------
+
+- estimate_stationarity improvements
+- python update
+
 
 0.2.4 (2024-11-15)
 ------------------
