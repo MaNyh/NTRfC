@@ -1,12 +1,34 @@
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
-from scipy import signal
 import matplotlib.pyplot as plt
 import os
-from scipy.stats import linregress
 
 from ntrfc.math.methods import minmax_normalize
+
+def ref_minmax_normalize(series_array,reference_array):
+    """Normalize a given 1D array to the range [0, 1] using min-max normalization.
+
+    Args:
+        series_array (array-like): The 1D array to be normalized.
+
+    Returns:
+        array-like: The normalized 1D array with values in the range [0, 1].
+
+    Note:
+        If all values in the input array are the same, the function will return the
+        input array unchanged.
+    """
+    min_ref = np.min(reference_array)
+    max_ref = np.max(reference_array)
+    mean_ref = np.mean(reference_array)
+    if min_ref != max_ref:
+        mins = min_ref
+        maxs = max_ref
+        f = (-mins + series_array) / (maxs - mins)
+        return f
+    else:
+        return series_array - mean_ref
 
 
 def optimal_window_size(time_series, mean_error=0, min_interval=0.05, max_interval=0.25):
@@ -63,7 +85,7 @@ def optimal_window_size(time_series, mean_error=0, min_interval=0.05, max_interv
         # check with a minmax normalized series and a rolling window.
         # needs to be normalized to have comparable values for a non-stationary check
 
-        test_signal = minmax_normalize(reference_window)
+        test_signal = ref_minmax_normalize(reference_window, reference_window)
         test_rolling_window = pd.DataFrame(test_signal).rolling(window=opt_window_size)
         test_mean = np.mean(test_signal)
         test_var = np.var(test_signal)
@@ -85,12 +107,12 @@ def optimal_window_size(time_series, mean_error=0, min_interval=0.05, max_interv
 
         if abs(error_mean) > allowed_mean_mean_error:
             print("Mean error too high")
-            return False, False, False
+            return False, False
         if error_var > allowed_var_mean_error:
             print("Variance error too high")
-            return False, False, False
+            return False, False
 
-    return reference_window, opt_window_size, False
+    return reference_window, opt_window_size
 
 
 def last_coherent_interval(arr, opt_window_size, threshold=0.95):
@@ -107,31 +129,31 @@ def estimate_stationarity(timeseries, allowed_error=0, create_plot_dir=False):
     if len(timeseries) < 400:
         return None, None, None
 
-    sigma_threshold = 2
+    sigma_threshold = 3
     percentage = (stats.norm.cdf(sigma_threshold) - stats.norm.cdf(-sigma_threshold))
 
-    ref_window, opt_window_size, nperiods = optimal_window_size(timeseries, mean_error=allowed_error)
+    ref_window, opt_window_size = optimal_window_size(timeseries, mean_error=allowed_error)
     if not opt_window_size:
         return None, None, None
     # normalize the reference window to have 0 mean and unit variance
     # if std is 0, then the window is constant, we cant devide by 0
-    reference_window_normed = normalize_zscore(ref_window, np.std(ref_window), np.mean(ref_window))
+    reference_window_normed = ref_minmax_normalize(ref_window, ref_window)
 
     reference_mean = np.mean(reference_window_normed)
     reference_variance = np.var(reference_window_normed)
 
     opt_rolling_window = pd.DataFrame(reference_window_normed).rolling(window=opt_window_size)
 
-    rolling_means = np.nan_to_num(opt_rolling_window.mean().values, 0)
-    rolling_vars = np.nan_to_num(opt_rolling_window.var().values, 0)
+    rolling_means = opt_rolling_window.mean().dropna().values
+    rolling_vars = opt_rolling_window.var().dropna().values
 
     mean_uncertainty = np.nanstd(rolling_means)  # /np.sqrt(len(rolling_means))
     var_uncertainty = np.nanstd(rolling_vars)  # /np.sqrt(len(rolling_vars))
 
-    mean_trend_tolerance = (np.nanmax(rolling_means) - np.nanmin(rolling_means))
-    var_trend_tolerance = (np.nanmax(rolling_vars) - np.nanmin(rolling_vars))
+    mean_minmax = np.nanmax(rolling_means) - np.nanmin(rolling_means)
+    var_minmax = np.nanmax(rolling_vars) - np.nanmin(rolling_vars)
 
-    checkseries = normalize_zscore(timeseries, np.std(ref_window), np.mean(ref_window))
+    checkseries =  ref_minmax_normalize(timeseries, ref_window)
 
     checkseries_reversed = pd.DataFrame(checkseries[::-1])
     rolling_win_reversed = checkseries_reversed.rolling(window=opt_window_size)
@@ -145,8 +167,8 @@ def estimate_stationarity(timeseries, allowed_error=0, create_plot_dir=False):
     rolling_means_errors_reversed = np.abs(rolling_means_reversed - reference_mean)
     rolling_vars_errors_reversed = np.abs(rolling_vars_reversed - reference_variance)
 
-    mean_limits = (mean_uncertainty + mean_trend_tolerance) * 1.6 + allowed_error
-    var_limits = (var_uncertainty + var_trend_tolerance) * 1.6 + allowed_error
+    mean_limits = (mean_uncertainty+mean_minmax) * (sigma_threshold) + allowed_error
+    var_limits = (var_uncertainty+var_minmax) * (sigma_threshold) + allowed_error
 
     rolling_means_errors_inliers_reversed = rolling_means_errors_reversed <= mean_limits
     rolling_vars_errors_inliers_reversed = rolling_vars_errors_reversed <= var_limits
@@ -155,7 +177,7 @@ def estimate_stationarity(timeseries, allowed_error=0, create_plot_dir=False):
 
     variance_index = last_coherent_interval(rolling_vars_errors_inliers_reversed, opt_window_size, percentage)
 
-    stationary_start_index = min(mean_index, variance_index)
+    stationary_start_index = min(mean_index, variance_index)#+2*opt_window_size
 
     if create_plot_dir:
         plot_args = {"mean_index": mean_index,

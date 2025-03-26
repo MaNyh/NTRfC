@@ -32,16 +32,16 @@ def test_optimal_timewindow():
     # we have four periods, at least one period should be captured
     # thats res // 4 as a return
     ysin = np.sin(x)
-    opt_window, opt_window_size, _ = optimal_window_size(ysin)
+    opt_window, opt_window_size= optimal_window_size(ysin)
 
     assert opt_window_size == res // nper * 2
     # tanh
     tanh = np.tanh(x * 2)
-    opt_window, opt_window_size, _ = optimal_window_size(tanh)
+    opt_window, opt_window_size= optimal_window_size(tanh)
     assert opt_window_size == res * 0.05
     # euler
     eul = np.e ** (-x * 60)
-    opt_window, opt_window_size, _ = optimal_window_size(eul)
+    opt_window, opt_window_size= optimal_window_size(eul)
 
     assert opt_window_size == res * 0.05
 
@@ -340,11 +340,11 @@ def test_last_coherent_interval():
 def test_statistical_convergence():
     from ntrfc.timeseries.stationarity import estimate_stationarity
 
-    repetitions = 4
+    repetitions = 24
     for i in range(repetitions):
         np.random.seed(i)
 
-        res = 30000
+        res = 5000
         noise = np.random.normal(-0.1, 0.1, res)
         idx, _, _ = estimate_stationarity(noise)
         assert idx != None, f"computation failed, should not return None for samplesize > {res} in run {i}"
