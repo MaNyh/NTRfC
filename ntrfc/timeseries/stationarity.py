@@ -167,8 +167,8 @@ def estimate_stationarity(timeseries, allowed_error=0, create_plot_dir=False):
     rolling_means_errors_reversed = np.abs(rolling_means_reversed - reference_mean)
     rolling_vars_errors_reversed = np.abs(rolling_vars_reversed - reference_variance)
 
-    mean_limits = (mean_uncertainty+mean_minmax) * (sigma_threshold) + allowed_error
-    var_limits = (var_uncertainty+var_minmax) * (sigma_threshold) + allowed_error
+    mean_limits = (mean_uncertainty+mean_minmax) * (sigma_threshold+0.00) + allowed_error
+    var_limits = (var_uncertainty+var_minmax) * (sigma_threshold+0.05) + allowed_error
 
     rolling_means_errors_inliers_reversed = rolling_means_errors_reversed <= mean_limits
     rolling_vars_errors_inliers_reversed = rolling_vars_errors_reversed <= var_limits
