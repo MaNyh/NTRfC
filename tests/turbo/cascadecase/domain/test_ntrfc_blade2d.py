@@ -127,3 +127,18 @@ def test_t106():
     assert blade.ss_pv.center[1]>blade.ps_pv.center[1], "Pressure side should be above suction side"
     assert np.abs(ite - ite_test) <= ite_tol
     assert np.abs(ile - ile_test) <= ile_tol
+
+def test_symmetric_airfoil_orientationwarning():
+    import pyvista as pv
+    import numpy as np
+    from ntrfc.turbo.cascade_case.utils.domain_utils import Blade2D
+    from ntrfc.turbo.airfoil_generators.naca_airfoil_creator import naca
+
+    xs, ys = naca("0009", 480, finite_te=False, half_cosine_spacing=False)
+    points = pv.PolyData(np.stack([xs, np.zeros(len(xs)),ys]).T)
+
+    try:
+        Blade2D(points)
+        assert True, "Blade2D should raise a ValueError when the blade is not in the x/y-plane"
+    except ValueError as e:
+        pass

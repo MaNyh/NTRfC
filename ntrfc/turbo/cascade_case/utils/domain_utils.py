@@ -66,6 +66,9 @@ class Blade2D:
             self.origpoints_pv = pv.PolyData(points)
             print("[ntrfc info]working with np.ndarray pointcloud. No dataarrays cab be used for postprocessing")
 
+        if np.max(self.origpoints_pv.points[:,2]) - np.min(self.origpoints_pv.points[:,2]) > 0:
+            raise ValueError("Blade2D assumes that the blade lies in the x/y-plane. Please check your input data.")
+
     def compute_polygon(self, alpha=None):
         unique_points = np.unique(self.origpoints_pv.points, axis=0)
         if alpha:
