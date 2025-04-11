@@ -12,6 +12,35 @@ from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
 
 
 class Blade2D:
+    """
+    A class representing a 2D blade profile.
+    This class provides methods to compute various properties of the blade profile,
+    including the leading and trailing edges, pressure and suction sides, skeleton line,
+    and various statistics.
+    Assumptions:
+    - The blade lies in the x/y-plane.
+    - The suction side points in the positive y-direction, and the pressure side points in the negative y-direction.
+    - The input data contains well-defined leading and trailing edge points.
+    Attributes:
+        origpoints_pv (pv.PolyData): Original points of the blade profile.
+        sortedpoints_pv (pv.PolyData): Sorted points of the blade profile.
+        sortedpoints_pv_rolled (pv.PolyData): Rolled sorted points of the blade profile.
+        periodicsplinepoints (np.ndarray): Points of the periodic spline.
+        skeletonline_pv (pv.PolyData): Skeleton line of the blade profile.
+        ps_pv (pv.PolyData): Pressure side points of the blade profile.
+        ss_pv (pv.PolyData): Suction side points of the blade profile.
+        hullalpha (float): Alpha value for the concave hull.
+        ile (int): Index of the leading edge point.
+        ite (int): Index of the trailing edge point.
+        ile_rolled (int): Rolled index of the leading edge point.
+        ite_rolled (int): Rolled index of the trailing edge point.
+        beta_le (float): Angle at the leading edge in degrees.
+        beta_te (float): Angle at the trailing edge in degrees.
+        camber_phi (float): Camber angle in degrees.
+        camber_length (float): Length of the camber line.
+    """
+
+
     def __init__(self, points: np.ndarray or pv.PolyData):
         self.origpoints_pv = None
         self.sortedpoints_pv = None
