@@ -23,9 +23,9 @@ def filter_voronoi_sites(voronoi_sites_3d, sortedPoly, refinedPoints):
     goal_le = []
     goal_te = []
 
-    upper = 150
+    upper = 90
     lower = 75
-    while goals != 512:
+    while goals != 2048:
 
         if start_size <= 0:
             start_size = 0.00025
@@ -63,14 +63,35 @@ def filter_voronoi_sites(voronoi_sites_3d, sortedPoly, refinedPoints):
 
 
 def extract_vk_hk(sortedPoly: pv.PolyData) -> (int, int):
-    voronoires = 32000
+    voronoires = 16000
 
     points_orig = sortedPoly.points
     points_2d_closed_refined_voronoi = pointcloud_to_profile(points_orig, voronoires)
 
     voronoi_sites = voronoi_skeleton_sites(points_2d_closed_refined_voronoi)
+
+    def filter_bifurkations(voronoi_sites):
+        x = voronoi_sites[:, 0]
+        y = voronoi_sites[:, 1]
+        # Schritt 1: Polynom 3. Ordnung anpassen
+        coeffs = np.polyfit(x, y, 3)  # Anpassung eines Polynoms 3. Ordnung
+        polynomial = np.poly1d(coeffs)  # Das angepasste Polynom
+
+        # Schritt 2: Berechne den Abstand jedes Punktes zum Polynom
+        y_fit = polynomial(x)  # Polynom-Vorhersage für alle x
+        distances = np.abs(y - y_fit)  # Abstand jedes Punktes zum Polynom
+
+        # Schritt 3: Filtere Punkte, die eine kleine Abweichung haben
+        threshold = np.std(distances)  # Schwellenwert für den Abstand
+        filtered_x = x[distances < threshold]
+        filtered_y = y[distances < threshold]
+
+        return np.array([filtered_x, filtered_y]).T
+
+    pre_filtered = filter_bifurkations(voronoi_sites)
+
     le_ind, te_ind = filter_voronoi_sites(
-        np.stack([voronoi_sites[:, 0], voronoi_sites[:, 1], np.zeros(len(voronoi_sites))]).T,
+        np.stack([pre_filtered[:, 0], pre_filtered[:, 1], np.zeros(len(pre_filtered))]).T,
         sortedPoly.points,
         points_2d_closed_refined_voronoi)
 
