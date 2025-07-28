@@ -2,24 +2,34 @@ import numpy as np
 import pyvista as pv
 
 from ntrfc.geometry.line import refine_spline, polyline_from_points
+from typing import Literal
 
 
-def midline_from_sides(ps_poly, ss_poly, res=100):
+def midline_from_sides(ps_poly, ss_poly, mode: Literal["2D", "Q3D"], res=100):
     x_ps, y_ps = ps_poly.points[::, 0], ps_poly.points[::, 1]
     x_ss, y_ss = ss_poly.points[::, 0], ss_poly.points[::, 1]
-    z = ps_poly.points[0][2]
+
+    if mode == "2D":
+        z_ss, z_ps = np.zeros_like(x_ss), np.zeros_like(x_ps)
+    elif mode == "3D":
+        z_ss, z_ps = ss_poly.points[::, 2], ps_poly.points[::, 2]
+    else:
+        raise ValueError("Mode must be either '2D' or 'Q3D'.")
+
     midsres = res
     if x_ps[0] > x_ps[-1]:
-        ax, ay = refine_spline(x_ps[::-1], y_ps[::-1], midsres, kind="linear")
+        ax, ay, az = refine_spline(x_ps[::-1], y_ps[::-1], z_ps[::-1], midsres, kind="linear")
     else:
-        ax, ay = refine_spline(x_ps, y_ps, midsres, kind="linear")
+        ax, ay, az = refine_spline(x_ps, y_ps, z_ps, midsres, kind="linear")
     if x_ss[0] > x_ss[-1]:
-        bx, by = refine_spline(x_ss[::-1], y_ss[::-1], midsres, kind="linear")
+        bx, by, bz = refine_spline(x_ss[::-1], y_ss[::-1], z_ss[::-1], midsres, kind="linear")
     else:
-        bx, by = refine_spline(x_ss, y_ss, midsres, kind="linear")
-    xmids, ymids = ((ax + bx) / 2, (ay + by) / 2)
+        bx, by, bz = refine_spline(x_ss, y_ss, z_ss, midsres, kind="linear")
 
-    midsPoly = polyline_from_points(np.stack((xmids, ymids, z * np.ones(len(ymids)))).T)
+    xmids, ymids, zmids = ((ax + bx) / 2, (ay + by) / 2, (az + bz) / 2)
+
+    midsPoly = polyline_from_points(np.stack((xmids, ymids, zmids)).T)
+    
     return midsPoly
 
 
