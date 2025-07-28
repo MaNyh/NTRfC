@@ -11,7 +11,7 @@ from ntrfc.turbo.pointcloud_methods import is_counterclockwise, extractSidePolys
 from ntrfc.turbo.profile_tele_extraction import extract_vk_hk
 
 
-class Blade2D:
+class Blade:
     """
     A class representing a 2D blade profile.
     This class provides methods to compute various properties of the blade profile,
@@ -66,8 +66,8 @@ class Blade2D:
             self.origpoints_pv = pv.PolyData(points)
             print("[ntrfc info]working with np.ndarray pointcloud. No dataarrays cab be used for postprocessing")
 
-        if np.max(self.origpoints_pv.points[:,2]) - np.min(self.origpoints_pv.points[:,2]) > 0:
-            raise ValueError("Blade2D assumes that the blade lies in the x/y-plane. Please check your input data.")
+        # if np.max(self.origpoints_pv.points[:,2]) - np.min(self.origpoints_pv.points[:,2]) > 0:
+            # raise ValueError("Blade2D assumes that the blade lies in the x/y-plane. Please check your input data.")
 
     def compute_polygon(self, alpha=None):
         unique_points = np.unique(self.origpoints_pv.points, axis=0)
@@ -110,6 +110,7 @@ class Blade2D:
         self.ps_pv, self.ss_pv = extractSidePolys(self.ite, self.ile, self.sortedpoints_pv)
 
     def compute_skeleton(self):
+        raise NotImplementedError("This method should be implemented in subclasses.")
         self.skeletonline_pv = midline_from_sides(self.ps_pv, self.ss_pv)
 
     def compute_stats(self):
@@ -152,6 +153,13 @@ class Blade2D:
             p.show(window_size=window_size)
             return None
 
+class Blade2D(Blade):
+    def compute_skeleton(self):
+        self.skeletonline_pv = midline_from_sides(self.ps_pv, self.ss_pv, mode="2D")
+
+class BladeQ3D(Blade):
+    def compute_skeleton(self):
+        self.skeletonline_pv = midline_from_sides(self.ps_pv, self.ss_pv, mode="Q3D")
 
 @dataclass
 class CascadeDomain2DParameters:
