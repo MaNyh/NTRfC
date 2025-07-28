@@ -11,7 +11,7 @@ def midline_from_sides(ps_poly, ss_poly, mode: Literal["2D", "Q3D"], res=100):
 
     if mode == "2D":
         z_ss, z_ps = np.zeros_like(x_ss), np.zeros_like(x_ps)
-    elif mode == "3D":
+    elif mode == "Q3D":
         z_ss, z_ps = ss_poly.points[::, 2], ps_poly.points[::, 2]
     else:
         raise ValueError("Mode must be either '2D' or 'Q3D'.")
