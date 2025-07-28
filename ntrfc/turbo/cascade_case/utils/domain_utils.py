@@ -111,7 +111,6 @@ class Blade:
 
     def compute_skeleton(self):
         raise NotImplementedError("This method should be implemented in subclasses.")
-        self.skeletonline_pv = midline_from_sides(self.ps_pv, self.ss_pv)
 
     def compute_stats(self):
         vk_tangent = self.skeletonline_pv.points[0] - self.skeletonline_pv.points[1]
