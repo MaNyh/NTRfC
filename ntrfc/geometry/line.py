@@ -23,7 +23,7 @@ def lines_from_points(points):
     return poly
 
 
-def refine_spline(x, y, res, half_cosine_spacing=False, kind='linear'):
+def refine_spline(x, y, z, res, half_cosine_spacing=False, kind='linear'):
     """
     Refine spline using cubic interpolation.
 
@@ -34,12 +34,19 @@ def refine_spline(x, y, res, half_cosine_spacing=False, kind='linear'):
     :return: Interpolated x and y coordinates.
     """
 
-    distance = np.cumsum(np.sqrt(np.ediff1d(x, to_begin=0) ** 2 + np.ediff1d(y, to_begin=0) ** 2))
+    distance = np.cumsum(
+        np.sqrt(
+            np.ediff1d(x, to_begin=0) ** 2 
+            + np.ediff1d(y, to_begin=0) ** 2
+            + np.ediff1d(z, to_begin=0) ** 2
+            )
+        )
     distance = distance / distance[-1]
 
     # Cubic spline interpolation
     fx = interp1d(distance, x, kind=kind)
     fy = interp1d(distance, y, kind=kind)
+    fz = interp1d(distance, z, kind=kind)
 
     if half_cosine_spacing:
         beta = np.linspace(0.0, np.pi, res)
@@ -49,4 +56,5 @@ def refine_spline(x, y, res, half_cosine_spacing=False, kind='linear'):
 
     # Interpolated x and y values
     x_new, y_new = fx(alpha_), fy(alpha_)
-    return x_new, y_new
+    z_new = fz(alpha_)
+    return x_new, y_new, z_new
